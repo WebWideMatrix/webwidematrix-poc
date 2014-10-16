@@ -14,27 +14,28 @@ createBldg = function(flr, near, contentType, payload) {
         foundSpot = false,
         created = false;
 
-    while (!created) {
-        while (!foundSpot) {
-            if (near) {
-                nearLookupsCount++;
-                // have we almost exhausted the near by spots?
-                if (nearLookupsCount > Math.pow((2 * proximity), 2)) {
-                    // if so, extend the lookup area
-                    proximity *= 2;
-                }
-                x = randomNumber(near.x - proximity, near.x + proximity);
-                y = randomNumber(near.y - proximity, near.y + proximity);
+    var findSpot = function() {
+        if (near) {
+            nearLookupsCount++;
+            // have we almost exhausted the near by spots?
+            if (nearLookupsCount > Math.pow((2 * proximity), 2)) {
+                // if so, extend the lookup area
+                proximity *= 2;
             }
-            else {
-                x = randomNumber(0, FLOOR_W);
-                y = randomNumber(0, FLOOR_H);
-            }
-            address = buildBldgAddress(flr, x, y);
-            var existing = Buildings.findOne({address: address});
-            foundSpot = !existing;
+            x = randomNumber(near.x - proximity, near.x + proximity);
+            y = randomNumber(near.y - proximity, near.y + proximity);
         }
-        var bldg = {
+        else {
+            x = randomNumber(0, FLOOR_W);
+            y = randomNumber(0, FLOOR_H);
+        }
+        address = buildBldgAddress(flr, x, y);
+        var existing = Buildings.findOne({address: address});
+        return !existing;
+    };
+
+    var _createBldg = function() {
+        return {
             address: address,
             flr: flr,
             x: x,
@@ -46,6 +47,12 @@ createBldg = function(flr, near, contentType, payload) {
             occupied: false,
             occupiedBy: null
         };
-        created = Buildings.insert(bldg);
+    };
+
+    while (!created) {
+        while (!foundSpot) {
+            foundSpot = findSpot();
+        }
+        created = Buildings.insert(_createBldg());
     }
 };
