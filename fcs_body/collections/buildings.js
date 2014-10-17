@@ -55,4 +55,5 @@ createBldg = function(flr, near, contentType, payload) {
         }
         created = Buildings.insert(_createBldg());
     }
+    return created;
 };
