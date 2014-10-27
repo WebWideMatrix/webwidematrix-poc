@@ -14,7 +14,7 @@ Accounts.onCreateUser(function (options, user) {
 
     var bldg = createBldg(INITIAL_FLOOR, null, USER_CONTENT_TYPE, user.profile);
     var dataPipe = createDataPipe(tokens);
-//    var lifecycleManager = createLifecycleManager(bldg);
+    var lifecycleManager = createLifecycleManager(bldg, dataPipe);
 //    var rsdt = createRsdt(bldg);
 
     user.bldg = {
@@ -22,7 +22,7 @@ Accounts.onCreateUser(function (options, user) {
         address: bldg.address
     };
     user.dataPipes = [dataPipe._id];
-//    user.lifecycleManagers = [lifecycleManager._id];
+    user.lifecycleManagers = [lifecycleManager._id];
 //    user.residents = [rsdt._id];
 
     return user;

@@ -1,14 +1,15 @@
 DataPipes = new Meteor.Collection('data_pipes');
 
-var DEFAULT_FETCH_INTERVAL = 10;
-
 
 createDataPipe = function(tokens) {
 
     var _getSchedule = function() {
+        // assuming a fixed 10 min interval for now
         var d = new Date();
         var m = d.getMinutes();
-        return m % DEFAULT_FETCH_INTERVAL;
+        return {
+            minutes_offset: m % 10
+        };
     };
 
     var _createDataPipe = function() {
