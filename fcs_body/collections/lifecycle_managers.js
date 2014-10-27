@@ -1,14 +1,14 @@
 LifecycleManagers = new Meteor.Collection('lifecycle_managers');
 
 
-createLifecycleManager = function(bldg, dataPipe) {
+createLifecycleManager = function(bldgId, dataPipeId, callback) {
 
 
     var _createLifecycleManager = function() {
         return {
             type: "DailyFeedDispatcher",
-            bldg: bldg._id,
-            dataPipe: dataPipe._id,
+            bldg: bldgId,
+            dataPipe: dataPipeId,
             schedule: {
                 minutes: 0,
                 hours: 0
@@ -16,6 +16,5 @@ createLifecycleManager = function(bldg, dataPipe) {
         }
     };
 
-    return LifecycleManagers.insert(_createLifecycleManager());
-
+    LifecycleManagers.insert(_createLifecycleManager(), callback);
 };

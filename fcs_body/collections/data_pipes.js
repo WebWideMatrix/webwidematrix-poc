@@ -1,7 +1,7 @@
 DataPipes = new Meteor.Collection('data_pipes');
 
 
-createDataPipe = function(tokens) {
+createDataPipe = function(tokens, callback) {
 
     var _getSchedule = function() {
         // assuming a fixed 10 min interval for now
@@ -22,6 +22,5 @@ createDataPipe = function(tokens) {
         }
     };
 
-    return DataPipes.insert(_createDataPipe());
-
+    DataPipes.insert(_createDataPipe(), callback);
 };

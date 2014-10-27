@@ -5,7 +5,7 @@ buildBldgAddress = function(flr, x, y) {
     return flr + "-b(" + x + "," + y + ")";
 };
 
-createBldg = function(flr, near, contentType, payload) {
+createBldg = function(flr, near, contentType, payload, callback) {
     var x = 0,
         y = 0,
         address = buildBldgAddress(flr, x, y),
@@ -49,11 +49,9 @@ createBldg = function(flr, near, contentType, payload) {
         };
     };
 
-    while (!created) {
-        while (!foundSpot) {
-            foundSpot = findSpot();
-        }
-        created = Buildings.insert(_createBldg());
+    while (!foundSpot) {
+        foundSpot = findSpot();
     }
-    return created;
+
+    Buildings.insert(_createBldg(), callback);
 };

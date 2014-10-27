@@ -5,24 +5,27 @@ Accounts.onCreateUser(function (options, user) {
     user.createdAt = new Date();
 
     user.profile = getUserDetails(options, user);
-    console.log(JSON.stringify(user));
 
     var tokens = {
         accessToken: user.services.twitter.accessToken,
         accessTokenSecret: user.services.twitter.accessTokenSecret
     };
 
-    var bldg = createBldg(INITIAL_FLOOR, null, USER_CONTENT_TYPE, user.profile);
-    var dataPipe = createDataPipe(tokens);
-    var lifecycleManager = createLifecycleManager(bldg, dataPipe);
+    var wrappedCreateBldg = Async.wrap(createBldg);
+    var bldgId = wrappedCreateBldg(INITIAL_FLOOR, null, USER_CONTENT_TYPE, user.profile);
+    var wrappedCreateDataPipe = Async.wrap(createDataPipe);
+    var dataPipeId = wrappedCreateDataPipe(tokens);
+    var wrappedCreateLifecycleManager = Async.wrap(createLifecycleManager);
+    var lifecycleManagerId = wrappedCreateLifecycleManager(bldgId, dataPipeId);
 //    var rsdt = createRsdt(bldg);
 
+    var bldg = Buildings.findOne({_id: bldgId});
     user.bldg = {
-        _id: bldg._id,
+        _id: bldgId,
         address: bldg.address
     };
-    user.dataPipes = [dataPipe._id];
-    user.lifecycleManagers = [lifecycleManager._id];
+    user.dataPipes = [dataPipeId];
+    user.lifecycleManagers = [lifecycleManagerId];
 //    user.residents = [rsdt._id];
 
     return user;
