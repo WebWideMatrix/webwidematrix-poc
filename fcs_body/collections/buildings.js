@@ -40,10 +40,10 @@ createBldg = function(flr, near, contentType, payload) {
             flr: flr,
             x: x,
             y: y,
+            createdAt: new Date(),
             contentType: contentType,
             payload: payload,
             processed: false,
-            smell: DEFAULT_SMELL,
             occupied: false,
             occupiedBy: null
         };
