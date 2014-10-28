@@ -13,20 +13,22 @@ Accounts.onCreateUser(function (options, user) {
 
     var wrappedCreateBldg = Async.wrap(createBldg);
     var bldgId = wrappedCreateBldg(INITIAL_FLOOR, null, USER_CONTENT_TYPE, user.profile);
+    var bldg = Buildings.findOne({_id: bldgId});
+
     var wrappedCreateDataPipe = Async.wrap(createDataPipe);
     var dataPipeId = wrappedCreateDataPipe(tokens);
     var wrappedCreateLifecycleManager = Async.wrap(createLifecycleManager);
     var lifecycleManagerId = wrappedCreateLifecycleManager(bldgId, dataPipeId);
-//    var rsdt = createRsdt(bldg);
+    var wrappedCreateRsdt = Async.wrap(createRsdt);
+    var rsdtId = wrappedCreateRsdt(bldg);
 
-    var bldg = Buildings.findOne({_id: bldgId});
     user.bldg = {
         _id: bldgId,
         address: bldg.address
     };
     user.dataPipes = [dataPipeId];
     user.lifecycleManagers = [lifecycleManagerId];
-//    user.residents = [rsdt._id];
+    user.residents = [rsdtId];
 
     return user;
 });
