@@ -2,7 +2,7 @@ if (!(typeof MochaWeb === 'undefined')) {
     MochaWeb.testOnly(function () {
         describe("bldgs creation", function () {
             it("should create a bldg", function () {
-                var flr = "g-b(111,222)-l3",
+                var flr = "g-b(111,222)-l" + (new Date().getTime()),
                     payload = {
                         "name": "John",
                         "age": 43
