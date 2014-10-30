@@ -1,21 +1,20 @@
-if (!(typeof MochaWeb === 'undefined')){
-  MochaWeb.testOnly(function(){
-    describe("bldgs creation", function(){
-      it("should create a bldg", function(done){
-          var flr = "g",
-              payload = {
-                  "name": "John",
-                  "age": 43
-              };
-          chai.assert.equal(1, 1);
-          createBldg(flr, null, USER_CONTENT_TYPE, payload, function(err, res) {
-              chai.assert.equal(1, 2);
-              done();
-          });
+if (!(typeof MochaWeb === 'undefined')) {
+    MochaWeb.testOnly(function () {
+        describe("bldgs creation", function () {
+            it("should create a bldg", function () {
+                var flr = "g-b(111,222)-l3",
+                    payload = {
+                        "name": "John",
+                        "age": 43
+                    };
+                var wrappedCreateBldg = Async.wrap(createBldg);
+                var bldgId = wrappedCreateBldg(flr, null, USER_CONTENT_TYPE, payload);
+                chai.assert(bldgId.length > 4);
+                var count = Buildings.find({flr: flr}).count();
+                chai.assert.equal(count, 1);
+            });
+        });
 
-      });
+
     });
-
-
-  });
 }
