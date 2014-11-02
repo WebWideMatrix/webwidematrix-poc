@@ -34,7 +34,7 @@ Accounts.onCreateUser(function (options, user) {
 });
 
 
-var getUserDetails = function(options, user) {
+getUserDetails = function(options, user) {
     var profile = options.profile || {};
     if (user.services.twitter) {
         profile = getUserDetailsFromTwitter(profile, user);
@@ -42,7 +42,7 @@ var getUserDetails = function(options, user) {
     return profile;
 };
 
-var getUserDetailsFromTwitter = function(profile, user) {
+getUserDetailsFromTwitter = function(profile, user) {
     console.log(user.services.twitter);
     profile.language = user.services.twitter.lang;
     profile.picture = user.services.twitter.profile_image_url;
