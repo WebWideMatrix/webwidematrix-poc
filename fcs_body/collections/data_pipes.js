@@ -15,10 +15,13 @@ createDataPipe = function(tokens, callback) {
     var _createDataPipe = function() {
         return {
             type: "PersonalTwitterFeed",
+            status: "active",
             schedule: _getSchedule(),
             tokens: tokens,
+            active: false,
             latestId: null,
-            connectedBldg: null
+            connectedBldg: null,
+            frequency: null
         }
     };
 
