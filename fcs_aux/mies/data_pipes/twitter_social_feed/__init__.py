@@ -1,1 +1,3 @@
-__author__ = 'udi'
+
+
+TWITTER_SOCIAL_POST = "twitter-social-post"

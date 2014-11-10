@@ -10,8 +10,9 @@ def load_data_pipes(limit=100):
         "connectedBldg": {'$exists': True}
     }
     skip = 0
-    results = []
-    while len(results) < limit:
+    done = False
+    while not done:
         results = db.data_pipes.find(spec, limit=limit, skip=skip)
         skip += len(results)
         yield results
+        done = len(results) < limit
