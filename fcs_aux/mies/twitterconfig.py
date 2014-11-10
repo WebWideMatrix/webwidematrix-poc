@@ -1,0 +1,5 @@
+
+TWITTER_POSTS_LIMIT = 200
+
+CONSUMER_KEY = "fake-key"
+CONSUMER_SECRET = "fake-secret"
