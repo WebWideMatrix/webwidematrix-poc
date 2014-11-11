@@ -62,5 +62,6 @@ def invoke_data_pipes(page):
             for post in results:
                 payloads.append(extract_payload_from_post(post))
                 latest_id = post.get("id")
-            create_buildings.delay(content_type=TWITTER_SOCIAL_POST,
-                                   payloads=payloads, flr=dp.connectedBldg)
+            create_buildings.s(content_type=TWITTER_SOCIAL_POST,
+                               payloads=payloads, flr=dp.connectedBldg)\
+                .apply_async(queue="create_buildings")
