@@ -11,8 +11,7 @@ createBldg = function(flr, near, contentType, payload, callback) {
         address = buildBldgAddress(flr, x, y),
         nearLookupsCount = 0,
         proximity = PROXIMITY,
-        foundSpot = false,
-        created = false;
+        foundSpot = false;
 
     var findSpot = function() {
         if (near) {
