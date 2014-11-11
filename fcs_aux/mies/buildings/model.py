@@ -5,30 +5,33 @@ from pymongo import MongoClient
 
 from mies.celery import app
 from mies.mongoconfig import MONOGO_HOST, MONOGO_PORT
-from mies.buildings.constants import FLOOR_W, FLOOR_H
+from mies.buildings.constants import FLOOR_W, FLOOR_H, PROXIMITY
 
 
 def build_bldg_address(flr, x, y):
     return flr + "-b(" + x + "," + y + ")"
 
 
-def create_bldg(flr, near, content_type, payload):
-    x = 0
-    y = 0
-    address = build_bldg_address(flr, x, y)
-    found_spot = False
+def construct_bldg(flr, near_x, near_y, content_type, payload):
 
-    def _find_spot():
+    def _is_vacant(_address):
+        # TODO implement using cache
+        return True
+
+    def _find_spot(state):
         # generate a random address
-        if near:
-            # TODO
-            pass
+        if near_x is not None and near_y is not None:
+            state['near_lookups_count'] += 1
+            # have we almost exhausted the near by spots?
+            if state['near_lookups_count'] > (2 * state['proximity'])**2:
+                # if so, extend the lookup area
+                state['proximity'] *= 2
+            _x = random.randint(near_x - state['proximity'], near_x + state['proximity'])
+            _y = random.randint(near_y - state['proximity'], near_y + state['proximity'])
         else:
-            x = random.randint(0, FLOOR_W)
-            y = random.randint(0, FLOOR_H)
-        address = build_bldg_address(flr, x, y)
-        # TODO verify (using the cache) that it's free
-        return address
+            _x = random.randint(0, FLOOR_W)
+            _y = random.randint(0, FLOOR_H)
+        return build_bldg_address(flr, _x, _y)
 
     def _create_bldg():
         return dict(
@@ -44,10 +47,15 @@ def create_bldg(flr, near, content_type, payload):
             occupiedBy=None
         )
 
-    while not found_spot:
-        found_spot = _find_spot()
+    x = 0
+    y = 0
+    address = None
+    trials_state = dict(near_lookups_count=0,
+                        proximity=PROXIMITY)
+    while address is not None and _is_vacant(address):
+        address = _find_spot(trials_state)
 
-    logging.info("Creating building for {content_type} at {address}: {text}"
+    logging.info("Creating building at: [{address}] '{text}'"
                  .format(content_type=content_type,
                          address=address,
                          text=payload["text"]))
@@ -55,7 +63,7 @@ def create_bldg(flr, near, content_type, payload):
 
 
 @app.task(ignore_results=True)
-def create_buildings(content_type, payloads, flr, near=None):
+def create_buildings(content_type, payloads, flr, near_x=None, near_y=None):
     def _create_batch_of_buildings():
         # TODO handle errors
         db.buildings.insert(buildings)
@@ -67,7 +75,7 @@ def create_buildings(content_type, payloads, flr, near=None):
     buildings = []
     count = 0
     for payload in payloads:
-        buildings.append(create_bldg(flr, near, content_type, payload))
+        buildings.append(construct_bldg(flr, near_x, near_y, content_type, payload))
         if len(buildings) == batch_size:
             count += _create_batch_of_buildings()
             buildings = []
