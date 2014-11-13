@@ -13,6 +13,7 @@ def load_data_pipes(limit=100):
     done = False
     while not done:
         results = db.data_pipes.find(spec, limit=limit, skip=skip)
-        skip += len(results)
         yield results
+        results = list(results)
+        skip += len(results)
         done = len(results) < limit

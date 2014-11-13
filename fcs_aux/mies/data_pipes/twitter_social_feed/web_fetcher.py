@@ -1,3 +1,4 @@
+import logging
 from twitter import *
 
 from mies.buildings.model import create_buildings
@@ -44,14 +45,15 @@ def invoke_data_pipes(page):
     :param page: batch of data-pipe objects read from the database.
     """
     # TODO send to an async web-fetcher service (Tornado)
+    count = 0
     for dp in page:
-        auth = OAuth(token=dp.tokens.accessToken,
-                     token_secret=dp.tokens.accessTokenSecret,
+        auth = OAuth(token=dp["tokens"]["accessToken"],
+                     token_secret=dp["tokens"]["accessTokenSecret"],
                      consumer_key=CONSUMER_KEY,
                      consumer_secret=CONSUMER_SECRET)
         t = Twitter(auth=auth)
         args = {"count": TWITTER_POSTS_LIMIT}
-        latest_id = dp.latestId
+        latest_id = dp["latestId"]
         done = False
         while not done:
             if latest_id is not None:
@@ -62,6 +64,11 @@ def invoke_data_pipes(page):
             for post in results:
                 payloads.append(extract_payload_from_post(post))
                 latest_id = post.get("id")
+                count += 1
+            # TODO check whether the connected bldg is a flr or a bldg
+            target_flr = dp["connectedBldg"] + "-l0"
+            logging.info("Sending {} buildings..".format(len(payloads)))
             create_buildings.s(content_type=TWITTER_SOCIAL_POST,
-                               payloads=payloads, flr=dp.connectedBldg)\
+                               payloads=payloads, flr=target_flr)\
                 .apply_async(queue="create_buildings")
+    return count

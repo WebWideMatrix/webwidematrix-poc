@@ -1,3 +1,3 @@
 
 MONOGO_HOST = 'localhost'
-MONOGO_PORT = 27017
+MONOGO_PORT = 3001

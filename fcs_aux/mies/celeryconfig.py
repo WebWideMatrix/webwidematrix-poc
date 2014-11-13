@@ -14,7 +14,7 @@ CELERY_TIMEZONE = 'UTC'
 CELERYBEAT_SCHEDULE = {
     'invoke_data_pipes_every_few_minutes': {
         'task': 'mies.data_pipes.twitter_social_feed.pipe.invoke',
-        'schedule': timedelta(minutes=10),
+        'schedule': timedelta(minutes=1),
 
     }
 }
