@@ -1,3 +1,4 @@
+import logging
 from pymongo import MongoClient
 from mies.mongoconfig import MONOGO_HOST, MONOGO_PORT
 
@@ -17,3 +18,10 @@ def load_data_pipes(limit=100):
         results = list(results)
         skip += len(results)
         done = len(results) < limit
+
+
+def update_data_pipe(id, change):
+    client = MongoClient(MONOGO_HOST, MONOGO_PORT)
+    db = client.meteor
+    db.data_pipes.update({"_id": id}, {"$set": change})
+    logging.info("Updated data-pipe {}: {}".format(id, change))

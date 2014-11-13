@@ -16,4 +16,4 @@ def invoke():
     count = 0
     for page in load_data_pipes():
         count += web_fetcher.invoke_data_pipes(page)
-    return "{} data-pipes invoked.".format(count)
+    return "{} posts fetched..".format(count)

@@ -9,7 +9,7 @@ from mies.buildings.constants import FLOOR_W, FLOOR_H, PROXIMITY
 
 
 def build_bldg_address(flr, x, y):
-    return flr + "-b(" + x + "," + y + ")"
+    return "{flr}-b({x},{y})".format(flr=flr, x=x, y=y)
 
 
 def construct_bldg(flr, near_x, near_y, content_type, payload):
@@ -31,38 +31,37 @@ def construct_bldg(flr, near_x, near_y, content_type, payload):
         else:
             _x = random.randint(0, FLOOR_W)
             _y = random.randint(0, FLOOR_H)
-        return build_bldg_address(flr, _x, _y)
-
-    def _create_bldg():
-        return dict(
-            address=address,
-            flr=flr,
-            x=x,
-            y=y,
-            createdAt=datetime.utcnow(),
-            contentType=content_type,
-            payload=payload,
-            processed=False,
-            occupied=False,
-            occupiedBy=None
-        )
+        return build_bldg_address(flr, _x, _y), x, y
 
     x = 0
     y = 0
     address = None
     trials_state = dict(near_lookups_count=0,
                         proximity=PROXIMITY)
-    while address is not None and _is_vacant(address):
-        address = _find_spot(trials_state)
+    while address is None:
+        address, x, y = _find_spot(trials_state)
+        if not _is_vacant(address):
+            address = None
 
-    logging.info("Creating building at: [{address}] '{text}'"
+    logging.info(u"Creating building at: [{address}] '{text}'"
                  .format(content_type=content_type,
                          address=address,
                          text=payload["text"]))
-    return _create_bldg()
+    return dict(
+        address=address,
+        flr=flr,
+        x=x,
+        y=y,
+        createdAt=datetime.utcnow(),
+        contentType=content_type,
+        payload=payload,
+        processed=False,
+        occupied=False,
+        occupiedBy=None
+    )
 
 
-@app.task(ignore_results=True, queue="create_buildings")
+@app.task(ignore_results=True)
 def create_buildings(content_type, payloads, flr, near_x=None, near_y=None):
     def _create_batch_of_buildings():
         # TODO handle errors
@@ -82,4 +81,5 @@ def create_buildings(content_type, payloads, flr, near_x=None, near_y=None):
             buildings = []
     if buildings:
         count += _create_batch_of_buildings()
+    logging.info("Created {} buildings in {}".format(count, flr))
     return count

@@ -4,10 +4,10 @@ import tweepy
 from mies.buildings.model import create_buildings
 from mies.twitterconfig import CONSUMER_KEY, CONSUMER_SECRET, TWITTER_POSTS_LIMIT
 from mies.data_pipes.twitter_social_feed import TWITTER_SOCIAL_POST
+from mies.data_pipes.model import update_data_pipe
 
 
 def extract_payload_from_post(post):
-    logging.info(dir(post))
     payload = {
         "text": post.text,
         "language": post.lang,
@@ -56,6 +56,7 @@ def invoke_data_pipes(page):
         while not done:
             if latest_id is not None:
                 args["since_id"] = latest_id
+            logging.info("Invoking twitter API with args: {}".format(args))
             results = t.home_timeline(**args)
             done = len(results) < TWITTER_POSTS_LIMIT
             payloads = []
@@ -65,8 +66,9 @@ def invoke_data_pipes(page):
                 count += 1
             # TODO check whether the connected bldg is a flr or a bldg
             target_flr = dp["connectedBldg"] + "-l0"
-            logging.info("Sending {} buildings..".format(len(payloads)))
+            logging.info("Sending {} buildings to {}..".format(len(payloads), target_flr))
             create_buildings.s(content_type=TWITTER_SOCIAL_POST,
                                payloads=payloads, flr=target_flr)\
-                .apply_async(queue="create_buildings")
+                .apply_async()
+            update_data_pipe(dp["_id"], {"latest_id": latest_id})
     return count
