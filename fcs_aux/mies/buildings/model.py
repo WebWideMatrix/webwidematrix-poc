@@ -62,7 +62,7 @@ def construct_bldg(flr, near_x, near_y, content_type, payload):
     return _create_bldg()
 
 
-@app.task(ignore_results=True)
+@app.task(ignore_results=True, queue="create_buildings")
 def create_buildings(content_type, payloads, flr, near_x=None, near_y=None):
     def _create_batch_of_buildings():
         # TODO handle errors

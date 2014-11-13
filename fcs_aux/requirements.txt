@@ -5,5 +5,5 @@ celery==3.1.16
 kombu==3.0.23
 pymongo==2.7.2
 pytz==2014.7
-twitter==1.15.0
+tweepy==2.3.0
 wsgiref==0.1.2
