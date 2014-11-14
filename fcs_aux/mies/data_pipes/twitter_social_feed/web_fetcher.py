@@ -70,5 +70,5 @@ def invoke_data_pipes(page):
             create_buildings.s(content_type=TWITTER_SOCIAL_POST,
                                payloads=payloads, flr=target_flr)\
                 .apply_async()
-            update_data_pipe(dp["_id"], {"latest_id": latest_id})
+            update_data_pipe(dp["_id"], {"latestId": latest_id})
     return count

@@ -31,7 +31,7 @@ def construct_bldg(flr, near_x, near_y, content_type, payload):
         else:
             _x = random.randint(0, FLOOR_W)
             _y = random.randint(0, FLOOR_H)
-        return build_bldg_address(flr, _x, _y), x, y
+        return build_bldg_address(flr, _x, _y), _x, _y
 
     x = 0
     y = 0
