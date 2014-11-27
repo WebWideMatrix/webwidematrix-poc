@@ -37,7 +37,7 @@ def extract_payload_from_post(post):
     return payload
 
 
-def invoke_data_pipes(page):
+def pull_from_data_pipes(page):
     """
     Receives a page of data-pipes.
     Invokes the Twitter API to fetch the home-timeline per each data-pipe.
@@ -51,24 +51,42 @@ def invoke_data_pipes(page):
         auth.set_access_token(dp["tokens"]["accessToken"], dp["tokens"]["accessTokenSecret"])
         t = tweepy.API(auth)
         args = {"count": TWITTER_POSTS_LIMIT}
-        latest_id = dp["latestId"]
+        latest_id = dp.get("latestId")
+        new_latest_id = None
+        max_id = None
         done = False
+        batch_count = 0
         while not done:
+            payloads = []
+            batch_count += 1
             if latest_id is not None:
                 args["since_id"] = latest_id
+            if max_id is not None:
+                args["max_id"] = max_id - 1
             logging.info("Invoking twitter API with args: {}".format(args))
             results = t.home_timeline(**args)
-            done = len(results) < TWITTER_POSTS_LIMIT
-            payloads = []
-            for post in results:
-                payloads.append(extract_payload_from_post(post))
-                latest_id = post.id
-                count += 1
-            # TODO check whether the connected bldg is a flr or a bldg
-            target_flr = dp["connectedBldg"] + "-l0"
-            logging.info("Sending {} buildings to {}..".format(len(payloads), target_flr))
-            create_buildings.s(content_type=TWITTER_SOCIAL_POST,
-                               payloads=payloads, flr=target_flr)\
-                .apply_async()
-            update_data_pipe(dp["_id"], {"latestId": latest_id})
+            if not results:
+                done = True
+            else:
+                for post in results:
+                    if latest_id is not None and post.id <= latest_id:
+                        done = True
+                    elif new_latest_id is None or post.id > new_latest_id:
+                        new_latest_id = post.id
+                    if not done:
+                        max_id = post.id
+                        payloads.append(extract_payload_from_post(post))
+                        count += 1
+                if latest_id is None and new_latest_id is not None:
+                    done = True
+
+            if payloads:
+                # TODO check whether the connected bldg is a flr or a bldg
+                target_flr = dp["connectedBldg"] + "-l0"
+                logging.info("Sending {} buildings to {}..".format(len(payloads), target_flr))
+                create_buildings.s(content_type=TWITTER_SOCIAL_POST,
+                                   payloads=payloads, flr=target_flr)\
+                    .apply_async()
+                if new_latest_id is not None:
+                    update_data_pipe(dp["_id"], {"latestId": new_latest_id})
     return count

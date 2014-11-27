@@ -15,5 +15,5 @@ def invoke():
     logging.info("Invoking data-pipes...")
     count = 0
     for page in load_data_pipes():
-        count += web_fetcher.invoke_data_pipes(page)
+        count += web_fetcher.pull_from_data_pipes(page)
     return "{} posts fetched..".format(count)

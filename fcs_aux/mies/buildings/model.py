@@ -43,10 +43,10 @@ def construct_bldg(flr, near_x, near_y, content_type, payload):
         if not _is_vacant(address):
             address = None
 
-    logging.info(u"Creating building at: [{address}] '{text}'"
-                 .format(content_type=content_type,
-                         address=address,
-                         text=payload["text"]))
+    # logging.info(u"Creating building at: [{address}] '{text}'"
+    #              .format(content_type=content_type,
+    #                      address=address,
+    #                      text=payload["text"]))
     return dict(
         address=address,
         flr=flr,
@@ -68,7 +68,6 @@ def create_buildings(content_type, payloads, flr, near_x=None, near_y=None):
         db.buildings.insert(buildings)
         return len(buildings)
 
-    logging.info("About to create buildings in flr {}".format(flr))
     client = MongoClient(MONOGO_HOST, MONOGO_PORT)
     db = client.meteor
     batch_size = 10

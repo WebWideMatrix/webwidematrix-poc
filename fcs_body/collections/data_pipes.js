@@ -18,7 +18,6 @@ createDataPipe = function(tokens, callback) {
             status: "active",
             schedule: _getSchedule(),
             tokens: tokens,
-            active: false,
             latestId: null,
             connectedBldg: null,
             frequency: null

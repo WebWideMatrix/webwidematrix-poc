@@ -3,11 +3,14 @@ from pymongo import MongoClient
 from mies.mongoconfig import MONOGO_HOST, MONOGO_PORT
 
 
+STATUS_ACTIVE = "active"
+
+
 def load_data_pipes(limit=100):
     client = MongoClient(MONOGO_HOST, MONOGO_PORT)
     db = client.meteor
     spec = {
-        "active": True,
+        "status": STATUS_ACTIVE,
         "connectedBldg": {'$exists': True}
     }
     skip = 0
