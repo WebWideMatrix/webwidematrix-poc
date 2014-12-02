@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime
 import logging
 import random
@@ -12,35 +13,44 @@ def build_bldg_address(flr, x, y):
     return "{flr}-b({x},{y})".format(flr=flr, x=x, y=y)
 
 
+def is_vacant(address):
+    # TODO implement using cache
+    return True
+
+
+def _create_trials_state():
+    trials_state = defaultdict(int)
+    trials_state["near_lookups_count"] = 0
+    trials_state["proximity"] = PROXIMITY
+    return trials_state
+
+
+def find_spot(flr, state=None, near_x=None, near_y=None):
+    if state is None:
+        state = _create_trials_state()
+    # generate a random address
+    if near_x is not None and near_y is not None:
+        state['near_lookups_count'] += 1
+        # have we almost exhausted the near by spots?
+        if state['near_lookups_count'] > (2 * state['proximity'])**2:
+            # if so, extend the lookup area
+            state['proximity'] *= 2
+        x = random.randint(near_x - state['proximity'], near_x + state['proximity'])
+        y = random.randint(near_y - state['proximity'], near_y + state['proximity'])
+    else:
+        x = random.randint(0, FLOOR_W)
+        y = random.randint(0, FLOOR_H)
+    return build_bldg_address(flr, x, y), x, y
+
+
 def construct_bldg(flr, near_x, near_y, content_type, payload):
-
-    def _is_vacant(_address):
-        # TODO implement using cache
-        return True
-
-    def _find_spot(state):
-        # generate a random address
-        if near_x is not None and near_y is not None:
-            state['near_lookups_count'] += 1
-            # have we almost exhausted the near by spots?
-            if state['near_lookups_count'] > (2 * state['proximity'])**2:
-                # if so, extend the lookup area
-                state['proximity'] *= 2
-            _x = random.randint(near_x - state['proximity'], near_x + state['proximity'])
-            _y = random.randint(near_y - state['proximity'], near_y + state['proximity'])
-        else:
-            _x = random.randint(0, FLOOR_W)
-            _y = random.randint(0, FLOOR_H)
-        return build_bldg_address(flr, _x, _y), _x, _y
-
     x = 0
     y = 0
     address = None
-    trials_state = dict(near_lookups_count=0,
-                        proximity=PROXIMITY)
+    trials_state = _create_trials_state()
     while address is None:
-        address, x, y = _find_spot(trials_state)
-        if not _is_vacant(address):
+        address, x, y = find_spot(flr, trials_state, near_x, near_y)
+        if not is_vacant(address):
             address = None
 
     # logging.info(u"Creating building at: [{address}] '{text}'"
