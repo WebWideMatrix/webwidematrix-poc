@@ -1,5 +1,6 @@
 from datetime import datetime
-from fcs_aux.mies.buildings.model import construct_bldg
+from fcs_aux.mies.buildings.model import construct_bldg, create_buildings
+from mock import patch, MagicMock
 import pytest
 
 from mies.buildings.model import build_bldg_address
@@ -70,6 +71,22 @@ def test_construct_bldg():
     assert abs(got['y'] - near_y) <= PROXIMITY
     assert (datetime.utcnow() - got['createdAt']).seconds < 10
     assert got['payload'] == payload
-    assert got['processed'] == False
-    assert got['occupied'] == False
+    assert not got['processed']
+    assert not got['occupied']
     assert got['occupiedBy'] is None
+
+
+@patch('fcs_aux.mies.buildings.model.MongoClient')
+def test_create_buildings(mongo_client):
+    mongo_client.meteor = MagicMock()
+    content_type = "SomeContent"
+    payloads = [
+        {
+            "field1": "value 1.1",
+            "field2": "value 1.2",
+            "field3": "value 1.3",
+        },
+    ]*35
+    flr = "g-b(1,2)-l1"
+    got = create_buildings(content_type, payloads, flr)
+    assert got == 35
