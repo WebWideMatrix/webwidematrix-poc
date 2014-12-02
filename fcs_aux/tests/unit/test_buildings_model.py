@@ -1,3 +1,5 @@
+from datetime import datetime
+from fcs_aux.mies.buildings.model import construct_bldg
 import pytest
 
 from mies.buildings.model import build_bldg_address
@@ -48,3 +50,26 @@ def test_find_spot_near():
     assert 0 <= y <= FLOOR_H
     assert abs(x - near_x) <= PROXIMITY
     assert abs(y - near_y) <= PROXIMITY
+
+
+def test_construct_bldg():
+    flr = "g-b(1,2)-l1"
+    near_x = 75
+    near_y = 6
+    content_type = "SomeContent"
+    payload = {
+        "field1": "value 1",
+        "field2": "value 2",
+        "field3": "value 3",
+    }
+    got = construct_bldg(flr, near_x, near_y, content_type, payload)
+    assert got is not None
+    assert got['address'].startswith(flr)
+    assert got['flr'] == flr
+    assert abs(got['x'] - near_x) <= PROXIMITY
+    assert abs(got['y'] - near_y) <= PROXIMITY
+    assert (datetime.utcnow() - got['createdAt']).seconds < 10
+    assert got['payload'] == payload
+    assert got['processed'] == False
+    assert got['occupied'] == False
+    assert got['occupiedBy'] is None
