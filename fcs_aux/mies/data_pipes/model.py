@@ -23,8 +23,8 @@ def load_data_pipes(limit=100):
         done = len(results) < limit
 
 
-def update_data_pipe(id, change):
+def update_data_pipe(data_pipe_id, change):
     client = MongoClient(MONOGO_HOST, MONOGO_PORT)
     db = client.meteor
-    db.data_pipes.update({"_id": id}, {"$set": change})
-    logging.info("Updated data-pipe {}: {}".format(id, change))
+    db.data_pipes.update({"_id": data_pipe_id}, {"$set": change})
+    logging.info("Updated data-pipe {}: {}".format(data_pipe_id, change))

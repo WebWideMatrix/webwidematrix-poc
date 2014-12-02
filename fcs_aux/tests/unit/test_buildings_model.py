@@ -1,5 +1,4 @@
 from datetime import datetime
-from fcs_aux.mies.buildings.model import construct_bldg, create_buildings
 from mock import patch, MagicMock
 import pytest
 
@@ -7,6 +6,7 @@ from mies.buildings.model import build_bldg_address
 from mies.buildings.model import is_vacant
 from mies.buildings.model import find_spot
 from mies.buildings.constants import FLOOR_W, FLOOR_H, PROXIMITY
+from mies.buildings.model import construct_bldg, create_buildings
 
 
 @pytest.mark.parametrize("flr,x,y,address", [
@@ -76,7 +76,7 @@ def test_construct_bldg():
     assert got['occupiedBy'] is None
 
 
-@patch('fcs_aux.mies.buildings.model.MongoClient')
+@patch('mies.buildings.model.MongoClient')
 def test_create_buildings(mongo_client):
     mongo_client.meteor = MagicMock()
     content_type = "SomeContent"
