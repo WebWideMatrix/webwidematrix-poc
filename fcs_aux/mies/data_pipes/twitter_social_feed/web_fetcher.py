@@ -65,20 +65,21 @@ def pull_from_data_pipes(page):
                 args["max_id"] = max_id - 1
             logging.info("Invoking twitter API with args: {}".format(args))
             results = t.home_timeline(**args)
-            if not results:
-                done = True
-            else:
-                for post in results:
-                    if latest_id is not None and post.id <= latest_id:
-                        done = True
-                    elif new_latest_id is None or post.id > new_latest_id:
-                        new_latest_id = post.id
-                    if not done:
-                        max_id = post.id
-                        payloads.append(extract_payload_from_post(post))
-                        count += 1
-                if latest_id is None and new_latest_id is not None:
+
+            for post in results:
+                if latest_id is not None and post.id <= latest_id:
                     done = True
+                elif new_latest_id is None or post.id > new_latest_id:
+                    new_latest_id = post.id
+                if not done:
+                    max_id = post.id
+                    payloads.append(extract_payload_from_post(post))
+                    count += 1
+            else:
+                done = True
+
+            if latest_id is None and new_latest_id is not None:
+                done = True
 
             if payloads:
                 # TODO check whether the connected bldg is a flr or a bldg
