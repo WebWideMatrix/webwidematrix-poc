@@ -35,8 +35,10 @@ def find_spot(flr, state=None, near_x=None, near_y=None):
         if state['near_lookups_count'] > (2 * state['proximity'])**2:
             # if so, extend the lookup area
             state['proximity'] *= 2
-        x = random.randint(near_x - state['proximity'], near_x + state['proximity'])
-        y = random.randint(near_y - state['proximity'], near_y + state['proximity'])
+        x = random.randint(near_x - state['proximity'],
+                           near_x + state['proximity'])
+        y = random.randint(near_y - state['proximity'],
+                           near_y + state['proximity'])
     else:
         x = random.randint(0, FLOOR_W)
         y = random.randint(0, FLOOR_H)
@@ -84,7 +86,8 @@ def create_buildings(content_type, payloads, flr, near_x=None, near_y=None):
     buildings = []
     count = 0
     for payload in payloads:
-        buildings.append(construct_bldg(flr, near_x, near_y, content_type, payload))
+        buildings.append(construct_bldg(flr, near_x, near_y,
+                                        content_type, payload))
         if len(buildings) == batch_size:
             count += _create_batch_of_buildings()
             buildings = []

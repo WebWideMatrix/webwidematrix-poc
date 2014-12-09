@@ -2,7 +2,8 @@ import logging
 import tweepy
 
 from mies.buildings.model import create_buildings
-from mies.twitterconfig import CONSUMER_KEY, CONSUMER_SECRET, TWITTER_POSTS_LIMIT
+from mies.twitterconfig import CONSUMER_KEY, \
+    CONSUMER_SECRET, TWITTER_POSTS_LIMIT
 from mies.data_pipes.twitter_social_feed import TWITTER_SOCIAL_POST
 from mies.data_pipes.model import update_data_pipe
 
@@ -48,7 +49,8 @@ def pull_from_data_pipes(page):
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     count = 0
     for dp in page:
-        auth.set_access_token(dp["tokens"]["accessToken"], dp["tokens"]["accessTokenSecret"])
+        auth.set_access_token(dp["tokens"]["accessToken"],
+                              dp["tokens"]["accessTokenSecret"])
         t = tweepy.API(auth)
         args = {"count": TWITTER_POSTS_LIMIT}
         latest_id = dp.get("latestId")
@@ -84,10 +86,12 @@ def pull_from_data_pipes(page):
             if payloads:
                 # TODO check whether the connected bldg is a flr or a bldg
                 target_flr = dp["connectedBldg"] + "-l0"
-                logging.info("Sending {} buildings to {}..".format(len(payloads), target_flr))
+                logging.info("Sending {} buildings to {}.."
+                             .format(len(payloads), target_flr))
                 create_buildings.s(content_type=TWITTER_SOCIAL_POST,
                                    payloads=payloads, flr=target_flr)\
                     .apply_async()
                 if new_latest_id is not None:
-                    update_data_pipe(dp["_id"], {"latestId": new_latest_id})
+                    update_data_pipe(dp["_id"],
+                                     {"latestId": new_latest_id})
     return count

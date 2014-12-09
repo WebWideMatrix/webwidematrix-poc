@@ -10,7 +10,8 @@ from mies.data_pipes.twitter_social_feed import web_fetcher
 def invoke():
     """
     * Reads in pages all connected & active data-pipes from the DB
-    * Each read page of data-pipes is sent to the web_fetcher service in a REST call
+    * Each read page of data-pipes is sent to the web_fetcher service
+    in a REST call
     """
     logging.info("Invoking data-pipes...")
     count = 0
