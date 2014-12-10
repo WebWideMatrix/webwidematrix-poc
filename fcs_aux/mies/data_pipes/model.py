@@ -7,6 +7,11 @@ STATUS_ACTIVE = "active"
 
 
 def load_data_pipes(limit=100):
+    """
+    Generator returning batches of data-pipe records
+    :param limit: the size of each batch
+    :return:
+    """
     # TODO abstract the DB & inject it
     client = MongoClient(MONOGO_HOST, MONOGO_PORT)
     db = client.meteor
