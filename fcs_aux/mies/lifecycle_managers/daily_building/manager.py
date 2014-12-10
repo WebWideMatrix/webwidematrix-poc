@@ -21,7 +21,7 @@ def _create_bldg(target_flr, today, user):
     }
     address = create_buildings(content_type=DAILY_FEED, keys=[today],
                                payloads=[payload], flr=target_flr,
-                               next_free=True),
+                               position_hints={"next_free": True}),
     return address
 
 
@@ -41,8 +41,10 @@ def create_daily_bldg_for_user(db, today, user):
         "key": today
     })
     if existing_bldg is not None:
+        logging.info("()"*30)
+        logging.info(existing_bldg)
         logging.info("Daily bldg ({today}) already existed for user {user}"
-                     .format(today=today, user=user["screenName"]))
+                     .format(today=today, user=user["profile"]["screenName"]))
     else:
         address = _create_bldg(target_flr, today, user)
         _update_data_pipes(address, user)

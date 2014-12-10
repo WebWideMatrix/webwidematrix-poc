@@ -125,11 +125,11 @@ def create_buildings(content_type, keys, payloads, flr, position_hints=None):
     for i, payload in enumerate(payloads):
         bldg = construct_bldg(flr, content_type, keys[i], payload, position_hints, db)
         buildings.append(bldg)
-        create_buildings.append(bldg["address"])
+        created_addresses.append(bldg["address"])
         if len(buildings) == batch_size:
             count += _create_batch_of_buildings()
             buildings = []
     if buildings:
         count += _create_batch_of_buildings()
     logging.info("Created {} buildings in {}".format(count, flr))
-    return create_buildings
+    return created_addresses
