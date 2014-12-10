@@ -10,13 +10,14 @@ DAILY_FEED = "daily-feed"
 
 
 def format_date(d):
-    return d.strftime('%Y-%b-%d')
+    # return d.strftime('%Y-%b-%d')
+    return d.strftime('%Y-%b-%d-%H%:%M')
 
 
 def _create_bldg(target_flr, today, user):
     payload = {
         "date": today,
-        "data_pipes": [dp["type"] for dp in user.data_pipes]
+        "data_pipes": [dp["type"] for dp in user["dataPipes"]]
     }
     address = create_buildings(content_type=DAILY_FEED, keys=[today],
                                payloads=[payload], flr=target_flr,
@@ -25,7 +26,7 @@ def _create_bldg(target_flr, today, user):
 
 
 def _update_data_pipes(address, user):
-    for dp in user.data_pipes:
+    for dp in user["dataPipes"]:
         if dp["status"] == STATUS_ACTIVE:
             update_data_pipe(dp["_id"], {
                 "connectedBldg": address
@@ -33,7 +34,7 @@ def _update_data_pipes(address, user):
 
 
 def create_daily_bldg_for_user(db, today, user):
-    user_bldg_address = user.bldg.address
+    user_bldg_address = user["bldg"]["address"]
     target_flr = "{}-l0".format(user_bldg_address)
     existing_bldg = db.buildings.find({
         "flr": target_flr,
@@ -41,7 +42,7 @@ def create_daily_bldg_for_user(db, today, user):
     })
     if existing_bldg is not None:
         logging.info("Daily bldg ({today}) already existed for user {user}"
-                     .format(today=today, user=user.screenName))
+                     .format(today=today, user=user["screenName"]))
     else:
         address = _create_bldg(target_flr, today, user)
         _update_data_pipes(address, user)

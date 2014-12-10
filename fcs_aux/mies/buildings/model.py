@@ -43,6 +43,7 @@ def find_spot(flr, state=None, position_hints=None, db=None):
     if state is None:
         state = _create_trials_state()
     # calculate the address according to the hints
+    position_hints = position_hints or {}
     near_x = position_hints.get('near_x')
     near_y = position_hints.get('near_y')
     next_free = position_hints.get('next_free') or False
