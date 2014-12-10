@@ -21,7 +21,7 @@ def is_vacant(address, db):
     # TODO implement using cache
     # TODO abstract the DB & inject it
     bldg = db.buildings.find({"address": address})
-    return bldg is not None
+    return bldg is None
 
 
 def _create_trials_state():
