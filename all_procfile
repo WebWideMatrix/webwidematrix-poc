@@ -1,6 +1,0 @@
-
-meteor: meteor
-
-rabbit: rabbitmq-server
-
-celery_all: celery -A mies worker -l info -B

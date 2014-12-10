@@ -8,6 +8,7 @@ binaryornot==0.3.0
 celery==3.1.16
 cookiecutter==0.8.0
 flake8==2.2.5
+honcho==0.5.0
 kombu==3.0.23
 mccabe==0.2.1
 mock==1.0.1
