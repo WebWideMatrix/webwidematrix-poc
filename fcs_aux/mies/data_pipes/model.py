@@ -7,6 +7,7 @@ STATUS_ACTIVE = "active"
 
 
 def load_data_pipes(limit=100):
+    # TODO abstract the DB & inject it
     client = MongoClient(MONOGO_HOST, MONOGO_PORT)
     db = client.meteor
     spec = {
