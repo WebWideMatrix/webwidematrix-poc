@@ -59,6 +59,7 @@ def pull_from_data_pipes(page):
         done = False
         batch_count = 0
         while not done:
+            keys = []
             payloads = []
             batch_count += 1
             if latest_id is not None:
@@ -75,6 +76,7 @@ def pull_from_data_pipes(page):
                     new_latest_id = post.id
                 if not done:
                     max_id = post.id
+                    keys.append(post.id)
                     payloads.append(extract_payload_from_post(post))
                     count += 1
             else:
@@ -89,7 +91,7 @@ def pull_from_data_pipes(page):
                 logging.info("Sending {} buildings to {}.."
                              .format(len(payloads), target_flr))
                 create_buildings.s(content_type=TWITTER_SOCIAL_POST,
-                                   payloads=payloads, flr=target_flr)\
+                                   keys=keys, payloads=payloads, flr=target_flr)\
                     .apply_async()
                 if new_latest_id is not None:
                     update_data_pipe(dp["_id"],

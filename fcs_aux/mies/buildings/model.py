@@ -45,7 +45,7 @@ def find_spot(flr, state=None, near_x=None, near_y=None):
     return build_bldg_address(flr, x, y), x, y
 
 
-def construct_bldg(flr, near_x, near_y, content_type, payload):
+def construct_bldg(flr, near_x, near_y, content_type, key, payload):
     # TODO revise to add more hints than just near
     x = 0
     y = 0
@@ -69,6 +69,7 @@ def construct_bldg(flr, near_x, near_y, content_type, payload):
         y=y,
         createdAt=datetime.utcnow(),
         contentType=content_type,
+        key=key,
         payload=payload,
         processed=False,
         occupied=False,
@@ -77,25 +78,40 @@ def construct_bldg(flr, near_x, near_y, content_type, payload):
 
 
 @app.task(ignore_results=True)
-def create_buildings(content_type, payloads, flr, near_x=None, near_y=None):
+def create_buildings(content_type, keys, payloads, flr, near_x=None, near_y=None,
+                     next_free=False):
+    """
+    Creates a batch of buildings.
+    :param content_type: the content-type of the buildings
+    :param keys: the list of keys for the buildings
+    :param payloads: the list of payloads for the buildings
+    :param flr: the target floor in which to create the buildings
+    :param near_x: optional x coordinate, near which the buildings will be created
+    :param near_y: optional y coordinate, near which the buildings will be created
+    :param next_free: optional hint to create the buildings in the next free place
+    (sequentially)
+    :return: the addresses of the created buildings.
+    """
     def _create_batch_of_buildings():
         # TODO handle errors
         db.buildings.insert(buildings)
         return len(buildings)
 
+    created_addresses = []
     # TODO abstract the DB & inject it
     client = MongoClient(MONOGO_HOST, MONOGO_PORT)
     db = client.meteor
     batch_size = 10
     buildings = []
     count = 0
-    for payload in payloads:
-        buildings.append(construct_bldg(flr, near_x, near_y,
-                                        content_type, payload))
+    for i, payload in enumerate(payloads):
+        bldg = construct_bldg(flr, near_x, near_y, content_type, keys[i], payload)
+        buildings.append(bldg)
+        create_buildings.append(bldg["address"])
         if len(buildings) == batch_size:
             count += _create_batch_of_buildings()
             buildings = []
     if buildings:
         count += _create_batch_of_buildings()
     logging.info("Created {} buildings in {}".format(count, flr))
-    return count
+    return create_buildings
