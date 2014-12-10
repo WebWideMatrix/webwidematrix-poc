@@ -24,6 +24,7 @@ def load_data_pipes(limit=100):
 
 
 def update_data_pipe(data_pipe_id, change):
+    # TODO abstract the DB & inject it
     client = MongoClient(MONOGO_HOST, MONOGO_PORT)
     db = client.meteor
     db.data_pipes.update({"_id": data_pipe_id}, {"$set": change})

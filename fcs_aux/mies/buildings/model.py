@@ -83,6 +83,7 @@ def create_buildings(content_type, payloads, flr, near_x=None, near_y=None):
         db.buildings.insert(buildings)
         return len(buildings)
 
+    # TODO abstract the DB & inject it
     client = MongoClient(MONOGO_HOST, MONOGO_PORT)
     db = client.meteor
     batch_size = 10
