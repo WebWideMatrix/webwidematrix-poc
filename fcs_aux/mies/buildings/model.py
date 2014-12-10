@@ -46,6 +46,7 @@ def find_spot(flr, state=None, near_x=None, near_y=None):
 
 
 def construct_bldg(flr, near_x, near_y, content_type, payload):
+    # TODO revise to add more hints than just near
     x = 0
     y = 0
     address = None
@@ -54,6 +55,8 @@ def construct_bldg(flr, near_x, near_y, content_type, payload):
         address, x, y = find_spot(flr, trials_state, near_x, near_y)
         if not is_vacant(address):
             address = None
+
+    # TODO revise to avoid infinite loop if no spot is available
 
     # logging.info(u"Creating building at: [{address}] '{text}'"
     #              .format(content_type=content_type,
