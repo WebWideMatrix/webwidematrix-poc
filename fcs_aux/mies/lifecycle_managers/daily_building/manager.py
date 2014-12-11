@@ -40,7 +40,7 @@ def create_daily_bldg_for_user(db, today, user):
         "flr": target_flr,
         "key": today
     })
-    if existing_bldg is not None:
+    if list(existing_bldg) is not None:
         logging.info("()"*30)
         logging.info(existing_bldg)
         logging.info("Daily bldg ({today}) already existed for user {user}"
