@@ -112,3 +112,4 @@ def test_create_buildings(mongo_client):
     flr = "g-b(1,2)-l1"
     got = create_buildings(content_type, keys, payloads, flr)
     assert len(got) == nbuildings
+    assert db.buildings.insert.call_count == 4  # 4 batch inserts
