@@ -28,9 +28,9 @@ def test_build_upper_level_bldg_address(flr, x, y, address):
 
 def test_is_vacant():
     db = MagicMock()
-    db.buildings.find = MagicMock(return_value=None)
+    db.buildings.find_one = MagicMock(return_value=None)
     assert True == is_vacant("g-b(1,2)", db)
-    db.buildings.find.assert_called_once_with({'address': 'g-b(1,2)'})
+    db.buildings.find_one.assert_called_once_with({'address': 'g-b(1,2)'})
 
 
 def test_find_spot():
@@ -75,7 +75,7 @@ def test_construct_bldg():
         "field3": "value 3",
     }
     db = MagicMock()
-    db.buildings.find = MagicMock(return_value=None)
+    db.buildings.find_one = MagicMock(return_value=None)
     got = construct_bldg(flr, content_type, "key", payload,
                          position_hints=pos_hints, db=db)
     assert got is not None
@@ -93,7 +93,7 @@ def test_construct_bldg():
 @patch('mies.buildings.model.MongoClient')
 def test_create_buildings(mongo_client):
     db = MagicMock()
-    db.buildings.find = MagicMock(return_value=None)
+    db.buildings.find_one = MagicMock(return_value=None)
     db.buildings.insert = MagicMock(return_value=None)
     cl = MagicMock()
     cl.meteor = db

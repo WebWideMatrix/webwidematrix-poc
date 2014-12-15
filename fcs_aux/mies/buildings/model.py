@@ -20,7 +20,7 @@ def build_bldg_address(flr, x, y):
 def is_vacant(address, db):
     # TODO implement using cache
     # TODO abstract the DB & inject it
-    bldg = db.buildings.find({"address": address})
+    bldg = db.buildings.find_one({"address": address})
     return bldg is None
 
 
