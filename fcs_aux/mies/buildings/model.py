@@ -65,7 +65,8 @@ def find_spot(flr, state=None, position_hints=None, db=None):
     return build_bldg_address(flr, x, y), x, y
 
 
-def construct_bldg(flr, content_type, key, payload, position_hints=None, db=None):
+def construct_bldg(flr, content_type, key, payload, position_hints=None,
+                   db=None):
     x = 0
     y = 0
     address = None
@@ -104,10 +105,12 @@ def create_buildings(content_type, keys, payloads, flr, position_hints=None):
     :param keys: the list of keys for the buildings
     :param payloads: the list of payloads for the buildings
     :param flr: the target floor in which to create the buildings
-    :param position_hints: dict of hints where to position the new buildings, such as:
+    :param position_hints: dict of hints where to position
+    the new buildings, such as:
     * near_x: x coordinate, near which the buildings will be created
     * near_y: y coordinate, near which the buildings will be created
-    * next_free: if True, create the buildings in the next free place (sequentially)
+    * next_free: if True, create the buildings in the next
+    free place (sequentially)
     :return: the addresses of the created buildings.
     """
     def _create_batch_of_buildings():
@@ -123,7 +126,8 @@ def create_buildings(content_type, keys, payloads, flr, position_hints=None):
     buildings = []
     count = 0
     for i, payload in enumerate(payloads):
-        bldg = construct_bldg(flr, content_type, keys[i], payload, position_hints, db)
+        bldg = construct_bldg(flr, content_type, keys[i], payload,
+                              position_hints, db)
         buildings.append(bldg)
         created_addresses.append(bldg["address"])
         if len(buildings) == batch_size:

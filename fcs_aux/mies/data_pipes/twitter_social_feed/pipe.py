@@ -3,7 +3,8 @@ import logging
 
 from mies.celery import app
 from mies.data_pipes.model import load_data_pipes
-from mies.data_pipes.twitter_social_feed import web_fetcher
+from mies.data_pipes.twitter_social_feed import web_fetcher, \
+    PERSONAL_TWITTER_FEED
 
 
 @app.task(ignore_result=True)
@@ -15,6 +16,7 @@ def invoke():
     """
     logging.info("Invoking data-pipes...")
     count = 0
-    for page in load_data_pipes():
+    criteria = {"type": PERSONAL_TWITTER_FEED}
+    for page in load_data_pipes(criteria=criteria):
         count += web_fetcher.pull_from_data_pipes(page)
     return "{} posts fetched..".format(count)

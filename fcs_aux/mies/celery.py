@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 from celery import Celery
 
-#TODO separate queues
+# TODO separate queues
 
 app = Celery('mies',
              include=[
