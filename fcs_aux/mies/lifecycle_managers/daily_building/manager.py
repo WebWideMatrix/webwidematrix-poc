@@ -12,8 +12,7 @@ DAILY_FEED = "daily-feed"
 
 
 def format_date(d):
-    # return d.strftime('%Y-%b-%d')
-    return d.strftime('%Y-%b-%d-%H%:%M')
+    return d.strftime('%Y-%b-%d')
 
 
 def _create_bldg(target_flr, today, data_pipe):
