@@ -46,13 +46,10 @@ def create_daily_bldg(db, today, manager):
         "flr": target_flr,
         "key": today
     })
-    if existing_bldg is not None:
-        logging.info("()"*30)
-        logging.info(existing_bldg)
-        logging.info("Daily bldg ({today}) already existed "
-                     "for user in {address}"
+    if existing_bldg is None:
+        logging.info("Creating daily bldg '{today}' "
+                     "inside {address}"
                      .format(today=today, address=user_bldg_address))
-    else:
         address = _create_bldg(target_flr, today, data_pipe)
         _update_data_pipes(address, data_pipe)
 

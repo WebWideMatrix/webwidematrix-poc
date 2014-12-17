@@ -1,5 +1,5 @@
 from datetime import timedelta
-from celery.schedules import crontab
+# from celery.schedules import crontab
 
 BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 
@@ -22,6 +22,7 @@ CELERYBEAT_SCHEDULE = {
     },
     'invoke_daily_lifecycle_manager_every_day': {
         'task': 'mies.lifecycle_managers.daily_building.manager.invoke',
-        'schedule': crontab(minute=0, hour=0),
+        # 'schedule': crontab(minute=0, hour=0),
+        'schedule': timedelta(hours=1),
     }
 }
