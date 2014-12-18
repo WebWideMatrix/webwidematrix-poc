@@ -68,6 +68,22 @@ def test_find_spot_near():
     assert abs(y - near_y) <= PROXIMITY
 
 
+def test_find_spot_next_free():
+    flr = "g-b(1,2)-l1"
+    pos_hints = {
+        "next_free": True,
+    }
+    vacancies = [{}]*350 + [None]
+    db = MagicMock()
+    db.buildings.find_one = MagicMock(side_effect=vacancies)
+    address, got_x, got_y = find_spot(flr, position_hints=pos_hints, db=db)
+    expected_x, expected_y = 3, 50
+    assert got_x == expected_x
+    assert got_y == expected_y
+    assert address is not None
+    assert address == "{flr}-b({expected_x},{expected_y})".format(**locals())
+
+
 def test_construct_bldg():
     flr = "g-b(1,2)-l1"
     near_x = 75
