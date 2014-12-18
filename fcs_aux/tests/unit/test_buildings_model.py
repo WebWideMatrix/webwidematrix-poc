@@ -2,7 +2,7 @@ from datetime import datetime
 from mock import patch, MagicMock
 import pytest
 
-from mies.buildings.model import build_bldg_address
+from mies.buildings.model import build_bldg_address, _get_next_free
 from mies.buildings.model import is_vacant
 from mies.buildings.model import find_spot
 from mies.buildings.constants import FLOOR_W, FLOOR_H, PROXIMITY
@@ -31,6 +31,14 @@ def test_is_vacant():
     db.buildings.find_one = MagicMock(return_value=None)
     assert True == is_vacant("g-b(1,2)", db)
     db.buildings.find_one.assert_called_once_with({'address': 'g-b(1,2)'})
+
+
+def test_get_next_free():
+    vacancies = [{}]*350 + [None]
+    db = MagicMock()
+    db.buildings.find_one = MagicMock(side_effect=vacancies)
+    got = _get_next_free("g-b(1,2)-l0", db)
+    assert got == (3, 50)
 
 
 def test_find_spot():
