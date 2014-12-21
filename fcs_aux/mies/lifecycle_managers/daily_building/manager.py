@@ -28,7 +28,7 @@ def _create_bldg(target_flr, today, data_pipe):
     return address
 
 
-def _update_data_pipes(address, data_pipe):
+def _update_data_pipe(address, data_pipe):
     update_data_pipe(data_pipe["_id"], {
         "connectedBldg": address
     })
@@ -51,7 +51,7 @@ def create_daily_bldg(db, today, manager):
                      "inside {address}"
                      .format(today=today, address=user_bldg_address))
         address = _create_bldg(target_flr, today, data_pipe)
-        _update_data_pipes(address, data_pipe)
+        _update_data_pipe(address, data_pipe)
 
 
 @app.task(ignore_result=True)
@@ -70,5 +70,6 @@ def invoke():
     managers = db.lifecycle_managers.find(
         {"type": DAILY_FEED_DISPATCHER_LIFEYCLE_MANAGER}
     )
+    # TODO read & process in batches
     for manager in managers:
         create_daily_bldg(db, today, manager)
