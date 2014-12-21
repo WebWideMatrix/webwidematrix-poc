@@ -1,7 +1,8 @@
+from datetime import datetime
 from mock import MagicMock, patch, call
 from mies.data_pipes.model import STATUS_ACTIVE
 from mies.data_pipes.twitter_social_feed import PERSONAL_TWITTER_FEED
-from mies.lifecycle_managers.daily_building.manager import create_daily_bldg
+from mies.lifecycle_managers.daily_building.manager import create_daily_bldg, format_date
 
 CREATED_BLDG_ADDRESS = "g-b(12,34)-l0-b(0,67)"
 
@@ -46,3 +47,10 @@ def test_create_daily_bldg(create_bldgs, update_pipe):
                                                         [PERSONAL_TWITTER_FEED]}])
     update_pipe.assert_called_once_with(data_pipe_id,
                                         {'connectedBldg': CREATED_BLDG_ADDRESS})
+
+
+def test_format_date():
+    d = datetime(2014, 12, 21, 15, 59, 26)
+    expected = "2014-Dec-21"
+    got = format_date(d)
+    assert got == expected
