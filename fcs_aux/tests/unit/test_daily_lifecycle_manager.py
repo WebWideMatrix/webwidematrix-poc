@@ -2,7 +2,8 @@ from datetime import datetime
 from mock import MagicMock, patch, call
 from mies.data_pipes.model import STATUS_ACTIVE
 from mies.data_pipes.twitter_social_feed import PERSONAL_TWITTER_FEED
-from mies.lifecycle_managers.daily_building.manager import create_daily_bldg, format_date
+from mies.lifecycle_managers.daily_building.manager import create_daily_bldg, \
+    format_date, _create_bldg
 
 CREATED_BLDG_ADDRESS = "g-b(12,34)-l0-b(0,67)"
 
@@ -53,4 +54,29 @@ def test_format_date():
     d = datetime(2014, 12, 21, 15, 59, 26)
     expected = "2014-Dec-21"
     got = format_date(d)
+    assert got == expected
+
+
+@patch('mies.lifecycle_managers.daily_building.manager.create_buildings')
+def test_create_bldg(create_bldgs_task):
+    target_flr = "g-b(12,34)-l0"
+    today = "2014-Dec-21"
+    data_pipe = {
+        "type": PERSONAL_TWITTER_FEED
+    }
+    expected = "{}-b(56,78)".format(target_flr)
+    create_bldgs_task.return_value = expected
+    got = _create_bldg(target_flr, today, data_pipe)
+    create_bldgs_task.assert_called_once_with(
+        position_hints={'next_free': True},
+        keys=[today],
+        flr=target_flr,
+        payloads=[
+            {
+                'date': today,
+                'data_pipes': [PERSONAL_TWITTER_FEED]
+            }
+        ],
+        content_type='daily-feed'
+    )
     assert got == expected
