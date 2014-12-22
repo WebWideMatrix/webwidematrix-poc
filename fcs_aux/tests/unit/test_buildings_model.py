@@ -2,7 +2,7 @@ from datetime import datetime
 from mock import patch, MagicMock
 import pytest
 
-from mies.buildings.model import build_bldg_address
+from mies.buildings.model import build_bldg_address, _get_next_free
 from mies.buildings.model import is_vacant
 from mies.buildings.model import find_spot
 from mies.buildings.constants import FLOOR_W, FLOOR_H, PROXIMITY
@@ -27,7 +27,18 @@ def test_build_upper_level_bldg_address(flr, x, y, address):
 
 
 def test_is_vacant():
-    assert True == is_vacant("g-b(1,2)")
+    db = MagicMock()
+    db.buildings.find_one = MagicMock(return_value=None)
+    assert True == is_vacant("g-b(1,2)", db)
+    db.buildings.find_one.assert_called_once_with({'address': 'g-b(1,2)'})
+
+
+def test_get_next_free():
+    vacancies = [{}]*350 + [None]
+    db = MagicMock()
+    db.buildings.find_one = MagicMock(side_effect=vacancies)
+    got = _get_next_free("g-b(1,2)-l0", db)
+    assert got == (3, 50)
 
 
 def test_find_spot():
@@ -44,7 +55,11 @@ def test_find_spot_near():
     flr = "g-b(1,2)-l1"
     near_x = 12
     near_y = 34
-    address, x, y = find_spot(flr, near_x=near_x, near_y=near_y)
+    pos_hints = {
+        "near_x": near_x,
+        "near_y": near_y
+    }
+    address, x, y = find_spot(flr, position_hints=pos_hints)
     assert address is not None
     assert address == "{flr}-b({x},{y})".format(**locals())
     assert 0 <= x <= FLOOR_W
@@ -53,17 +68,40 @@ def test_find_spot_near():
     assert abs(y - near_y) <= PROXIMITY
 
 
+def test_find_spot_next_free():
+    flr = "g-b(1,2)-l1"
+    pos_hints = {
+        "next_free": True,
+    }
+    vacancies = [{}]*350 + [None]
+    db = MagicMock()
+    db.buildings.find_one = MagicMock(side_effect=vacancies)
+    address, got_x, got_y = find_spot(flr, position_hints=pos_hints, db=db)
+    expected_x, expected_y = 3, 50
+    assert got_x == expected_x
+    assert got_y == expected_y
+    assert address is not None
+    assert address == "{flr}-b({expected_x},{expected_y})".format(**locals())
+
+
 def test_construct_bldg():
     flr = "g-b(1,2)-l1"
     near_x = 75
     near_y = 6
+    pos_hints = {
+        "near_x": near_x,
+        "near_y": near_y
+    }
     content_type = "SomeContent"
     payload = {
         "field1": "value 1",
         "field2": "value 2",
         "field3": "value 3",
     }
-    got = construct_bldg(flr, near_x, near_y, content_type, payload)
+    db = MagicMock()
+    db.buildings.find_one = MagicMock(return_value=None)
+    got = construct_bldg(flr, content_type, "key", payload,
+                         position_hints=pos_hints, db=db)
     assert got is not None
     assert got['address'].startswith(flr)
     assert got['flr'] == flr
@@ -78,15 +116,24 @@ def test_construct_bldg():
 
 @patch('mies.buildings.model.MongoClient')
 def test_create_buildings(mongo_client):
-    mongo_client.meteor = MagicMock()
+    db = MagicMock()
+    db.buildings.find_one = MagicMock(return_value=None)
+    db.buildings.insert = MagicMock(return_value=None)
+    cl = MagicMock()
+    cl.meteor = db
+    mongo_client.return_value = cl
+
     content_type = "SomeContent"
+    nbuildings = 35
+    keys = ["key-{}".format(i) for i in xrange(nbuildings)]
     payloads = [
         {
             "field1": "value 1.1",
             "field2": "value 1.2",
             "field3": "value 1.3",
         },
-    ]*35
+    ]* nbuildings
     flr = "g-b(1,2)-l1"
-    got = create_buildings(content_type, payloads, flr)
-    assert got == 35
+    got = create_buildings(content_type, keys, payloads, flr)
+    assert len(got) == nbuildings
+    assert db.buildings.insert.call_count == 4  # 4 batch inserts

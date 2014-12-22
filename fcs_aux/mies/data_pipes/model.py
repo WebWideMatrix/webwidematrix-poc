@@ -6,7 +6,7 @@ from mies.mongoconfig import MONOGO_HOST, MONOGO_PORT
 STATUS_ACTIVE = "active"
 
 
-def load_data_pipes(limit=100):
+def load_data_pipes(criteria=None, limit=100):
     """
     Generator returning batches of data-pipe records
     :param limit: the size of each batch
@@ -19,6 +19,8 @@ def load_data_pipes(limit=100):
         "status": STATUS_ACTIVE,
         "connectedBldg": {'$exists': True}
     }
+    if criteria is not None:
+        spec.update(criteria)
     skip = 0
     done = False
     while not done:

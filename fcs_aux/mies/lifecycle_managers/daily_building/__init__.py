@@ -1,0 +1,3 @@
+
+
+DAILY_FEED_DISPATCHER_LIFEYCLE_MANAGER = "DailyFeedDispatcher"
