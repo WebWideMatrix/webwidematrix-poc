@@ -1,10 +1,11 @@
 from datetime import datetime
-from mock import MagicMock, patch, call
+from mock import MagicMock, patch, call, ANY
 from mies.data_pipes.model import STATUS_ACTIVE
 from mies.data_pipes.twitter_social_feed import PERSONAL_TWITTER_FEED
 from mies.lifecycle_managers.daily_building.manager import create_daily_bldg, \
-    format_date, _create_bldg
+    format_date, _create_bldg, invoke
 
+TODAY = "2014-Dec-21"
 CREATED_BLDG_ADDRESS = "g-b(12,34)-l0-b(0,67)"
 
 
@@ -52,7 +53,7 @@ def test_create_daily_bldg(create_bldgs, update_pipe):
 
 def test_format_date():
     d = datetime(2014, 12, 21, 15, 59, 26)
-    expected = "2014-Dec-21"
+    expected = TODAY
     got = format_date(d)
     assert got == expected
 
@@ -60,7 +61,7 @@ def test_format_date():
 @patch('mies.lifecycle_managers.daily_building.manager.create_buildings')
 def test_create_bldg(create_bldgs_task):
     target_flr = "g-b(12,34)-l0"
-    today = "2014-Dec-21"
+    today = TODAY
     data_pipe = {
         "type": PERSONAL_TWITTER_FEED
     }
@@ -80,3 +81,20 @@ def test_create_bldg(create_bldgs_task):
         content_type='daily-feed'
     )
     assert got == expected
+
+
+@patch('mies.lifecycle_managers.daily_building.manager.MongoClient')
+@patch('mies.lifecycle_managers.daily_building.manager.create_daily_bldg')
+@patch('mies.lifecycle_managers.daily_building.manager.format_date',
+       return_value=TODAY)
+def test_invoke(format, create, mongo_client):
+    db = MagicMock()
+    mc = mongo_client.return_value
+    mc.meteor = db
+    managers = [{"_id": "h34gf23h42"}, {"_id": "4eh2873h28"}, ]
+    db.lifecycle_managers.find.return_value = managers
+    invoke()
+    create.assert_has_calls([
+        call(ANY, TODAY, managers[0]),
+        call(ANY, TODAY, managers[1])
+    ])
