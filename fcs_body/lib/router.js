@@ -18,13 +18,19 @@ Router.configure({
     }
 );
 Router.map(function () {
-    this.route('glassDoor', {
-        path: '/'
+
+    this.route('/', function () {
+        this.subscribe('userData').wait();
+
+        if (this.ready()) {
+            this.render('glassDoor');
+        } else {
+            this.render('Loading');
+        }
     });
 
-
-    Router.route('/buildings/:flr', function () {
-        this.subscribe('Buildings', this.params.flr).wait();
+    this.route('/buildings/:flr', function () {
+        this.subscribe('buildings', this.params.flr).wait();
 
         if (this.ready()) {
             this.render('buildingsView');

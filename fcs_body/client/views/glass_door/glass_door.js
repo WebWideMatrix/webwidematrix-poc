@@ -1,6 +1,11 @@
 
 Template.glassDoor.helpers({
-    today: todayDateForDisplay
+    today: function() {
+        return formatDate(new Date());
+    },
+    userAddress: function() {
+        return getCurrentUserBldgAddress() + "-l0";
+    }
 });
 
 

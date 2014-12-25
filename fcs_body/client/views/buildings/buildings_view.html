@@ -1,5 +1,17 @@
 <template name="buildingsView">
     <div class="buildingsView">
-        <h3>Hold on</h3>
+        {{>buildingsGrid}}
     </div>
+</template>
+
+<template name="buildingsGrid">
+    <svg id="grid" class="container-fluid" xmlns="http://www.w3.org/2000/svg" version="1.1" width="880" height="600">
+		<g id="grid_viewport">
+        	<g class="bldgs"></g>
+		</g>
+    </svg>
+	<br/>
+	<p class="help-block">
+		<strong>Tip:</strong> Use the mouse scroll to zoom, and drag the map to move around
+	</p>
 </template>
