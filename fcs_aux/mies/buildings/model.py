@@ -32,8 +32,8 @@ def _create_trials_state():
 
 
 def _get_next_free(flr, db):
-    for x in xrange(FLOOR_H):
-        for y in xrange(FLOOR_W):
+    for y in xrange(FLOOR_H):
+        for x in xrange(FLOOR_W):
             if is_vacant(build_bldg_address(flr, x, y), db):
                 return x, y
     raise NoSpotLeft()

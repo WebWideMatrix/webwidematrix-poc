@@ -8,8 +8,9 @@ Template.buildingsView.helpers({
 
 Template.buildingsGrid.rendered = function() {
     var WIDTH = 1200,
-        HEIGHT = 600,
-        SQUARE_WIDTH = 10;
+        HEIGHT = 400,
+        SQUARE_WIDTH = 10,
+        SQUARE_HEIGHT = 10;
 
 
     var self = this;
@@ -29,7 +30,8 @@ Template.buildingsGrid.rendered = function() {
 
 
 
-    var scale = d3.scale.linear().domain([0, 100*SQUARE_WIDTH]).range([0, HEIGHT]);
+    var xScale = d3.scale.linear().domain([0, FLOOR_W*SQUARE_WIDTH]).range([0, WIDTH]);
+    var yScale = d3.scale.linear().domain([0, FLOOR_H*SQUARE_HEIGHT]).range([0, HEIGHT]);
 
     if (!self.handle) {
         self.handle = Meteor.autorun(function () {
@@ -40,14 +42,14 @@ Template.buildingsGrid.rendered = function() {
             });
 
             var squares = [];
-            for (var j = 0; j < 100; j++) {
-                for (var i = 0; i < 100; i++) {
-                    var k = i + "," + j;
+            for (var row = 0; row < FLOOR_H; row++) {
+                for (var col = 0; col < FLOOR_W; col++) {
+                    var k = col + "," + row;
                     if (bldgsDict[k]) {
                         squares.push(bldgsDict[k]);
                     }
                     else {
-                        squares.push({x: i, y: j});
+                        squares.push({x: col, y: row});
                     }
                 }
             }
@@ -56,10 +58,10 @@ Template.buildingsGrid.rendered = function() {
             svg.selectAll('rect')
                 .data(squares)
                 .enter().append('rect')
-                .attr('x', function(d) {return scale(d.x * SQUARE_WIDTH)})
-                .attr('y', function(d) {return scale(d.y * SQUARE_WIDTH)})
-                .attr('width', scale(SQUARE_WIDTH))
-                .attr('height', scale(SQUARE_WIDTH))
+                .attr('x', function(d) {return xScale(d.x * SQUARE_WIDTH)})
+                .attr('y', function(d) {return yScale(d.y * SQUARE_WIDTH)})
+                .attr('width', xScale(SQUARE_WIDTH))
+                .attr('height', yScale(SQUARE_WIDTH))
                 .attr("stroke", function(d) {
                     if (d.contentType)
                         return "black";
