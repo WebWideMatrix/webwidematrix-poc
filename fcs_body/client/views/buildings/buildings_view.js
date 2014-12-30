@@ -21,7 +21,7 @@ Template.buildingsGrid.rendered = function () {
         .attr("width", BOUNDING_WIDTH)
         .attr("height", BOUNDING_HEIGHT)
         .append("g")
-        .call(d3.behavior.zoom().scaleExtent([1, 60]).on("zoom", zoom))
+        .call(d3.behavior.zoom().scaleExtent([0.8, 60]).on("zoom", zoom))
         .append("g");
 
     dom.svg.append("rect")
@@ -49,6 +49,40 @@ Template.buildingsGrid.rendered = function () {
                 .attr("class", "node");
 
             dom.nodes
+                .append('rect')
+                .attr({
+                    x: function (d) {
+                        return xScale(d.x * SQUARE_WIDTH)
+                    },
+                    y: function (d) {
+                        return yScale(d.y * SQUARE_WIDTH)
+                    },
+                    width: xScale(SQUARE_WIDTH),
+                    height: yScale(SQUARE_WIDTH),
+                    stroke: 'none',
+                    fill: function (d) {
+                        if (d.contentType)
+                            return "white";
+                    }
+                });
+            dom.nodes
+                .append('rect')
+                .attr({
+                    x: function (d) {
+                        return xScale(d.x * SQUARE_WIDTH)
+                    },
+                    y: function (d) {
+                        return yScale(d.y * SQUARE_WIDTH)
+                    },
+                    width: xScale(SQUARE_WIDTH),
+                    height: yScale(SQUARE_WIDTH),
+                    stroke: 'none',
+                    fill: function (d) {
+                        if (d.contentType)
+                            return "white";
+                    }
+                });
+            dom.nodes
                 .append("foreignObject")
                 .attr({
                     width: xScale(SQUARE_WIDTH),
@@ -58,7 +92,8 @@ Template.buildingsGrid.rendered = function () {
                     },
                     y: function (d) {
                         return yScale(d.y * SQUARE_WIDTH)
-                    }
+                    },
+                    fill: 'none'
                 })
                 .append("xhtml:body").append("xhtml:p")
                 .style({
@@ -66,11 +101,15 @@ Template.buildingsGrid.rendered = function () {
                     "font-size": "0.6px"
                 })
                 .html(function (d) {
-                    console.log(d);
-                    if (d.contentType)
+                    if (d.contentType == 'twitter-social-post') {
                         return d.payload.text;
-                    else
-                        return ""
+                    }
+                    else if (d.contentType == 'daily-feed') {
+                        return d.key;
+                    }
+                    else {
+                        return "";
+                    }
                 });
 
         });
