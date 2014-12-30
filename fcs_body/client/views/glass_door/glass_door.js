@@ -2,13 +2,21 @@
 Template.glassDoor.helpers({
     today: function() {
         return formatDate(new Date());
-    },
-    userAddress: function() {
-        return getCurrentUserBldgAddress() + "-l0";
     }
 });
 
 
 Template.glassDoor.events({
-
+    "click .enter-button": function() {
+        var key = formatDate(new Date());
+        console.log(key);
+        Meteor.call("getBldgAddressByKey", key, function(err, data) {
+            if (err) {
+                // TODO handle errors, such as no bldg
+                console.log(err);
+            }
+            // TODO use router
+            window.open("/buildings/" + data + "-l0", "_top");
+        });
+    }
 });
