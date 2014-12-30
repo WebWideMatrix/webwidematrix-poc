@@ -66,7 +66,7 @@ Template.buildingsGrid.rendered = function () {
                     }
                 });
             dom.nodes
-                .append('rect')
+                .append('image')
                 .attr({
                     x: function (d) {
                         return xScale(d.x * SQUARE_WIDTH)
@@ -77,8 +77,8 @@ Template.buildingsGrid.rendered = function () {
                     width: xScale(SQUARE_WIDTH),
                     height: yScale(SQUARE_WIDTH),
                     stroke: 'none',
-                    fill: function (d) {
-                        if (d.contentType)
+                    "xlink:href": function (d) {
+                        if (d.payload.)
                             return "white";
                     }
                 });
