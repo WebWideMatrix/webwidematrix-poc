@@ -12,7 +12,7 @@ def extract_payload_from_post(post):
     payload = {
         "text": post.text,
         "language": post.lang,
-        "external_id": post.id,
+        "external_id": str(post.id),
         "created_at": post.id,
         "in_reply_to_id": post.in_reply_to_status_id,
         "in_reply_to_screen_name": post.in_reply_to_screen_name,
