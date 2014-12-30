@@ -9,7 +9,6 @@ Template.glassDoor.helpers({
 Template.glassDoor.events({
     "click .enter-button": function() {
         var key = formatDate(new Date());
-        console.log(key);
         Meteor.call("getBldgAddressByKey", key, function(err, data) {
             if (err) {
                 // TODO handle errors, such as no bldg

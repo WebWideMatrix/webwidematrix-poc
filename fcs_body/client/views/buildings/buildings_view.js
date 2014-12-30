@@ -79,7 +79,8 @@ Template.buildingsGrid.rendered = function () {
                     },
                     width: xScale(SQUARE_WIDTH),
                     height: yScale(SQUARE_WIDTH),
-                    stroke: 'none',
+                    stroke: 'grey',
+                    "stroke-width": 0.05,
                     fill: function (d) {
                         if (d.contentType)
                             return "white";
