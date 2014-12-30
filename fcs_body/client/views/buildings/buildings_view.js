@@ -4,6 +4,14 @@ Template.buildingsView.helpers({
     }
 });
 
+Template.buildingsGrid.events({
+    "mousedown .node": function(event) {
+        var externalUrl = $(event.currentTarget).attr("href");
+        if (externalUrl) {
+            window.open(externalUrl, '_blank');
+        }
+    }
+});
 
 Template.buildingsGrid.rendered = function () {
     var WIDTH = 1200,
@@ -46,7 +54,15 @@ Template.buildingsGrid.rendered = function () {
                 .data(squares)
                 .enter()
                 .append("g")
-                .attr("class", "node");
+                .attr("class", "node")
+                .attr("xlink:href", function(d) {
+                    if (d.payload.external_url) {
+                        return d.payload.external_url;
+                    }
+                    else {
+                        return "";
+                    }
+                });
 
             dom.nodes
                 .append('rect')
@@ -65,23 +81,7 @@ Template.buildingsGrid.rendered = function () {
                             return "white";
                     }
                 });
-            dom.nodes
-                .append('image')
-                .attr({
-                    x: function (d) {
-                        return xScale(d.x * SQUARE_WIDTH)
-                    },
-                    y: function (d) {
-                        return yScale(d.y * SQUARE_WIDTH)
-                    },
-                    width: xScale(SQUARE_WIDTH),
-                    height: yScale(SQUARE_WIDTH),
-                    stroke: 'none',
-                    "xlink:href": function (d) {
-                        if (d.payload.)
-                            return "white";
-                    }
-                });
+
             dom.nodes
                 .append("foreignObject")
                 .attr({
@@ -97,7 +97,12 @@ Template.buildingsGrid.rendered = function () {
                 })
                 .append("xhtml:body").append("xhtml:p")
                 .style({
-                    "color": "navy",
+                    "color": function (d) {
+                        if (d.payload.external_url)
+                            return "red";
+                        else
+                            return "navy"
+                    },
                     "font-size": "0.6px"
                 })
                 .html(function (d) {

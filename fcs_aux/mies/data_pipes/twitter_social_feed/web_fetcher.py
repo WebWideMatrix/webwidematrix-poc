@@ -10,6 +10,8 @@ from mies.data_pipes.model import update_data_pipe
 
 def extract_payload_from_post(post):
     payload = {
+        "external_url": "http://twitter.com/{user}/status/{id}"
+        .format(user=post.user.screen_name, id=post.id),
         "text": post.text,
         "language": post.lang,
         "external_id": str(post.id),
@@ -91,7 +93,7 @@ def pull_from_data_pipes(page):
                 logging.info("Sending {} buildings to {}.."
                              .format(len(payloads), target_flr))
                 create_buildings.s(TWITTER_SOCIAL_POST,
-                                   keys, payloads, target_flr)\
+                                   keys, payloads, target_flr) \
                     .apply_async()
                 if new_latest_id is not None:
                     update_data_pipe(dp["_id"],
