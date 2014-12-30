@@ -18,9 +18,9 @@ Template.buildingsGrid.events({
 
 Template.buildingsGrid.rendered = function () {
     var WIDTH = 1200,
-        HEIGHT = 400,
+        HEIGHT = 600,
         BOUNDING_WIDTH = 1220,
-        BOUNDING_HEIGHT = 420,
+        BOUNDING_HEIGHT = 620,
         SQUARE_WIDTH = 10,
         SQUARE_HEIGHT = 10;
 
