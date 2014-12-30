@@ -63,7 +63,7 @@ Template.buildingsGrid.rendered = function () {
                         return d.payload.external_url;
                     }
                     else {
-                        // if no external link, link to the 1st flr of the bldg
+                        // if no external link, link to the 1st flr of the blsg
                         return "/buildings/" + d.address + "-l0";
                     }
                 });
@@ -102,10 +102,12 @@ Template.buildingsGrid.rendered = function () {
                 .append("xhtml:body").append("xhtml:p")
                 .style({
                     "color": function (d) {
-                        if (d.payload.external_url)
-                            return "red";
+                        // different color for posts with links
+                        // TODO this ain't generic
+                        if (d.payload.urls && d.payload.urls.length)
+                            return "blue";
                         else
-                            return "navy"
+                            return "navy";
                     },
                     "font-size": "0.6px"
                 })
