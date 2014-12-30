@@ -119,8 +119,8 @@ Template.buildingsGrid.rendered = function () {
                     else if (d.contentType == 'daily-feed') {
                         return d.key;
                     }
-                    else {
-                        return "";
+                    else if (d.contentType == 'user') {
+                        return d.payload.screenName;
                     }
                 });
 
