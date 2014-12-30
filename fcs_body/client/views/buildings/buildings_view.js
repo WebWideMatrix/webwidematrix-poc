@@ -8,7 +8,10 @@ Template.buildingsGrid.events({
     "mousedown .node": function(event) {
         var externalUrl = $(event.currentTarget).attr("href");
         if (externalUrl) {
-            window.open(externalUrl, '_blank');
+            var target = '_top';
+            if (externalUrl.length > 4 && externalUrl.substr(0, 4) == "http")
+                target = '_blank';
+            window.open(externalUrl, target);
         }
     }
 });
@@ -60,7 +63,8 @@ Template.buildingsGrid.rendered = function () {
                         return d.payload.external_url;
                     }
                     else {
-                        return "";
+                        // if no external link, link to the 1st flr of the bldg
+                        return "/buildings/" + d.address + "-l0";
                     }
                 });
 
