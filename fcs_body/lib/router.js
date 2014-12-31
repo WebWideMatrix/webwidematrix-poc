@@ -29,8 +29,10 @@ Router.map(function () {
         }
     });
 
-    this.route('/buildings/:flr', function () {
-        this.subscribe('buildings', this.params.flr).wait();
+    this.route('/buildings/:addr', function () {
+        this.subscribe('buildings', this.params.addr).wait();
+
+        Session.set("currentAddress", this.params.addr);
 
         if (this.ready()) {
             this.render('buildingsView');

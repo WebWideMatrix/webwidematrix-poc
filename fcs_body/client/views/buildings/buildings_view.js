@@ -1,7 +1,4 @@
 Template.buildingsView.helpers({
-    "allBldgs": function () {
-        return Buildings.find();    // TODO limit fields
-    }
 });
 
 Template.buildingsGrid.events({
@@ -13,6 +10,13 @@ Template.buildingsGrid.events({
                 target = '_blank';
             window.open(externalUrl, target);
         }
+    },
+    "click .navigate-up": function() {
+        var currentAddress = Session.get("currentAddress");
+        var parts = currentAddress.split("-");
+        parts.pop();
+        var newAddress = parts.join("-");
+        window.open("/buildings/" + newAddress, "_top");
     }
 });
 
