@@ -54,3 +54,21 @@ createBldg = function(flr, near, contentType, payload, callback) {
 
     Buildings.insert(_createBldg(), callback);
 };
+
+getFlr = function(addr) {
+    var parts = addr.split("-");
+    if (parts[parts.length - 1].substring(0, 1) == "b") {
+        parts.pop();
+        addr = parts.join("-");
+    }
+    return addr;
+};
+
+getBldg = function(addr) {
+    var parts = addr.split("-");
+    if (parts[parts.length - 1].substring(0, 1) == "l") {
+        parts.pop();
+        addr = parts.join("-");
+    }
+    return addr;
+};

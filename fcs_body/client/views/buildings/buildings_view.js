@@ -1,8 +1,19 @@
-Template.buildingsView.helpers({
+Template.buildingsGrid.helpers({
+    bldgKey: function() {
+        var bldgAddr = getBldg(Session.get("currentAddress"));
+        console.log(bldgAddr);
+        var bldg = Buildings.findOne({address: bldgAddr});
+        if (bldg) {
+            return bldg.key;
+        }
+        else {
+            return Session.get("currentAddress");
+        }
+    }
 });
 
 Template.buildingsGrid.events({
-    "mousedown .node": function(event) {
+    "mousedown .bldg": function(event) {
         var externalUrl = $(event.currentTarget).attr("href");
         if (externalUrl) {
             var target = '_top';
@@ -51,17 +62,11 @@ Template.buildingsGrid.rendered = function () {
 
     if (!self.handle) {
         self.handle = Meteor.autorun(function () {
-            var bldgs = Buildings.find();
-            var squares = [];
-            bldgs.forEach(function (b) {
-                squares.push(b);
-            });
-
-            dom.nodes = dom.svg.selectAll('.node')
-                .data(squares)
+            dom.bldgs = dom.svg.selectAll('.bldg')
+                .data(Buildings.find().fetch())
                 .enter()
                 .append("g")
-                .attr("class", "node")
+                .attr("class", "bldg")
                 .attr("xlink:href", function(d) {
                     if (d.payload.external_url) {
                         return d.payload.external_url;
@@ -72,7 +77,7 @@ Template.buildingsGrid.rendered = function () {
                     }
                 });
 
-            dom.nodes
+            dom.bldgs
                 .append('rect')
                 .attr({
                     x: function (d) {
@@ -91,7 +96,7 @@ Template.buildingsGrid.rendered = function () {
                     }
                 });
 
-            dom.nodes
+            dom.bldgs
                 .append("foreignObject")
                 .attr({
                     width: xScale(SQUARE_WIDTH),

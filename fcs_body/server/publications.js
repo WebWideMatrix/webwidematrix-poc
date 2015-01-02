@@ -5,17 +5,22 @@ Meteor.publish("userData", function () {
 });
 
 Meteor.publish("buildings", function (addr) {
+    var flrAddr,
+        bldgAddr;
     if (!addr) {
-        var userAddress = getCurrentUserBldgAddress();
-        addr = userAddress + "-l0";
+        bldgAddr = getCurrentUserBldgAddress();
+        flrAddr = bldgAddr + "-l0";
     }
     else {
-        var parts = addr.split("-");
-        if (parts[parts.length - 1].substring(0, 1) == "b") {
-            // looking at a bldg, so publish all bldgs in its flr
-            parts.pop();
-            addr = parts.join("-");
-        }
+        flrAddr = getFlr(addr);
+        bldgAddr = getBldg(addr);
     }
-    return Buildings.find({flr: addr});
+    // publish both flr & its container bldg
+    query = {
+        $or: [
+            {flr: flrAddr},
+            {address: bldgAddr}
+        ]
+    };
+    return Buildings.find(query);
 });
