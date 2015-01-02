@@ -3,10 +3,11 @@
 Meteor.methods({
     "getBldgAddressByKey": function(key) {
         var userBldgAddress = getCurrentUserBldgAddress();
-        var bldg = Buildings.findOne({
+        var query = {
             flr: userBldgAddress + "-l0",
             key: key
-        });
+        };
+        var bldg = Buildings.findOne(query);
         if (bldg) {
             return bldg.address;
         }
@@ -14,4 +15,4 @@ Meteor.methods({
             return null;
         }
     }
-})
+});

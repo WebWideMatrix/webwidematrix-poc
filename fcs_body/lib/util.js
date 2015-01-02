@@ -10,5 +10,5 @@ todayDateForDisplay = function() {
 };
 
 formatDate = function(d) {
-    return moment(d).format("YYYY-MMM-D");
+    return moment(d).format("YYYY-MMM-DD");
 };
