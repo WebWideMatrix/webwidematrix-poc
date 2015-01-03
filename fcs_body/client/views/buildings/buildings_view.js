@@ -43,11 +43,12 @@ Template.buildingsGrid.rendered = function () {
     var self = this;
 
     var dom = {};
+    var zoomBehavior = d3.behavior.zoom().scaleExtent([0.8, 60]).on("zoom", zoom);
     dom.svg = d3.select("#display").append("svg")
         .attr("width", BOUNDING_WIDTH)
         .attr("height", BOUNDING_HEIGHT)
         .append("g")
-        .call(d3.behavior.zoom().scaleExtent([0.8, 60]).on("zoom", zoom))
+        .call(zoomBehavior)
         .append("g");
 
     dom.svg.append("rect")
@@ -133,6 +134,23 @@ Template.buildingsGrid.rendered = function () {
                     }
                 });
 
+//            if (Session.get("currentAddress")) {
+//                var addr = Session.get("currentAddress");
+//                var bldgAddr = getBldg(addr);
+//                if (bldgAddr == addr) {
+//                    // given a bldg address, so zoom on it
+//                    var parts = bldgAddr.split("-");
+//
+//                    var part = parts[parts.length - 1];
+//                    var coords = part.substring(2, part.length - 1);
+//                    console.log("Zooming on " + coords);
+//                    var x_y = coords.split(",");
+//                    console.log(x_y);
+//                    var x = x_y[0],
+//                        y = x_y[1];
+//                    zoomBehavior.center([xScale(x) + (xScale(SQUARE_WIDTH) / 2), yScale(y) + (yScale(SQUARE_WIDTH) / 2)])
+//                }
+//            }
         });
     }
     function zoom() {
