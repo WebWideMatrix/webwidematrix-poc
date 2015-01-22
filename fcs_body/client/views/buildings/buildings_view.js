@@ -1,7 +1,6 @@
 Template.buildingsGrid.helpers({
     bldgKey: function() {
         var bldgAddr = getBldg(Session.get("currentAddress"));
-        console.log(bldgAddr);
         var bldg = Buildings.findOne({address: bldgAddr});
         if (bldg) {
             return bldg.key;
@@ -12,15 +11,26 @@ Template.buildingsGrid.helpers({
     }
 });
 
+var dom = {};
+
+var zoom = function() {
+    dom.svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+};
+
+var zoomBehavior = d3.behavior.zoom().scaleExtent([0.8, 60]).on("zoom", zoom);
+
+function openBldgURL(externalUrl) {
+    if (externalUrl) {
+        var target = '_top';
+        if (externalUrl.length > 4 && externalUrl.substr(0, 4) == "http")
+            target = '_blank';
+        window.open(externalUrl, target);
+    }
+}
 Template.buildingsGrid.events({
     "mousedown .bldg": function(event) {
         var externalUrl = $(event.currentTarget).attr("href");
-        if (externalUrl) {
-            var target = '_top';
-            if (externalUrl.length > 4 && externalUrl.substr(0, 4) == "http")
-                target = '_blank';
-            window.open(externalUrl, target);
-        }
+        openBldgURL(externalUrl);
     },
     "click .navigate-up": function() {
         var currentAddress = Session.get("currentAddress");
@@ -42,8 +52,6 @@ Template.buildingsGrid.rendered = function () {
 
     var self = this;
 
-    var dom = {};
-    var zoomBehavior = d3.behavior.zoom().scaleExtent([0.8, 60]).on("zoom", zoom);
     dom.svg = d3.select("#display").append("svg")
         .attr("width", BOUNDING_WIDTH)
         .attr("height", BOUNDING_HEIGHT)
@@ -134,26 +142,27 @@ Template.buildingsGrid.rendered = function () {
                     }
                 });
 
-//            if (Session.get("currentAddress")) {
-//                var addr = Session.get("currentAddress");
-//                var bldgAddr = getBldg(addr);
-//                if (bldgAddr == addr) {
-//                    // given a bldg address, so zoom on it
-//                    var parts = bldgAddr.split("-");
-//
-//                    var part = parts[parts.length - 1];
-//                    var coords = part.substring(2, part.length - 1);
-//                    console.log("Zooming on " + coords);
-//                    var x_y = coords.split(",");
-//                    console.log(x_y);
-//                    var x = x_y[0],
-//                        y = x_y[1];
-//                    zoomBehavior.center([xScale(x) + (xScale(SQUARE_WIDTH) / 2), yScale(y) + (yScale(SQUARE_WIDTH) / 2)])
-//                }
-//            }
+            if (Session.get("currentAddress")) {
+                var addr = Session.get("currentAddress");
+                var bldgAddr = getBldg(addr);
+                if (bldgAddr == addr) {
+                    // given a bldg address, so zoom on it
+                    var parts = bldgAddr.split("-");
+
+                    var part = parts[parts.length - 1];
+                    var coords = part.substring(2, part.length - 1);
+                    var x_y = coords.split(",");
+                    var x = xScale(x_y[0] * SQUARE_WIDTH),
+                        y = yScale(x_y[1] * SQUARE_WIDTH);
+                    var X_OFFSET = 10,
+                        Y_OFFSET = 5;
+                    if (x >  xScale(X_OFFSET)) x -= xScale(X_OFFSET);
+                    if (y >  yScale(Y_OFFSET)) y -=  yScale(Y_OFFSET);
+                    var scale = 60;
+                    dom.svg.attr("transform", "translate(-" + (x*scale) + ',-' + (y*scale) + ")scale(" + scale + ")");
+                }
+            }
         });
     }
-    function zoom() {
-        dom.svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-    }
+
 };
