@@ -11,14 +11,6 @@ Template.buildingsGrid.helpers({
     }
 });
 
-var dom = {};
-
-var zoom = function() {
-    dom.svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-};
-
-var zoomBehavior = d3.behavior.zoom().scaleExtent([0.8, 60]).on("zoom", zoom);
-
 function openBldgURL(externalUrl) {
     if (externalUrl) {
         var target = '_top';
@@ -36,6 +28,10 @@ Template.buildingsGrid.events({
         var currentAddress = Session.get("currentAddress");
         var parts = currentAddress.split("-");
         parts.pop();
+        // if it's a flr, get out to the containing bldg
+        if (parts[parts.length - 1][0] == "l") {
+            parts.pop();
+        }
         var newAddress = parts.join("-");
         window.open("/buildings/" + newAddress, "_top");
     }
@@ -51,6 +47,12 @@ Template.buildingsGrid.rendered = function () {
 
 
     var self = this;
+    var dom = {};
+
+    var zoom = function() {
+        dom.svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+    };
+    var zoomBehavior = d3.behavior.zoom().scaleExtent([0.8, 60]).on("zoom", zoom);
 
     dom.svg = d3.select("#display").append("svg")
         .attr("width", BOUNDING_WIDTH)
