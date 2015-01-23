@@ -102,12 +102,12 @@ Template.buildingsGrid.rendered = function () {
                         return xScale(d.x * SQUARE_WIDTH)
                     },
                     y: function (d) {
-                        return yScale(d.y * SQUARE_WIDTH)
+                        return yScale(d.y * SQUARE_HEIGHT)
                     },
                     width: xScale(SQUARE_WIDTH),
-                    height: yScale(SQUARE_WIDTH),
+                    height: yScale(SQUARE_HEIGHT),
                     stroke: 'grey',
-                    "stroke-width": 0.05,
+                    "stroke-width": 0.01,
                     fill: function (d) {
                         if (d.contentType)
                             return "white";
@@ -123,7 +123,7 @@ Template.buildingsGrid.rendered = function () {
                         return xScale(d.x * SQUARE_WIDTH)
                     },
                     y: function (d) {
-                        return yScale(d.y * SQUARE_WIDTH)
+                        return yScale(d.y * SQUARE_HEIGHT)
                     },
                     fill: 'none'
                 })
