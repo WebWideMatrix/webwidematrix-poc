@@ -19,6 +19,19 @@ function openBldgURL(externalUrl) {
         window.open(externalUrl, target);
     }
 }
+
+var bldgRenderFunc = {
+    'twitter-social-post': function(d) {
+        return d.payload.text;
+    },
+    'daily-feed': function(d) {
+        return d.key;
+    },
+    'user': function(d) {
+        return d.payload.screenName;
+    }
+};
+
 Template.buildingsGrid.events({
     "mousedown .bldg": function(event) {
         var externalUrl = $(event.currentTarget).attr("href");
@@ -85,6 +98,7 @@ Template.buildingsGrid.rendered = function () {
                 // if we're in a flr, don't render the containing bldg
                 query = {flr: Session.get("currentAddress")};
             }
+            // add g elements for all bldgs
             dom.bldgs = dom.svg.selectAll('.bldg')
                 .data(Buildings.find(query).fetch())
                 .enter()
@@ -100,6 +114,7 @@ Template.buildingsGrid.rendered = function () {
                     }
                 });
 
+            // draw the bldg frame
             dom.bldgs
                 .append('rect')
                 .attr({
@@ -119,6 +134,7 @@ Template.buildingsGrid.rendered = function () {
                     }
                 });
 
+            // add the bldg content
             dom.bldgs
                 .append("foreignObject")
                 .attr({
@@ -145,15 +161,7 @@ Template.buildingsGrid.rendered = function () {
                     "font-size": "0.6px"
                 })
                 .html(function (d) {
-                    if (d.contentType == 'twitter-social-post') {
-                        return d.payload.text;
-                    }
-                    else if (d.contentType == 'daily-feed') {
-                        return d.key;
-                    }
-                    else if (d.contentType == 'user') {
-                        return d.payload.screenName;
-                    }
+                    return bldgRenderFunc[d.contentType](d);
                 });
 
             // if given a bldg address, zoom on it
