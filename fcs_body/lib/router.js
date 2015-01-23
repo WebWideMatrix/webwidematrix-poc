@@ -33,6 +33,7 @@ Router.map(function () {
         this.subscribe('buildings', this.params.addr).wait();
 
         Session.set("currentAddress", this.params.addr);
+        Session.set("currentBldg", getBldg(this.params.addr));
 
         if (this.ready()) {
             this.render('buildingsView');
@@ -41,22 +42,4 @@ Router.map(function () {
         }
     });
 
-//    this.route('buildingsView', {
-//        path: '/buildings/:address',
-//        path: '/buildings'
-//        data: function () {
-    /*
-     var parts = address.split(".");
-     var suffix = parts[parts.length - 1];
-     if (suffix === "" || suffix.startsWith("l")) {
-     var level = address;
-     return Buildings.find({level: level});
-     }
-     else if (suffix.startsWith("b(")) {
-     return Buildings.findOne({address: address});
-     }
-     */
-//            return Buildings.find();
-//        }
-//    });
 });

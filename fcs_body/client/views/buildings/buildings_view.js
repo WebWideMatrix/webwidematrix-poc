@@ -1,6 +1,6 @@
 Template.buildingsGrid.helpers({
     bldgKey: function() {
-        var bldgAddr = getBldg(Session.get("currentAddress"));
+        var bldgAddr = Session.get("currentBldg");
         var bldg = Buildings.findOne({address: bldgAddr});
         if (bldg) {
             return bldg.key;
@@ -75,8 +75,13 @@ Template.buildingsGrid.rendered = function () {
 
     if (!self.handle) {
         self.handle = Meteor.autorun(function () {
+            var query = {};
+            if (Session.get("currentBldg") != Session.get("currentAddress")) {
+                // if we're in a flr, don't render the containing bldg
+                query = {flr: Session.get("currentAddress")};
+            }
             dom.bldgs = dom.svg.selectAll('.bldg')
-                .data(Buildings.find().fetch())
+                .data(Buildings.find(query).fetch())
                 .enter()
                 .append("g")
                 .attr("class", "bldg")
