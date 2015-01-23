@@ -51,9 +51,14 @@ Template.buildingsGrid.rendered = function () {
     var self = this;
     var dom = {};
 
-    var zoom = function() {
-        dom.svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+    var _zoom = function(_translate, _scale) {
+        dom.svg.attr("transform", "translate(" + _translate + ")scale(" + _scale + ")");
     };
+
+    var zoom = function() {
+        _zoom(d3.event.translate, d3.event.scale);
+    };
+
     var zoomBehavior = d3.behavior.zoom().scaleExtent([MAX_ZOOM_OUT, MAX_ZOOM_IN]).on("zoom", zoom);
 
     dom.svg = d3.select("#display").append("svg")
@@ -151,28 +156,24 @@ Template.buildingsGrid.rendered = function () {
                     }
                 });
 
-            // zoom on the current bldg
-            if (Session.get("currentAddress")) {
-                var addr = Session.get("currentAddress");
-                var bldgAddr = getBldg(addr);
-                if (bldgAddr == addr) {
-                    // given a bldg address, so zoom on it
-                    var parts = bldgAddr.split("-");
-
-                    var part = parts[parts.length - 1];
-                    var coords = part.substring(2, part.length - 1);
-                    var x_y = coords.split(",");
-                    var x = xScale(x_y[0] * SQUARE_WIDTH),
-                        y = yScale(x_y[1] * SQUARE_WIDTH);
-                    var X_OFFSET = 10,
-                        Y_OFFSET = 5;
-                    if (x >  xScale(X_OFFSET)) x -= xScale(X_OFFSET);
-                    if (y >  yScale(Y_OFFSET)) y -=  yScale(Y_OFFSET);
-                    var scale = MAX_ZOOM_IN;
-                    zoomBehavior.scale(scale);
-                    zoomBehavior.translate([-(x*scale), -(y*scale)]);
-                    dom.svg.attr("transform", "translate(-" + (x*scale) + ',-' + (y*scale) + ")scale(" + scale + ")");
-                }
+            // if given a bldg address, zoom on it
+            if (Session.get("currentAddress") && Session.get("currentAddress") == Session.get("currentBldg")) {
+                var parts = Session.get("currentBldg").split("-");
+                var part = parts[parts.length - 1];
+                var coords = part.substring(2, part.length - 1);
+                var x_y = coords.split(",");
+                var x = xScale(x_y[0] * SQUARE_WIDTH),
+                    y = yScale(x_y[1] * SQUARE_WIDTH);
+                // if possible, show some offset
+                var X_OFFSET = 10,
+                    Y_OFFSET = 5;
+                if (x > xScale(X_OFFSET)) x -= xScale(X_OFFSET);
+                if (y > yScale(Y_OFFSET)) y -=  yScale(Y_OFFSET);
+                var scale = MAX_ZOOM_IN;
+                zoomBehavior.scale(scale);
+                var translate_vector = [-(x * scale), -(y * scale)];
+                zoomBehavior.translate(translate_vector);
+                _zoom(translate_vector, scale);
             }
         });
     }
