@@ -43,7 +43,9 @@ Template.buildingsGrid.rendered = function () {
         BOUNDING_WIDTH = 1220,
         BOUNDING_HEIGHT = 620,
         SQUARE_WIDTH = 10,
-        SQUARE_HEIGHT = 10;
+        SQUARE_HEIGHT = 10,
+        MAX_ZOOM_OUT = 0.8,
+        MAX_ZOOM_IN = 60;
 
 
     var self = this;
@@ -52,7 +54,7 @@ Template.buildingsGrid.rendered = function () {
     var zoom = function() {
         dom.svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
     };
-    var zoomBehavior = d3.behavior.zoom().scaleExtent([0.8, 60]).on("zoom", zoom);
+    var zoomBehavior = d3.behavior.zoom().scaleExtent([MAX_ZOOM_OUT, MAX_ZOOM_IN]).on("zoom", zoom);
 
     dom.svg = d3.select("#display").append("svg")
         .attr("width", BOUNDING_WIDTH)
@@ -161,10 +163,9 @@ Template.buildingsGrid.rendered = function () {
                         Y_OFFSET = 5;
                     if (x >  xScale(X_OFFSET)) x -= xScale(X_OFFSET);
                     if (y >  yScale(Y_OFFSET)) y -=  yScale(Y_OFFSET);
-                    var scale = 60;
+                    var scale = MAX_ZOOM_IN;
                     zoomBehavior.scale(scale);
                     zoomBehavior.translate([-(x*scale), -(y*scale)]);
-                    // set the zoomBehavior x & y
                     dom.svg.attr("transform", "translate(-" + (x*scale) + ',-' + (y*scale) + ")scale(" + scale + ")");
                 }
             }
