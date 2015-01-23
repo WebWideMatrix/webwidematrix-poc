@@ -144,6 +144,7 @@ Template.buildingsGrid.rendered = function () {
                     }
                 });
 
+            // zoom on the current bldg
             if (Session.get("currentAddress")) {
                 var addr = Session.get("currentAddress");
                 var bldgAddr = getBldg(addr);
@@ -161,6 +162,9 @@ Template.buildingsGrid.rendered = function () {
                     if (x >  xScale(X_OFFSET)) x -= xScale(X_OFFSET);
                     if (y >  yScale(Y_OFFSET)) y -=  yScale(Y_OFFSET);
                     var scale = 60;
+                    zoomBehavior.scale(scale);
+                    zoomBehavior.translate([-(x*scale), -(y*scale)]);
+                    // set the zoomBehavior x & y
                     dom.svg.attr("transform", "translate(-" + (x*scale) + ',-' + (y*scale) + ")scale(" + scale + ")");
                 }
             }
