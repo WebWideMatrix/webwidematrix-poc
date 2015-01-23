@@ -1,17 +1,18 @@
+
 Template.buildingsGrid.helpers({
     bldgKey: function() {
-        var bldgAddr = Session.get("currentBldg");
-        var bldg = Buildings.findOne({address: bldgAddr});
-        if (bldg) {
-            return bldg.key;
+        var bldgKey = getBldgKey(Session.get("currentBldg"));
+        if (bldgKey) {
+            return bldgKey;
         }
         else {
+            // if there's no bldg, just show the address
             return Session.get("currentAddress");
         }
     }
 });
 
-function openBldgURL(externalUrl) {
+function openExternalURL(externalUrl) {
     if (externalUrl) {
         var target = '_top';
         if (externalUrl.length > 4 && externalUrl.substr(0, 4) == "http")
@@ -35,7 +36,7 @@ var bldgRenderFunc = {
 Template.buildingsGrid.events({
     "mousedown .bldg": function(event) {
         var externalUrl = $(event.currentTarget).attr("href");
-        openBldgURL(externalUrl);
+        openExternalURL(externalUrl);
     },
     "click .navigate-up": function() {
         var currentAddress = Session.get("currentAddress");

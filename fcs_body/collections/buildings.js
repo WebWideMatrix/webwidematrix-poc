@@ -72,3 +72,13 @@ getBldg = function(addr) {
     }
     return addr;
 };
+
+getBldgKey = function(bldgAddr) {
+    var bldg = Buildings.findOne({address: bldgAddr});
+    if (bldg) {
+        return bldg.key;
+    }
+    else {
+        return null;
+    }
+};
