@@ -168,15 +168,15 @@ Template.buildingsGrid.rendered = function () {
                 var x = xScale(coords[0] * SQUARE_WIDTH),
                     y = yScale(coords[1] * SQUARE_WIDTH);
                 // if possible, show some offset
-                var X_OFFSET = 10,
-                    Y_OFFSET = 5;
-                if (x > xScale(X_OFFSET)) x -= xScale(X_OFFSET);
-                if (y > yScale(Y_OFFSET)) y -=  yScale(Y_OFFSET);
-                var scale = MAX_ZOOM_IN;
-                zoomBehavior.scale(scale);
-                var translate_vector = [-(x * scale), -(y * scale)];
+                var X_OFFSET = xScale(10),
+                    Y_OFFSET = yScale(5);
+                if (x > X_OFFSET) x -= X_OFFSET;
+                if (y > Y_OFFSET) y -=  Y_OFFSET;
+                // apply the zoom
+                var translate_vector = [-(x * MAX_ZOOM_IN), -(y * MAX_ZOOM_IN)];
+                zoomBehavior.scale(MAX_ZOOM_IN);
                 zoomBehavior.translate(translate_vector);
-                _zoom(translate_vector, scale);
+                _zoom(translate_vector, MAX_ZOOM_IN);
             }
         });
     }
