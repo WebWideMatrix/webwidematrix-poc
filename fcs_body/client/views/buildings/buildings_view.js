@@ -1,4 +1,29 @@
 
+openExternalURL = function(externalUrl) {
+    if (externalUrl) {
+        var target = '_top';
+        if (externalUrl.length > 4 && externalUrl.substr(0, 4) == "http")
+            target = '_blank';
+        window.open(externalUrl, target);
+    }
+};
+
+redirectTo = function(newAddress) {
+    window.open("/buildings/" + newAddress, "_top");
+};
+
+bldgRenderFunc = {
+    'twitter-social-post': function(d) {
+        return d.payload.text;
+    },
+    'daily-feed': function(d) {
+        return d.key;
+    },
+    'user': function(d) {
+        return d.payload.screenName;
+    }
+};
+
 Template.buildingsGrid.helpers({
     bldgKey: function() {
         var bldgKey = getBldgKey(Session.get("currentBldg"));
@@ -11,42 +36,6 @@ Template.buildingsGrid.helpers({
         }
     }
 });
-
-function openExternalURL(externalUrl) {
-    if (externalUrl) {
-        var target = '_top';
-        if (externalUrl.length > 4 && externalUrl.substr(0, 4) == "http")
-            target = '_blank';
-        window.open(externalUrl, target);
-    }
-}
-
-var bldgRenderFunc = {
-    'twitter-social-post': function(d) {
-        return d.payload.text;
-    },
-    'daily-feed': function(d) {
-        return d.key;
-    },
-    'user': function(d) {
-        return d.payload.screenName;
-    }
-};
-
-function getContainingBldgAddress() {
-    var currentAddress = Session.get("currentAddress");
-    var parts = currentAddress.split("-");
-    parts.pop();
-    // if it's a flr, get out to the containing bldg
-    if (parts[parts.length - 1][0] == "l") {
-        parts.pop();
-    }
-    return parts.join("-");
-}
-
-redirectTo = function(newAddress) {
-    window.open("/buildings/" + newAddress, "_top");
-};
 
 Template.buildingsGrid.events({
     "mousedown .bldg": function(event) {

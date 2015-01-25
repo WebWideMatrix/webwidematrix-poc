@@ -82,3 +82,14 @@ getBldgKey = function(bldgAddr) {
         return null;
     }
 };
+
+getContainingBldgAddress = function() {
+    var currentAddress = Session.get("currentAddress");
+    var parts = currentAddress.split("-");
+    parts.pop();
+    // if it's a flr, get out to the containing bldg
+    if (parts[parts.length - 1][0] == "l") {
+        parts.pop();
+    }
+    return parts.join("-");
+};
