@@ -100,3 +100,13 @@ extractBldgCoordinates = function(bldgAddr) {
     var coords = part.substring(2, part.length - 1);
     return coords.split(",");
 };
+
+getBldgLink = function(d) {
+    if (d.payload.external_url) {
+        return d.payload.external_url;
+    }
+    else {
+        // if no external link, link to the 1st flr of the blsg
+        return "/buildings/" + d.address + "-l0";
+    }
+};

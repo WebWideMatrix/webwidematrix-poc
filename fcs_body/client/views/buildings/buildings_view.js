@@ -102,15 +102,7 @@ Template.buildingsGrid.rendered = function () {
                 .enter()
                 .append("g")
                 .attr("class", "bldg")
-                .attr("xlink:href", function(d) {
-                    if (d.payload.external_url) {
-                        return d.payload.external_url;
-                    }
-                    else {
-                        // if no external link, link to the 1st flr of the blsg
-                        return "/buildings/" + d.address + "-l0";
-                    }
-                });
+                .attr("xlink:href", getBldgLink);
 
             // draw the bldg frame
             dom.bldgs
@@ -173,10 +165,10 @@ Template.buildingsGrid.rendered = function () {
                 if (x > X_OFFSET) x -= X_OFFSET;
                 if (y > Y_OFFSET) y -=  Y_OFFSET;
                 // apply the zoom
-                var translate_vector = [-(x * MAX_ZOOM_IN), -(y * MAX_ZOOM_IN)];
+                var translateVector = [-(x * MAX_ZOOM_IN), -(y * MAX_ZOOM_IN)];
                 zoomBehavior.scale(MAX_ZOOM_IN);
-                zoomBehavior.translate(translate_vector);
-                _zoom(translate_vector, MAX_ZOOM_IN);
+                zoomBehavior.translate(translateVector);
+                _zoom(translateVector, MAX_ZOOM_IN);
             }
         });
     }
