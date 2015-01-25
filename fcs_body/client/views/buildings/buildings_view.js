@@ -33,21 +33,29 @@ var bldgRenderFunc = {
     }
 };
 
+function getContainingBldgAddress() {
+    var currentAddress = Session.get("currentAddress");
+    var parts = currentAddress.split("-");
+    parts.pop();
+    // if it's a flr, get out to the containing bldg
+    if (parts[parts.length - 1][0] == "l") {
+        parts.pop();
+    }
+    return parts.join("-");
+}
+
+redirectTo = function(newAddress) {
+    window.open("/buildings/" + newAddress, "_top");
+};
+
 Template.buildingsGrid.events({
     "mousedown .bldg": function(event) {
         var externalUrl = $(event.currentTarget).attr("href");
         openExternalURL(externalUrl);
     },
     "click .navigate-up": function() {
-        var currentAddress = Session.get("currentAddress");
-        var parts = currentAddress.split("-");
-        parts.pop();
-        // if it's a flr, get out to the containing bldg
-        if (parts[parts.length - 1][0] == "l") {
-            parts.pop();
-        }
-        var newAddress = parts.join("-");
-        window.open("/buildings/" + newAddress, "_top");
+        var newAddress = getContainingBldgAddress();
+        redirectTo(newAddress);
     }
 });
 

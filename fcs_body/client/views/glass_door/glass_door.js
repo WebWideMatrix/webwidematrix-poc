@@ -15,7 +15,7 @@ Template.glassDoor.events({
                 console.log(err);
             }
             // TODO use router
-            window.open("/buildings/" + data + "-l0", "_top");
+            redirectTo("/buildings/" + data + "-l0", "_top");
         });
     }
 });
