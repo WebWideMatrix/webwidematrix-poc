@@ -164,12 +164,9 @@ Template.buildingsGrid.rendered = function () {
 
             // if given a bldg address, zoom on it
             if (Session.get("currentAddress") && Session.get("currentAddress") == Session.get("currentBldg")) {
-                var parts = Session.get("currentBldg").split("-");
-                var part = parts[parts.length - 1];
-                var coords = part.substring(2, part.length - 1);
-                var x_y = coords.split(",");
-                var x = xScale(x_y[0] * SQUARE_WIDTH),
-                    y = yScale(x_y[1] * SQUARE_WIDTH);
+                var coords = extractBldgCoordinates(Session.get("currentBldg"));
+                var x = xScale(coords[0] * SQUARE_WIDTH),
+                    y = yScale(coords[1] * SQUARE_WIDTH);
                 // if possible, show some offset
                 var X_OFFSET = 10,
                     Y_OFFSET = 5;

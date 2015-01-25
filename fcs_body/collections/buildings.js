@@ -93,3 +93,10 @@ getContainingBldgAddress = function() {
     }
     return parts.join("-");
 };
+
+extractBldgCoordinates = function(bldgAddr) {
+    var parts = bldgAddr.split("-");
+    var part = parts[parts.length - 1];
+    var coords = part.substring(2, part.length - 1);
+    return coords.split(",");
+};
