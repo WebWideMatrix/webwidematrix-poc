@@ -1,11 +1,10 @@
 Buildings = new Meteor.Collection('buildings');
 
+//
+// DB involving functions
+//
 
-buildBldgAddress = function(flr, x, y) {
-    return flr + "-b(" + x + "," + y + ")";
-};
-
-createBldg = function(flr, near, contentType, payload, callback) {
+createBldg = function(flr, key, near, contentType, payload, callback) {
     var x = 0,
         y = 0,
         address = buildBldgAddress(flr, x, y),
@@ -55,6 +54,24 @@ createBldg = function(flr, near, contentType, payload, callback) {
     Buildings.insert(_createBldg(), callback);
 };
 
+getBldgKey = function(bldgAddr) {
+    var bldg = Buildings.findOne({address: bldgAddr});
+    if (bldg) {
+        return bldg.key;
+    }
+    else {
+        return null;
+    }
+};
+
+//
+//  Non-DB functions
+//
+
+buildBldgAddress = function(flr, x, y) {
+    return flr + "-b(" + x + "," + y + ")";
+};
+
 getFlr = function(addr) {
     var parts = addr.split("-");
     if (parts[parts.length - 1].substring(0, 1) == "b") {
@@ -71,16 +88,6 @@ getBldg = function(addr) {
         addr = parts.join("-");
     }
     return addr;
-};
-
-getBldgKey = function(bldgAddr) {
-    var bldg = Buildings.findOne({address: bldgAddr});
-    if (bldg) {
-        return bldg.key;
-    }
-    else {
-        return null;
-    }
 };
 
 getContainingBldgAddress = function() {
