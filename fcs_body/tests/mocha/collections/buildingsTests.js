@@ -39,6 +39,16 @@ if (!(typeof MochaWeb === 'undefined')) {
                 chai.assert.equal(got, expected);
             });
 
+            it("should get the containing bldg address", function () {
+                var addr = "g-b(1,2)-l2",
+                    expected = "g-b(1,2)";
+                var got = getContainingBldgAddress(addr);
+                chai.assert.equal(got, expected);
+                addr += "-b(15,16)";
+                got = getContainingBldgAddress(addr);
+                chai.assert.equal(got, expected);
+            });
+
         });
 
     });

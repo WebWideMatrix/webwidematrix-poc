@@ -90,9 +90,8 @@ getBldg = function(addr) {
     return addr;
 };
 
-getContainingBldgAddress = function() {
-    var currentAddress = Session.get("currentAddress");
-    var parts = currentAddress.split("-");
+getContainingBldgAddress = function(addr) {
+    var parts = addr.split("-");
     parts.pop();
     // if it's a flr, get out to the containing bldg
     if (parts[parts.length - 1][0] == "l") {

@@ -43,7 +43,7 @@ Template.buildingsGrid.events({
         openExternalURL(externalUrl);
     },
     "click .navigate-up": function() {
-        var newAddress = getContainingBldgAddress();
+        var newAddress = getContainingBldgAddress(Session.get("currentAddress"));
         redirectTo(newAddress);
     }
 });
