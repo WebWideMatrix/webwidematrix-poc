@@ -20,7 +20,7 @@ bldgRenderFunc = {
         return d.key;
     },
     'user': function(d) {
-        return d.payload.screenName;
+        return d.key;
     }
 };
 
