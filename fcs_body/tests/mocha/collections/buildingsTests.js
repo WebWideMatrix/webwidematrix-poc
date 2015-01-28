@@ -53,8 +53,32 @@ if (!(typeof MochaWeb === 'undefined')) {
                 var addr = "g-b(1,2)",
                     expected = [1, 2];
                 var got = extractBldgCoordinates(addr);
+                chai.assert.equal(got.length, expected.length);
                 chai.assert.equal(got[0], expected[0]);
                 chai.assert.equal(got[1], expected[1]);
+            });
+
+            it("should get a bldg's link", function () {
+                var bldg = {
+                        address: "g-b(1,2)",
+                        key: "bldg1",
+                        payload: {
+                            external_url: "http://dada.org"
+                        }
+                    },
+                    expected = "http://dada.org";
+                var got = getBldgLink(bldg);
+                chai.assert.equal(got, expected);
+                bldg = {
+                    address: "g-b(1,2)",
+                    key: "bldg1",
+                    payload: {
+                        text: "blah"
+                    }
+                };
+                expected = "/buildings/g-b(1,2)-l0";
+                got = getBldgLink(bldg);
+                chai.assert.equal(got, expected);
             });
 
         });
