@@ -102,6 +102,10 @@ getContainingBldgAddress = function(addr) {
 
 extractBldgCoordinates = function(bldgAddr) {
     var parts = bldgAddr.split("-");
+    if (parts.length <= 1) {
+        // ground level, no coordinated
+        return null;
+    }
     var part = parts[parts.length - 1];
     if (part[0] != "b") {
         bldgAddr = getBldg(bldgAddr);

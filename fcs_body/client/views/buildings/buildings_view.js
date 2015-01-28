@@ -157,18 +157,20 @@ Template.buildingsGrid.rendered = function () {
             // if given a bldg address, zoom on it
             if (Session.get("currentAddress") && Session.get("currentAddress") == Session.get("currentBldg")) {
                 var coords = extractBldgCoordinates(Session.get("currentBldg"));
-                var x = xScale(coords[0] * SQUARE_WIDTH),
-                    y = yScale(coords[1] * SQUARE_WIDTH);
-                // if possible, show some offset
-                var X_OFFSET = xScale(10),
-                    Y_OFFSET = yScale(5);
-                if (x > X_OFFSET) x -= X_OFFSET;
-                if (y > Y_OFFSET) y -=  Y_OFFSET;
-                // apply the zoom
-                var translateVector = [-(x * MAX_ZOOM_IN), -(y * MAX_ZOOM_IN)];
-                zoomBehavior.scale(MAX_ZOOM_IN);
-                zoomBehavior.translate(translateVector);
-                _zoom(translateVector, MAX_ZOOM_IN);
+                if (coords) {
+                    var x = xScale(coords[0] * SQUARE_WIDTH),
+                        y = yScale(coords[1] * SQUARE_WIDTH);
+                    // if possible, show some offset
+                    var X_OFFSET = xScale(10),
+                        Y_OFFSET = yScale(5);
+                    if (x > X_OFFSET) x -= X_OFFSET;
+                    if (y > Y_OFFSET) y -= Y_OFFSET;
+                    // apply the zoom
+                    var translateVector = [-(x * MAX_ZOOM_IN), -(y * MAX_ZOOM_IN)];
+                    zoomBehavior.scale(MAX_ZOOM_IN);
+                    zoomBehavior.translate(translateVector);
+                    _zoom(translateVector, MAX_ZOOM_IN);
+                }
             }
         });
     }
