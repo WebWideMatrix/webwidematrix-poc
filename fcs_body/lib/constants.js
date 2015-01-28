@@ -1,7 +1,7 @@
 
 INITIAL_FLOOR = "g";
 
-FLOOR_W = 100;
+FLOOR_W = 200;
 FLOOR_H = 100;
 
 PROXIMITY = 10;

@@ -1,5 +1,23 @@
 <template name="buildingsView">
     <div class="buildingsView">
-        <h3>Hold on</h3>
+        {{>buildingsGrid}}
     </div>
+</template>
+
+<template name="buildingsGrid">
+    <div id="navigation" style="float: right">
+        <span class="label label-info">{{bldgKey}}</span>
+        <div class="btn-group" role="group" aria-label="...">
+            <button type="button" class="btn btn-default navigate-up">
+                <img src="/images/arrow_go_outof.png" width="16px">
+            </button>
+        </div>
+    </div>
+    <div id="display">
+    </div>
+    <br/>
+
+    <p class="help-block">
+        <strong>Tip:</strong> Use the mouse scroll to zoom, and drag the view to move around
+    </p>
 </template>

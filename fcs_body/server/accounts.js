@@ -12,7 +12,8 @@ Accounts.onCreateUser(function (options, user) {
     };
 
     var wrappedCreateBldg = Async.wrap(createBldg);
-    var bldgId = wrappedCreateBldg(INITIAL_FLOOR, null, USER_CONTENT_TYPE, user.profile);
+    var bldgId = wrappedCreateBldg(INITIAL_FLOOR, user.profile.screenName, null,
+        USER_CONTENT_TYPE, user.profile);
     var bldg = Buildings.findOne({_id: bldgId});
 
     var wrappedCreateDataPipe = Async.wrap(createDataPipe);
