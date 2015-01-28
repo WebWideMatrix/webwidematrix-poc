@@ -14,8 +14,13 @@ Template.glassDoor.events({
                 // TODO handle errors, such as no bldg
                 console.log(err);
             }
-            // TODO use router
-            redirectTo(data + "-l0");
+            if (data) {
+                // TODO use router
+                redirectTo(data + "-l0");
+            }
+            else {
+                $("#error").text("No data yet, please try again soon..");
+            }
         });
     }
 });
