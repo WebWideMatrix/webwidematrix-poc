@@ -117,7 +117,7 @@ getBldgLink = function(d) {
         return d.payload.external_url;
     }
     else {
-        // if no external link, link to the 1st flr of the blsg
+        // if no external link, link to the 1st flr of the bldg
         return "/buildings/" + d.address + "-l0";
     }
 };
