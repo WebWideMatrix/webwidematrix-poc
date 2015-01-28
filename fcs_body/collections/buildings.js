@@ -103,8 +103,13 @@ getContainingBldgAddress = function(addr) {
 extractBldgCoordinates = function(bldgAddr) {
     var parts = bldgAddr.split("-");
     var part = parts[parts.length - 1];
-    var coords = part.substring(2, part.length - 1);
-    return coords.split(",");
+    if (part[0] != "b") {
+        bldgAddr = getBldg(bldgAddr);
+        parts = bldgAddr.split("-");
+        part = parts[parts.length - 1];
+    }
+    var coords = part.substring(2, part.length - 1).split(",");
+    return [parseInt(coords[0]), parseInt(coords[1])];
 };
 
 getBldgLink = function(d) {

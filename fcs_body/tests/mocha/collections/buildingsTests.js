@@ -49,6 +49,14 @@ if (!(typeof MochaWeb === 'undefined')) {
                 chai.assert.equal(got, expected);
             });
 
+            it("should extract a bldg's coordinates", function () {
+                var addr = "g-b(1,2)",
+                    expected = [1, 2];
+                var got = extractBldgCoordinates(addr);
+                chai.assert.equal(got[0], expected[0]);
+                chai.assert.equal(got[1], expected[1]);
+            });
+
         });
 
     });
