@@ -22,16 +22,23 @@ bldgRenderFunc = {
         return html;
     },
     'daily-feed': function(d) {
-        var html = "<table style='border-color: red; height: 5px;' width='5px;'>";
-        html += "<tr><td bgcolor='red' style='color: white; text-align: center; vertical-align: middle; height: 2px;'>" + d.key.substring(5, 8) + "</td></tr>";
-        html += "<tr><td bgcolor='white' style='width: 100%; text-align: center; font-weight: bold; font-size: 1px;'>" + d.key.substring(9, 11) + "</td></tr>";
+        var html = "<table style='border-color: red; height: 5px;' " +
+            "width='5px;'>";
+        html += "<tr><td bgcolor='red' style='color: white; " +
+            "text-align: center; vertical-align: middle; " +
+            "height: 2px; font-weight: bold; font-size: 1px;'>" +
+            d.key.substring(5, 8) + "</td></tr>";
+        html += "<tr><td bgcolor='white' style='width: 100%; " +
+            "text-align: center; font-weight: bold; font-size: 2px;'>" +
+            d.key.substring(9, 11) + "</td></tr>";
         html += "</table>";
         return html;
     },
     'user': function(d) {
         var imgUrl = d.payload.picture;
-        var html = "<div style=\"background-image: URL(" + imgUrl + ");\">";
-        html += d.key;
+        var html = "<div style=\"height: 6px; width: 6px;\">";
+        html += "<img src=\"" + d.payload.picture + "\" width=6px " +
+            "height=6px title=\"" + d.key + "\">";
         html += "</div>";
         return html;
     }
