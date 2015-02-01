@@ -25,7 +25,11 @@ bldgRenderFunc = {
         return d.key;
     },
     'user': function(d) {
-        return d.key;
+        var imgUrl = d.payload.picture;
+        var html = "<div style=\"background-image: URL(" + imgUrl + ");\">";
+        html += d.key;
+        html += "</div>";
+        return html;
     }
 };
 
@@ -143,7 +147,7 @@ Template.buildingsGrid.rendered = function () {
                     },
                     fill: 'none'
                 })
-                .append("xhtml:body").append("xhtml:p")
+                .append("xhtml:body").append("xhtml:div")
                 .style({
                     "font-size": "0.6px"
                 })
