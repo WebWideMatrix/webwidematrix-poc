@@ -14,13 +14,33 @@ redirectTo = function(newAddress) {
 
 bldgRenderFunc = {
     'twitter-social-post': function(d) {
-        return d.payload.text;
+        var text = d.payload.text;
+        var html = "<p " +
+            "style=\"color: #" + d.payload.user.profile_text_color + "; " +
+            "background-color: #" + d.payload.user.profile_background_color + "; " +
+            "height: 10px; \">" + text + "</p>";
+        return html;
     },
     'daily-feed': function(d) {
-        return d.key;
+        var html = "<table style='border-color: red; height: 5px;' " +
+            "width='5px;'>";
+        html += "<tr><td bgcolor='red' style='color: white; " +
+            "text-align: center; vertical-align: middle; " +
+            "height: 2px; font-weight: bold; font-size: 1px;'>" +
+            d.key.substring(5, 8) + "</td></tr>";
+        html += "<tr><td bgcolor='white' style='width: 100%; " +
+            "text-align: center; font-weight: bold; font-size: 2px;'>" +
+            d.key.substring(9, 11) + "</td></tr>";
+        html += "</table>";
+        return html;
     },
     'user': function(d) {
-        return d.key;
+        var imgUrl = d.payload.picture;
+        var html = "<div style=\"height: 6px; width: 6px;\">";
+        html += "<img src=\"" + d.payload.picture + "\" width=6px " +
+            "height=6px title=\"" + d.key + "\">";
+        html += "</div>";
+        return html;
     }
 };
 
@@ -38,7 +58,7 @@ Template.buildingsGrid.helpers({
 });
 
 Template.buildingsGrid.events({
-    "mousedown .bldg": function(event) {
+    "click .bldg": function(event) {
         var externalUrl = $(event.currentTarget).attr("href");
         openExternalURL(externalUrl);
     },
@@ -138,16 +158,8 @@ Template.buildingsGrid.rendered = function () {
                     },
                     fill: 'none'
                 })
-                .append("xhtml:body").append("xhtml:p")
+                .append("xhtml:body").append("xhtml:div")
                 .style({
-                    "color": function (d) {
-                        // different color for posts with links
-                        // TODO this ain't generic
-                        if (d.payload.urls && d.payload.urls.length)
-                            return "blue";
-                        else
-                            return "navy";
-                    },
                     "font-size": "0.6px"
                 })
                 .html(function (d) {
