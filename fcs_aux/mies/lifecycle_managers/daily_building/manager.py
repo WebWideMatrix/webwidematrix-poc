@@ -1,11 +1,10 @@
 from datetime import datetime
 import logging
-from pymongo import MongoClient
 from mies.celery import app
 from mies.data_pipes.model import update_data_pipe, STATUS_ACTIVE
 from mies.lifecycle_managers.daily_building import \
     DAILY_FEED_DISPATCHER_LIFEYCLE_MANAGER
-from mies.mongoconfig import MONOGO_HOST, MONOGO_PORT
+from mies.mongoconfig import get_db
 from mies.buildings.model import create_buildings
 
 DAILY_FEED = "daily-feed"
@@ -64,9 +63,7 @@ def invoke():
     """
     logging.info("Invoking lifecycle manager...")
     today = format_date(datetime.utcnow())
-    # TODO abstract the DB & inject it
-    client = MongoClient(MONOGO_HOST, MONOGO_PORT)
-    db = client.meteor
+    db = get_db()
     managers = db.lifecycle_managers.find(
         {"type": DAILY_FEED_DISPATCHER_LIFEYCLE_MANAGER}
     )

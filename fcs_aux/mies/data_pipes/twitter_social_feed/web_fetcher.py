@@ -5,7 +5,7 @@ from mies.buildings.model import create_buildings
 from mies.twitterconfig import CONSUMER_KEY, \
     CONSUMER_SECRET, TWITTER_POSTS_LIMIT
 from mies.data_pipes.twitter_social_feed import TWITTER_SOCIAL_POST
-from mies.data_pipes.model import update_data_pipe
+from mies.data_pipes.model import update_data_pipe, STATUS_ACTIVE
 
 
 def extract_payload_from_post(post):
@@ -54,6 +54,10 @@ def pull_from_data_pipes(page):
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     count = 0
     for dp in page:
+        if dp.get("connectedBldg") is None:
+            logging.warning("Data-pipe {} still not connected to anything"
+                            .format(dp["_id"]))
+            continue
         auth.set_access_token(dp["tokens"]["accessToken"],
                               dp["tokens"]["accessTokenSecret"])
         t = tweepy.API(auth)
