@@ -25,7 +25,9 @@ def home_timeline_response():
                               'user')
     Url = namedtuple('Url', 'url indices expanded_url display_url')
     User = namedtuple('User', 'name screen_name id description lang '
-                              'url statuses_count followers_count')
+                              'url statuses_count followers_count '
+                              'profile_text_color profile_background_color '
+                              'profile_link_color')
     resp = [
         Post(text="Radio 1 launches content for iPlayer http://t.co/rU5SgUXouX",
              id=531722559625396224,
@@ -53,6 +55,9 @@ def home_timeline_response():
                        url="http://t.co/xBkUyADpLc",
                        statuses_count=16577,
                        followers_count=331992,
+                       profile_text_color="white",
+                       profile_background_color="black",
+                       profile_link_color="blue",
                        description="The official account for the BBC technology news team."),
              ),
         Post(text="Your gang's done gone away.",
@@ -76,7 +81,10 @@ def home_timeline_response():
                        url="http://vonnegut.com",
                        statuses_count=4513,
                        followers_count=12876283,
-                       description="An author"),
+                       description="An author",
+                       profile_text_color="black",
+                       profile_background_color="white",
+                       profile_link_color="blue"),
              )
     ]
     return resp

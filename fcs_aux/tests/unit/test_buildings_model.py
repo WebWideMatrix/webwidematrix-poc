@@ -114,14 +114,12 @@ def test_construct_bldg():
     assert got['occupiedBy'] is None
 
 
-@patch('mies.buildings.model.MongoClient')
-def test_create_buildings(mongo_client):
+@patch('mies.buildings.model.get_db')
+def test_create_buildings(get_db):
     db = MagicMock()
     db.buildings.find_one = MagicMock(return_value=None)
     db.buildings.insert = MagicMock(return_value=None)
-    cl = MagicMock()
-    cl.meteor = db
-    mongo_client.return_value = cl
+    get_db.return_value = db
 
     content_type = "SomeContent"
     nbuildings = 35

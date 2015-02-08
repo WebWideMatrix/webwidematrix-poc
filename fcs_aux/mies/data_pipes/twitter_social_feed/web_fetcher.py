@@ -5,7 +5,7 @@ from mies.buildings.model import create_buildings
 from mies.twitterconfig import CONSUMER_KEY, \
     CONSUMER_SECRET, TWITTER_POSTS_LIMIT
 from mies.data_pipes.twitter_social_feed import TWITTER_SOCIAL_POST
-from mies.data_pipes.model import update_data_pipe, STATUS_ACTIVE
+from mies.data_pipes.model import update_data_pipe
 
 
 def extract_payload_from_post(post):

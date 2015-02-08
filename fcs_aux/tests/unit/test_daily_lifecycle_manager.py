@@ -83,16 +83,15 @@ def test_create_bldg(create_bldgs_task):
     assert got == expected
 
 
-@patch('mies.lifecycle_managers.daily_building.manager.MongoClient')
+@patch('mies.lifecycle_managers.daily_building.manager.get_db')
 @patch('mies.lifecycle_managers.daily_building.manager.create_daily_bldg')
 @patch('mies.lifecycle_managers.daily_building.manager.format_date',
        return_value=TODAY)
-def test_invoke(format, create, mongo_client):
+def test_invoke(format, create, get_db):
     db = MagicMock()
-    mc = mongo_client.return_value
-    mc.meteor = db
     managers = [{"_id": "h34gf23h42"}, {"_id": "4eh2873h28"}, ]
     db.lifecycle_managers.find.return_value = managers
+    get_db.return_value = db
     invoke()
     create.assert_has_calls([
         call(ANY, TODAY, managers[0]),
