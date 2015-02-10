@@ -1,11 +1,13 @@
 from collections import defaultdict
 from datetime import datetime
-import logging
 import random
+from celery.utils.log import get_task_logger
 
 from mies.celery import app
 from mies.mongoconfig import get_db
 from mies.buildings.constants import FLOOR_W, FLOOR_H, PROXIMITY
+
+logging = get_task_logger(__name__)
 
 
 class NoSpotLeft(Exception):

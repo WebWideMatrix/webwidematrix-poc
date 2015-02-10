@@ -1,11 +1,13 @@
 from datetime import datetime
-import logging
+from celery.utils.log import get_task_logger
 from mies.celery import app
 from mies.data_pipes.model import update_data_pipe, STATUS_ACTIVE
 from mies.lifecycle_managers.daily_building import \
     DAILY_FEED_DISPATCHER_LIFEYCLE_MANAGER
 from mies.mongoconfig import get_db
 from mies.buildings.model import create_buildings
+
+logging = get_task_logger(__name__)
 
 DAILY_FEED = "daily-feed"
 
