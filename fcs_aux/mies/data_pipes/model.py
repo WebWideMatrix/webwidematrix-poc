@@ -1,6 +1,5 @@
 import logging
-from pymongo import MongoClient
-from mies.mongoconfig import MONOGO_HOST, MONOGO_PORT
+from mies.mongoconfig import get_db
 
 
 STATUS_ACTIVE = "active"
@@ -12,9 +11,7 @@ def load_data_pipes(criteria=None, limit=100):
     :param limit: the size of each batch
     :return:
     """
-    # TODO abstract the DB & inject it
-    client = MongoClient(MONOGO_HOST, MONOGO_PORT)
-    db = client.meteor
+    db = get_db()
     spec = {
         "status": STATUS_ACTIVE,
         "connectedBldg": {'$exists': True}
@@ -32,8 +29,6 @@ def load_data_pipes(criteria=None, limit=100):
 
 
 def update_data_pipe(data_pipe_id, change):
-    # TODO abstract the DB & inject it
-    client = MongoClient(MONOGO_HOST, MONOGO_PORT)
-    db = client.meteor
+    db = get_db()
     db.data_pipes.update({"_id": data_pipe_id}, {"$set": change})
     logging.info("Updated data-pipe {}: {}".format(data_pipe_id, change))

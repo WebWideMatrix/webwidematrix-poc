@@ -54,6 +54,10 @@ def pull_from_data_pipes(page):
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     count = 0
     for dp in page:
+        if dp.get("connectedBldg") is None:
+            logging.warning("Data-pipe {} still not connected to anything"
+                            .format(dp["_id"]))
+            continue
         auth.set_access_token(dp["tokens"]["accessToken"],
                               dp["tokens"]["accessTokenSecret"])
         t = tweepy.API(auth)

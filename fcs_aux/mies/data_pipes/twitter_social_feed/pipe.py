@@ -1,10 +1,12 @@
 from __future__ import absolute_import
-import logging
+from celery.utils.log import get_task_logger
 
 from mies.celery import app
 from mies.data_pipes.model import load_data_pipes
 from mies.data_pipes.twitter_social_feed import web_fetcher, \
     PERSONAL_TWITTER_FEED
+
+logging = get_task_logger(__name__)
 
 
 @app.task(ignore_result=True)

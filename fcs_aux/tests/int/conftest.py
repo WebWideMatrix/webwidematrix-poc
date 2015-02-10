@@ -1,7 +1,7 @@
 from datetime import datetime
 from pymongo import MongoClient
 import pytest
-from mies.mongoconfig import MONOGO_HOST, MONOGO_PORT
+from mies.mongoconfig import DEFAULT_MONGO_HOST, DEFAULT_MONGO_PORT
 
 
 @pytest.fixture(scope="module")
@@ -13,7 +13,7 @@ def db_name():
 def db(db_name):
     # TODO abstract the DB & inject it
     # TODO use a test db
-    client = MongoClient(MONOGO_HOST, MONOGO_PORT)
+    client = MongoClient(DEFAULT_MONGO_HOST, DEFAULT_MONGO_PORT)
     return getattr(client, db_name)
 
 

@@ -38,7 +38,7 @@ def test_get_next_free():
     db = MagicMock()
     db.buildings.find_one = MagicMock(side_effect=vacancies)
     got = _get_next_free("g-b(1,2)-l0", db)
-    assert got == (3, 50)
+    assert got == (150, 1)
 
 
 def test_find_spot():
@@ -77,7 +77,7 @@ def test_find_spot_next_free():
     db = MagicMock()
     db.buildings.find_one = MagicMock(side_effect=vacancies)
     address, got_x, got_y = find_spot(flr, position_hints=pos_hints, db=db)
-    expected_x, expected_y = 3, 50
+    expected_x, expected_y = 150, 1
     assert got_x == expected_x
     assert got_y == expected_y
     assert address is not None
@@ -114,14 +114,12 @@ def test_construct_bldg():
     assert got['occupiedBy'] is None
 
 
-@patch('mies.buildings.model.MongoClient')
-def test_create_buildings(mongo_client):
+@patch('mies.buildings.model.get_db')
+def test_create_buildings(get_db):
     db = MagicMock()
     db.buildings.find_one = MagicMock(return_value=None)
     db.buildings.insert = MagicMock(return_value=None)
-    cl = MagicMock()
-    cl.meteor = db
-    mongo_client.return_value = cl
+    get_db.return_value = db
 
     content_type = "SomeContent"
     nbuildings = 35

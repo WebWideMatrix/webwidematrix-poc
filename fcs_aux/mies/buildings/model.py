@@ -1,12 +1,13 @@
 from collections import defaultdict
 from datetime import datetime
-import logging
 import random
-from pymongo import MongoClient
+from celery.utils.log import get_task_logger
 
 from mies.celery import app
-from mies.mongoconfig import MONOGO_HOST, MONOGO_PORT
+from mies.mongoconfig import get_db
 from mies.buildings.constants import FLOOR_W, FLOOR_H, PROXIMITY
+
+logging = get_task_logger(__name__)
 
 
 class NoSpotLeft(Exception):
@@ -119,9 +120,7 @@ def create_buildings(content_type, keys, payloads, flr, position_hints=None):
         return len(buildings)
 
     created_addresses = []
-    # TODO abstract the DB & inject it
-    client = MongoClient(MONOGO_HOST, MONOGO_PORT)
-    db = client.meteor
+    db = get_db()
     batch_size = 10
     buildings = []
     count = 0
