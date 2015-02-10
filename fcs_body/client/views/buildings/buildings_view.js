@@ -46,7 +46,10 @@ bldgRenderFunc = {
 
 Template.buildingsGrid.helpers({
     bldgKey: function() {
-        var bldgKey = getBldgKey(Session.get("currentBldg"));
+        var bldg = getBldg(Session.get("currentAddress"));
+        Session.set("currentBldg", bldg);
+
+        var bldgKey = getBldgKey(bldg);
         if (bldgKey) {
             return bldgKey;
         }

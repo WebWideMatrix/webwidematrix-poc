@@ -35,6 +35,7 @@ createBldg = function(flr, key, near, contentType, payload, callback) {
     var _createBldg = function() {
         return {
             address: address,
+            key: key,
             flr: flr,
             x: x,
             y: y,
@@ -57,9 +58,11 @@ createBldg = function(flr, key, near, contentType, payload, callback) {
 getBldgKey = function(bldgAddr) {
     var bldg = Buildings.findOne({address: bldgAddr});
     if (bldg) {
+        console.log("Returning key: " + bldg.key);
         return bldg.key;
     }
     else {
+        console.log("Got null");
         return null;
     }
 };
@@ -82,11 +85,13 @@ getFlr = function(addr) {
 };
 
 getBldg = function(addr) {
+    console.log("In getBldg, for addr: " + addr);
     var parts = addr.split("-");
     if (parts[parts.length - 1].substring(0, 1) == "l") {
         parts.pop();
         addr = parts.join("-");
     }
+    console.log("getBldg returning: " + addr);
     return addr;
 };
 

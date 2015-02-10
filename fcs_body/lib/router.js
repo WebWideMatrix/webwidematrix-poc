@@ -33,7 +33,6 @@ Router.map(function () {
         this.subscribe('buildings', this.params.addr).wait();
 
         Session.set("currentAddress", this.params.addr);
-        Session.set("currentBldg", getBldg(this.params.addr));
 
         if (this.ready()) {
             this.render('buildingsView');
