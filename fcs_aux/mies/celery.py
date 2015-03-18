@@ -7,6 +7,7 @@ app = Celery('mies',
              include=[
                  'mies.data_pipes.twitter_social_feed.pipe',
                  'mies.lifecycle_managers.daily_building.manager',
+                 'mies.lifecycle_managers.residents_life.manager',
                  'mies.buildings.model',
              ])
 

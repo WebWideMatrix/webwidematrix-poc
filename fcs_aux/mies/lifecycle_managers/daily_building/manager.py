@@ -63,7 +63,7 @@ def invoke():
     * If not found, creates one, next to the previous day
     * Connects any data-pipes for this user to the created bldg
     """
-    logging.info("Invoking lifecycle manager...")
+    logging.info("Invoking daily-bldg lifecycle manager...")
     today = format_date(datetime.utcnow())
     db = get_db()
     managers = db.lifecycle_managers.find(

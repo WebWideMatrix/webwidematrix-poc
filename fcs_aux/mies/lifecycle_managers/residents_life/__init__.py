@@ -1,0 +1,3 @@
+
+
+RESIDANT_LIFE_EVENT_DISPATCHER_LIFEYCLE_MANAGER = "ResidantLifeEventDispatcher"

@@ -11,7 +11,8 @@ createRsdt = function(bldg, callback) {
             acceleration: null,
             velocity: null,
             location: bldg.address,
-            energy: DEFAULT_ENERGY
+            energy: DEFAULT_ENERGY,
+            status: "active"
         };
     };
 
