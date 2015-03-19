@@ -10,8 +10,9 @@ def handle_life_event(resident):
     logging.info("Resident {id} life event invoked..."
                  .format(id=resident["_id"]))
 
+    location = resident["location"]
     # read all near-by bldgs
-    bldgs = load_nearby_bldgs()
+    bldgs = load_nearby_bldgs(location)
 
     # choose a bldg to move into
 
