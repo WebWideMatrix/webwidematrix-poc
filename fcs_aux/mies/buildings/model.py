@@ -2,6 +2,7 @@ from collections import defaultdict
 from datetime import datetime
 import random
 from celery.utils.log import get_task_logger
+from mies.buildings.utils import extract_bldg_coordinates, get_flr
 
 from mies.celery import app
 from mies.mongoconfig import get_db
@@ -136,3 +137,21 @@ def create_buildings(content_type, keys, payloads, flr, position_hints=None):
         count += _create_batch_of_buildings()
     logging.info("Created {} buildings in {}".format(count, flr))
     return created_addresses
+
+
+def load_nearby_bldgs(address):
+    proximity = 10
+    # generate a list of neighbour addresses
+    addresses = []
+    flr = get_flr(address)
+    center_x, center_y = extract_bldg_coordinates(address)
+    for x in range(center_x - proximity / 2, center_x + proximity / 2):
+        for y in range(center_y - proximity / 2, center_y + proximity / 2):
+            addresses.append("{flr}-b({x},{y})".format(flr, x, y))
+    # query for all these bldgs
+    db = get_db()
+    return db.find({
+        "_id": {
+            "$in": addresses
+        }
+    })
