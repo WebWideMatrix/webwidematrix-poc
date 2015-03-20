@@ -139,7 +139,7 @@ def create_buildings(content_type, keys, payloads, flr, position_hints=None):
     return created_addresses
 
 
-def load_nearby_bldgs(address):
+def get_nearby_addresses(address):
     proximity = 10
     # generate a list of neighbour addresses
     addresses = []
@@ -147,11 +147,17 @@ def load_nearby_bldgs(address):
     center_x, center_y = extract_bldg_coordinates(address)
     for x in range(center_x - proximity / 2, center_x + proximity / 2):
         for y in range(center_y - proximity / 2, center_y + proximity / 2):
-            addresses.append("{flr}-b({x},{y})".format(flr, x, y))
-    # query for all these bldgs
+            if 0 < x < FLOOR_W and 0 < y < FLOOR_H:
+                addresses.append("{flr}-b({x},{y})".format(flr, x, y))
+    return addresses
+
+
+def load_nearby_bldgs(address):
+    addresses = get_nearby_addresses(address)
+    # query for any bldg whose address is one of these addresses
     db = get_db()
     return db.find({
-        "_id": {
+        "address": {
             "$in": addresses
         }
     })
