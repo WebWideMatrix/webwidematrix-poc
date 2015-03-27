@@ -35,7 +35,7 @@ def handle_life_event(resident):
 
     # update the bldg at the previous location (if existing),
     # that the resident has left the bldg
-
+    remove_occupant(resident.bldg);
 
     # if moved into a bldg, update it to indicate that
     # the residents is inside

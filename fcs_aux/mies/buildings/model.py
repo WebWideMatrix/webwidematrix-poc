@@ -161,3 +161,14 @@ def load_nearby_bldgs(address):
             "$in": addresses
         }
     })
+
+
+def remove_occupant(bldg_id):
+    db = get_db()
+    db.buildings.update({"_id": bldg_id},
+        {
+            "$set": {
+                "occupiedBy": None,
+                "occupied": False
+            }
+        })
