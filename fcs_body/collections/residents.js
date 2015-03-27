@@ -1,10 +1,11 @@
 Residents = new Meteor.Collection('residents');
 
 
-createRsdt = function(bldg, callback) {
+createRsdt = function(name, bldg, callback) {
 
     var _createRsdt = function() {
         return {
+            name: name,
             type: "ContentVisualizer",
             bldg: bldg._id,
             processing: false,

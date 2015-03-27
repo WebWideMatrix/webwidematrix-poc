@@ -21,7 +21,7 @@ Accounts.onCreateUser(function (options, user) {
     var wrappedCreateLifecycleManager = Async.wrap(createLifecycleManager);
     var lifecycleManagerId = wrappedCreateLifecycleManager(bldgId, dataPipeId);
     var wrappedCreateRsdt = Async.wrap(createRsdt);
-    var rsdtId = wrappedCreateRsdt(bldg);
+    var rsdtId = wrappedCreateRsdt(initialResidentName(user.profile), bldg);
 
     user.bldg = {
         _id: bldgId,
@@ -50,4 +50,8 @@ getUserDetailsFromTwitter = function(profile, user) {
     profile.screenName = user.services.twitter.screenName;
 
     return profile;
+};
+
+initialResidentName = function(profile) {
+    return "1a " + profile.screenName;
 };
