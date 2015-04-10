@@ -163,11 +163,26 @@ def load_nearby_bldgs(address):
     })
 
 
+def add_occupant(bldg_id, resident_id):
+    db = get_db()
+    db.buildings.update(
+        {"_id": bldg_id},
+        {
+            "$set":
+            {
+                "occupiedBy": resident_id,
+                "occupied": True
+            }
+        })
+
+
 def remove_occupant(bldg_id):
     db = get_db()
-    db.buildings.update({"_id": bldg_id},
+    db.buildings.update(
+        {"_id": bldg_id},
         {
-            "$set": {
+            "$set":
+            {
                 "occupiedBy": None,
                 "occupied": False
             }
