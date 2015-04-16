@@ -1,6 +1,6 @@
 import random
 from celery.utils.log import get_task_logger
-from mies.buildings.model import load_nearby_bldgs, get_nearby_addresses, remove_occupant, add_occupant
+from mies.buildings.model import load_nearby_bldgs, get_nearby_addresses, remove_occupant, add_occupant, load_bldg
 from mies.celery import app
 from mies.residents.movement.simple import occupy_bldg, occupy_empty_address
 from mies.residents.object import Resident
@@ -20,8 +20,6 @@ def choose_bldg(bldgs, addresses):
         return random.choice(addresses), None
 
 
-
-
 @app.task(ignore_result=True)
 def handle_life_event(resident_data):
     """
@@ -38,20 +36,20 @@ def handle_life_event(resident_data):
     location = resident_data["location"]
 
     # Check status of previous action.
-    curr_bldg = load_bldg(resident_data["bldg"])
+    curr_bldg = load_bldg(_id=resident_data["bldg"])
     if curr_bldg is not None:
-        action_status = get_latest_action(curr_bldg)
-        if is_action_pending(action_status):
-            if should_discard_action(action_status):
-                discard_action(curr_bldg, action_status)
+        action_status = resident.get_latest_action(curr_bldg)
+        if resident.is_action_pending(action_status):
+            if resident.should_discard_action(action_status):
+                resident.discard_action(curr_bldg, action_status)
             else:
                 logging.info("Action in {addr} is still pending. "
                              "Doing nothing for now."
                              .format(addr=resident_data["bldg"]))
                 return
 
-        resident.update_energy_status_based_on_action_result(action_status)
-
+        resident.update_energy_status_based_on_action_result(action_status,
+                                                             curr_bldg)
 
     # read all near-by bldgs
     addresses = get_nearby_addresses(location)

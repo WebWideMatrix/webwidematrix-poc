@@ -6,7 +6,7 @@ from mies.buildings.utils import extract_bldg_coordinates, get_flr
 
 from mies.celery import app
 from mies.mongoconfig import get_db
-from mies.buildings.constants import FLOOR_W, FLOOR_H, PROXIMITY
+from mies.buildings.constants import FLOOR_W, FLOOR_H, PROXIMITY, DEFAULT_BLDG_ENERGY
 
 logging = get_task_logger(__name__)
 
@@ -95,7 +95,8 @@ def construct_bldg(flr, content_type, key, payload, position_hints=None,
         payload=payload,
         processed=False,
         occupied=False,
-        occupiedBy=None
+        occupiedBy=None,
+        energy=DEFAULT_BLDG_ENERGY
     )
 
 
@@ -150,6 +151,11 @@ def get_nearby_addresses(address):
             if 0 < x < FLOOR_W and 0 < y < FLOOR_H:
                 addresses.append("{flr}-b({x},{y})".format(flr, x, y))
     return addresses
+
+
+def load_bldg(**kwargs):
+    db = get_db()
+    return db.find(kwargs)
 
 
 def load_nearby_bldgs(address):
