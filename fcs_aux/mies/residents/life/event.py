@@ -36,8 +36,8 @@ def handle_life_event(resident_data):
     location = resident_data["location"]
 
     # Check status of previous action.
-    curr_bldg = load_bldg(_id=resident_data["bldg"])
-    if curr_bldg is not None:
+    curr_bldg = load_bldg(_id=resident["bldg"])
+    if curr_bldg is not None and resident["processing"]:
         action_status = resident.get_latest_action(curr_bldg)
         if resident.is_action_pending(action_status):
             if resident.should_discard_action(action_status):
@@ -45,11 +45,9 @@ def handle_life_event(resident_data):
             else:
                 logging.info("Action in {addr} is still pending. "
                              "Doing nothing for now."
-                             .format(addr=resident_data["bldg"]))
+                             .format(addr=resident["bldg"]))
                 return
-
-        resident.update_energy_status_based_on_action_result(action_status,
-                                                             curr_bldg)
+        resident.finish_processing(action_status, curr_bldg)
 
     # read all near-by bldgs
     addresses = get_nearby_addresses(location)
@@ -65,15 +63,18 @@ def handle_life_event(resident_data):
     # if moved into a bldg, update it to indicate that
     # the residents is inside
     if bldg:
-        add_occupant(resident_data["_id"], bldg["_id"])
+        add_occupant(resident["_id"], bldg["_id"])
 
-        occupy_bldg(resident_data, bldg)
+        occupy_bldg(resident, bldg)
 
         # if the bldg has payload that requires processing,
-        # choose an action to apply to the payload
+        if "payload" in bldg and not bldg["processed"]:
 
+            # choose an action to apply to the payload
+            action = resident.choose_action(bldg)
 
-        # apply the action
+            # apply the action & mark the resident as processing
+            resident.execute_action(action, bldg)
 
     else:
-        occupy_empty_address(resident_data, destination_addr)
+        occupy_empty_address(resident, destination_addr)
