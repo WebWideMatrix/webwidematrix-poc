@@ -2,11 +2,12 @@ from datetime import datetime
 from mock import patch, MagicMock
 import pytest
 
-from mies.buildings.model import build_bldg_address, _get_next_free
+from mies.buildings.model import build_bldg_address, _get_next_free, get_nearby_addresses
 from mies.buildings.model import is_vacant
 from mies.buildings.model import find_spot
 from mies.buildings.constants import FLOOR_W, FLOOR_H, PROXIMITY
 from mies.buildings.model import construct_bldg, create_buildings
+from mies.buildings.utils import extract_bldg_coordinates
 
 
 @pytest.mark.parametrize("flr,x,y,address", [
@@ -135,3 +136,13 @@ def test_create_buildings(get_db):
     got = create_buildings(content_type, keys, payloads, flr)
     assert len(got) == nbuildings
     assert db.buildings.insert.call_count == 4  # 4 batch inserts
+
+def test_get_nearby_addresses():
+    addr = "g-b(1,2)-l0-b(50,50)"
+    res = get_nearby_addresses(addr)
+    assert len(res) == 99
+    assert addr not in res
+    nearby_addr = res[47]
+    x, y = extract_bldg_coordinates(nearby_addr)
+    assert abs(x - 50) < 10
+    assert abs(y - 50) < 10

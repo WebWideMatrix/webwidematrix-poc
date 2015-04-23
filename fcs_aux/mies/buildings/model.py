@@ -148,8 +148,9 @@ def get_nearby_addresses(address):
     center_x, center_y = extract_bldg_coordinates(address)
     for x in range(center_x - proximity / 2, center_x + proximity / 2):
         for y in range(center_y - proximity / 2, center_y + proximity / 2):
-            if 0 < x < FLOOR_W and 0 < y < FLOOR_H:
-                addresses.append("{flr}-b({x},{y})".format(flr, x, y))
+            if not (x == center_x and y == center_y) and \
+               0 < x < FLOOR_W and 0 < y < FLOOR_H:
+                addresses.append("{flr}-b({x},{y})".format(flr=flr, x=x, y=y))
     return addresses
 
 
