@@ -1,5 +1,6 @@
 from collections import namedtuple
 import pytest
+from mies.buildings.constants import DEFAULT_RESIDENT_ENERGY
 
 
 @pytest.fixture()
@@ -88,3 +89,17 @@ def home_timeline_response():
              )
     ]
     return resp
+
+@pytest.fixture
+def resident_data():
+    return {
+            "name": "3j",
+            "type": "ContentVisualizer",
+            "bldg": "bldg123",
+            "processing": False,
+            "acceleration": None,
+            "velocity": None,
+            "location": "g-b(1,2)-l0",
+            "energy": DEFAULT_RESIDENT_ENERGY,
+            "status": "active"
+    }
