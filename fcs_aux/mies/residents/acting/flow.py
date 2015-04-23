@@ -5,12 +5,14 @@ from mies.mongoconfig import get_db
 
 def update_action_status(bldg, action_status):
     # TODO have a Bldg class & move the method there
+    actions = bldg["actions"]
+    actions[-1] = action_status
     db = get_db()
     db.buildings.update({
         "_id": bldg["_id"]
     }, {
         "$set": {
-            "actionStatus": action_status
+            "actions": actions
         }
     })
 

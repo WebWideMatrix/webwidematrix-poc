@@ -33,13 +33,13 @@ def handle_life_event(resident_data):
                  .format(id=resident_data["_id"]))
     resident = Resident(resident_data)
 
-    location = resident_data["location"]
+    location = resident["location"]
 
     # Check status of previous action.
     curr_bldg = load_bldg(_id=resident["bldg"])
     if curr_bldg is not None and resident["processing"]:
         action_status = resident.get_latest_action(curr_bldg)
-        if resident.is_action_pending(action_status):
+        if action_status is not None and resident.is_action_pending(action_status):
             if resident.should_discard_action(action_status):
                 resident.discard_action(curr_bldg, action_status)
             else:
