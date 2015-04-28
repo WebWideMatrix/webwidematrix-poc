@@ -55,7 +55,10 @@ class ActingBehavior:
         return bldg["actions"][-1]
 
     def is_action_pending(self, action_status):
-        return "result" not in action_status
+        """
+        TODO move to Bldg class
+        """
+        return "endedAt" not in action_status
 
     def should_discard_action(self, action_status):
         """
