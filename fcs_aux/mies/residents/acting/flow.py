@@ -48,13 +48,14 @@ class ActingBehavior:
     def get_latest_action(self, bldg):
         """
         Get the most recent action logged in the given bldg.
+        TODO move to Bldg class
         """
         if not bldg["actions"]:
             return None
         return bldg["actions"][-1]
 
     def is_action_pending(self, action_status):
-        return "result" in action_status
+        return "result" not in action_status
 
     def should_discard_action(self, action_status):
         """
