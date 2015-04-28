@@ -26,3 +26,9 @@ class Resident(dict, ActingBehavior):
     def __init__(self, data, **kwargs):
         super(Resident, self).__init__(**kwargs)
         self.update(data)
+
+    def __getattribute__(self, item):
+        try:
+            return super(Resident, self).__getattribute__(item)
+        except:
+            return self[item]
