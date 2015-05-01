@@ -1,4 +1,5 @@
 from datetime import datetime
+import random
 from mies.buildings.constants import DEFAULT_BLDG_ENERGY
 from mies.mongoconfig import get_db
 
@@ -7,6 +8,20 @@ def update_action_status(bldg, action_status):
     # TODO have a Bldg class & move the method there
     actions = bldg["actions"]
     actions[-1] = action_status
+    db = get_db()
+    db.buildings.update({
+        "_id": bldg["_id"]
+    }, {
+        "$set": {
+            "actions": actions
+        }
+    })
+
+
+def add_new_action_status(bldg, action_status):
+    # TODO have a Bldg class & move the method there
+    actions = bldg["actions"]
+    actions.append(action_status)
     db = get_db()
     db.buildings.update({
         "_id": bldg["_id"]
@@ -79,8 +94,32 @@ class ActingBehavior:
         action_status["status"] = "DISCARDED"
         update_action_status(bldg, action_status)
 
+    def get_registered_actions(self, content_type):
+        """
+        Stub implementation
+        TODO lookup actions registered for given content-type
+        """
+        registered_actions = {
+            "twitter-social-post": ["fetch-article"]
+        }
+        return registered_actions.get(content_type)
+
     def choose_action(self, bldg):
+        """
+        Stub implementation.
+        TODO lookup registered actions by content-type
+        TODO extract features from bldg payload
+        TODO predict the success of each action
+        TODO return the action with highest predicted success
+        """
+        registered_actions = self.get_registered_actions(bldg["contentType"])
+        return random.choice(registered_actions)
+
+    def mark_as_executing(self, action, bldg):
+        # create empty action status
+        # add_new_action_status(action, bldg)
+        # mark resident as processing
         pass
 
-    def execute_action(self, action, bldg):
+    def start_action(self, action, bldg):
         pass

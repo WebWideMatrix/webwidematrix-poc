@@ -34,7 +34,6 @@ class MovementBehavior:
                 }
             })
 
-
     def occupy_empty_address(self, addr):
         curr_location = self.location
         x, y = extract_bldg_coordinates(curr_location)
@@ -53,6 +52,7 @@ class MovementBehavior:
             })
 
     def look_around(self):
+        assert self.location
         addresses = get_nearby_addresses(self.location)
         bldgs = load_nearby_bldgs(self.location)
         return addresses, bldgs
