@@ -32,33 +32,39 @@ def add_new_action_status(bldg, action_status):
     })
 
 
+def update_bldg_processed_status(bldg, energy_change):
+    # TODO have a Bldg class & move the method there
+    curr_bldg_energy = bldg["energy"] or DEFAULT_BLDG_ENERGY
+    db = get_db()
+    db.buildings.update({
+                            "_id": bldg["_id"]
+                        }, {
+                            "$set": {
+                                "processed": (energy_change < 0),
+                                "energy": curr_bldg_energy + energy_change
+                            }
+                        })
+
+
 class ActingBehavior:
+
+    def update_processing_status(self, is_processing, energy_gained=0):
+        db = get_db()
+        db.residents.update({
+                                "_id": self._id
+                            }, {
+                                "$set": {
+                                    "processing": is_processing,
+                                    "energy": self.energy + energy_gained
+                                }
+                            })
 
     def finish_processing(self, action_status, bldg):
         bldg_energy = bldg["energy"] or DEFAULT_BLDG_ENERGY
         success = action_status["successLevel"]
         energy_gained = bldg_energy * success
-
-        db = get_db()
-
-        db.residents.update({
-            "_id": self["_id"]
-        }, {
-            "$set": {
-                "processing": False,
-                "energy": self["energy"] + energy_gained
-            }
-        })
-        curr_bldg_energy = bldg["energy"] or DEFAULT_BLDG_ENERGY
-
-        db.buildings.update({
-            "_id": bldg["_id"]
-        }, {
-            "$set": {
-                "processed": (energy_gained > 0),
-                "energy": curr_bldg_energy - energy_gained
-            }
-        })
+        self.update_processing_status(False, energy_gained)
+        update_bldg_processed_status(bldg, -energy_gained)
 
     def get_latest_action(self, bldg):
         """
@@ -83,14 +89,14 @@ class ActingBehavior:
         :param action_status:
         :return:
         """
-        if (datetime.now() - action_status["startedAt"]).seconds > 60 * 60 * 24:
+        if (datetime.utcnow() - action_status["startedAt"]).seconds > 60 * 60 * 24:
             return True
         if action_status["result"] == "ERROR":
             return True
         return False
 
     def discard_action(self, bldg, action_status):
-        action_status["endedAt"] = datetime.now()
+        action_status["endedAt"] = datetime.utcnow()
         action_status["status"] = "DISCARDED"
         update_action_status(bldg, action_status)
 
@@ -116,10 +122,14 @@ class ActingBehavior:
         return random.choice(registered_actions)
 
     def mark_as_executing(self, action, bldg):
-        # create empty action status
-        # add_new_action_status(action, bldg)
         # mark resident as processing
-        pass
+        action_status = {
+            "startedAt": datetime.utcnow(),
+            "startedBy": self._id
+        }
+        add_new_action_status(bldg, action_status)
+        self.update_processing_status(True)
+
 
     def start_action(self, action, bldg):
         pass
