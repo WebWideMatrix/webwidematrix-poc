@@ -125,11 +125,11 @@ class ActingBehavior:
         # mark resident as processing
         action_status = {
             "startedAt": datetime.utcnow(),
-            "startedBy": self._id
+            "startedBy": self._id,
+            "action": action
         }
         add_new_action_status(bldg, action_status)
         self.update_processing_status(True)
-
 
     def start_action(self, action, bldg):
         pass

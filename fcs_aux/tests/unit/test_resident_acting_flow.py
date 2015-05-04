@@ -52,6 +52,7 @@ def test_mark_as_executing():
             action_status = add_status_mock.call_args[0][1]
             assert "startedAt" in action_status
             assert action_status["startedBy"] == resident_id
+            assert "action" in action_status
             update_processing_mock.assert_called_once_with(True)
 
 
