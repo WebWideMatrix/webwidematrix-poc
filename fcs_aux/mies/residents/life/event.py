@@ -21,7 +21,10 @@ def handle_life_event(resident):
     curr_bldg = load_bldg(_id=resident.bldg)
     if curr_bldg is not None and resident.processing:
         action_status = resident.get_latest_action(curr_bldg)
-        if action_status is not None and resident.is_action_pending(action_status):
+        action_result = resident.get_action_result(action_status)
+        if action_status is not None and \
+           action_result is None and \
+           resident.is_action_pending(action_status):
             if resident.should_discard_action(action_status):
                 resident.discard_action(curr_bldg, action_status)
             else:

@@ -9,6 +9,7 @@ app = Celery('mies',
                  'mies.lifecycle_managers.daily_building.manager',
                  'mies.lifecycle_managers.residents_life.manager',
                  'mies.buildings.model',
+                 'fconveys.actions.fetch_content.fetch_article',
              ])
 
 app.config_from_object('mies.celeryconfig')

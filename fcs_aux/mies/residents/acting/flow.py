@@ -1,6 +1,8 @@
 from datetime import datetime
 import random
+from mies import celery
 from mies.buildings.constants import DEFAULT_BLDG_ENERGY
+from mies.celery import app
 from mies.mongoconfig import get_db
 
 
@@ -123,13 +125,22 @@ class ActingBehavior:
 
     def mark_as_executing(self, action, bldg):
         # mark resident as processing
-        action_status = {
-            "startedAt": datetime.utcnow(),
-            "startedBy": self._id,
-            "action": action
-        }
-        add_new_action_status(bldg, action_status)
         self.update_processing_status(True)
 
     def start_action(self, action, bldg):
-        pass
+        task = celery.send_task(action, bldg)
+        action_status = {
+            "startedAt": datetime.utcnow(),
+            "startedBy": self._id,
+            "action": action,
+            "result_id": task.task_id
+        }
+        add_new_action_status(bldg, action_status)
+
+    def get_action_result(self, action_status):
+        result_id = action_status["result_id"]
+        result = app.AsyncResult(result_id)
+        if result.ready():
+            return result.get(timeout=1)
+        else:
+            return None
