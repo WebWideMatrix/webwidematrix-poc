@@ -141,6 +141,8 @@ class ActingBehavior:
         result_id = action_status["result_id"]
         result = app.AsyncResult(result_id)
         if result.ready():
-            return result.get(timeout=1)
-        else:
-            return None
+            try:
+                return result.get(timeout=1)
+            except:
+                pass
+        return None
