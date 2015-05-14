@@ -8,8 +8,17 @@ logging = get_task_logger(__name__)
 @app.task(ignore_result=True)
 def handle_life_event(resident):
     """
-
-    :param resident:
+    Periodic behavior of residents:
+    * Check for a pending action in current bldg
+    * Fetch the result of the action
+    * Apply the result (update a bldg payload or create new ones)
+    * UPdate energy status
+    * Look at near-by bldgs
+    * Choose a one to process or move to
+    * Move to the chosen bldg
+    * Choose an action to apply to the bldg's payload (if any)
+    * Fire up the action
+    :param resident: the acting resident
     :return:
     """
 
