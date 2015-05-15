@@ -18,4 +18,6 @@ def invoke():
     }
     for page in load_residents(criteria):
         for resident in page:
+            logging.info(type(resident))
+            logging.info(resident)
             handle_life_event.s(resident).apply_async()

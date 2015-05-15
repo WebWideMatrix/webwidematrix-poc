@@ -1,6 +1,7 @@
 from celery.utils.log import get_task_logger
 from mies.buildings.model import remove_occupant, add_occupant, load_bldg
 from mies.celery import app
+from mies.residents.model import Resident
 
 logging = get_task_logger(__name__)
 
@@ -21,6 +22,9 @@ def handle_life_event(resident):
     :param resident: the acting resident
     :return:
     """
+
+    if not isinstance(resident, Resident):
+        resident = Resident(resident)
 
     # TODO use Redis to improve data integrity
     logging.info("Resident {id} life event invoked..."
@@ -51,14 +55,15 @@ def handle_life_event(resident):
 
     # update the bldg at the previous location (if existing),
     # that the resident has left the bldg
-    remove_occupant(curr_bldg)
+    if curr_bldg:
+        remove_occupant(curr_bldg)
 
     # if moved into a bldg, update it to indicate that
     # the residents is inside
     if bldg:
         add_occupant(resident._id, bldg["_id"])
 
-        resident.occupy_bldg(resident, bldg)
+        resident.occupy_bldg(bldg)
 
         # if the bldg has payload that requires processing,
         if "payload" in bldg and not bldg["processed"]:
@@ -67,7 +72,7 @@ def handle_life_event(resident):
             action = resident.choose_action(bldg)
 
             # mark the resident & bldg as processing
-            resident.mark_as_executing(action, bldg)
+            resident.mark_as_executing()
 
             # apply the action
             resident.start_action(action, bldg)

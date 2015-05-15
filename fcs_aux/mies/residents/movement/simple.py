@@ -28,7 +28,7 @@ class MovementBehavior:
             {
                 "$set":
                 {
-                    "bldg": bldg["_id"],
+                    "bldg": str(bldg["_id"]),
                     "location": bldg["address"],
                     "velocity": velocity
                 }

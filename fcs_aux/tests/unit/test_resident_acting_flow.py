@@ -52,12 +52,15 @@ def test_start_action():
     resident_id = "3j"
     resident = Resident(dict(_id=resident_id))
     bldg = {
+        "payload": {
+            "da": "nyet"
+        }
     }
     action = "fetch-article"
     with patch("mies.residents.acting.flow.add_new_action_status") as add_status_mock:
         with patch("mies.residents.acting.flow.app.send_task") as send_task_mock:
             resident.start_action(action, bldg)
-            send_task_mock.assert_called_once_with(action, bldg)
+            send_task_mock.assert_called_once_with(action, [bldg["payload"]])
             add_status_mock.assert_called_once_with(bldg, ANY)
             action_status = add_status_mock.call_args[0][1]
             assert "startedAt" in action_status

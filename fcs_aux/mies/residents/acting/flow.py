@@ -7,7 +7,7 @@ from mies.mongoconfig import get_db
 
 def update_action_status(bldg, action_status):
     # TODO have a Bldg class & move the method there
-    actions = bldg["actions"]
+    actions = bldg.get("actions", [])
     actions[-1] = action_status
     db = get_db()
     db.buildings.update({
@@ -21,7 +21,7 @@ def update_action_status(bldg, action_status):
 
 def add_new_action_status(bldg, action_status):
     # TODO have a Bldg class & move the method there
-    actions = bldg["actions"]
+    actions = bldg.get("actions", [])
     actions.append(action_status)
     db = get_db()
     db.buildings.update({
@@ -127,7 +127,7 @@ class ActingBehavior:
         self.update_processing_status(True)
 
     def start_action(self, action, bldg):
-        task = app.send_task(action, bldg)
+        task = app.send_task(action, [bldg["payload"]])
         action_status = {
             "startedAt": datetime.utcnow(),
             "startedBy": self._id,

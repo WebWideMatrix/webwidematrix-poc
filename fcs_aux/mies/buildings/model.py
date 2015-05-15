@@ -156,14 +156,14 @@ def get_nearby_addresses(address):
 
 def load_bldg(**kwargs):
     db = get_db()
-    return db.find(kwargs)
+    return db.buildings.find_one(kwargs)
 
 
 def load_nearby_bldgs(address):
     addresses = get_nearby_addresses(address)
     # query for any bldg whose address is one of these addresses
     db = get_db()
-    return db.find({
+    return db.buildings.find({
         "address": {
             "$in": addresses
         }
@@ -183,10 +183,10 @@ def add_occupant(bldg_id, resident_id):
         })
 
 
-def remove_occupant(bldg_id):
+def remove_occupant(bldg):
     db = get_db()
     db.buildings.update(
-        {"_id": bldg_id},
+        {"_id": bldg["_id"]},
         {
             "$set":
             {

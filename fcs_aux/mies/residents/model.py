@@ -17,8 +17,8 @@ def load_residents(criteria=None, limit=100):
     done = False
     while not done:
         results = db.residents.find(spec, limit=limit, skip=skip)
-        results = [Resident(r) for r in results]
         yield results
+        results = list(results)
         skip += len(results)
         done = len(results) < limit
 
