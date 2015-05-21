@@ -78,4 +78,4 @@ def handle_life_event(resident):
             resident.start_action(action, bldg)
 
     else:
-        resident.occupy_empty_address(resident, destination_addr)
+        resident.occupy_empty_address(destination_addr)

@@ -4,7 +4,7 @@ from mies.celery import app
 logging = get_task_logger(__name__)
 
 
-@app.task(name='fetch_article')
+@app.task(name='fetch-article')
 def fetch_article_action(input_payload):
     logging.info("Fetching article from social post")
     logging.info(input_payload)
