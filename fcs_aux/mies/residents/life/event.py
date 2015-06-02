@@ -6,6 +6,10 @@ from mies.residents.model import Resident
 logging = get_task_logger(__name__)
 
 
+def create_result_bldgs(result_bldgs, placement_hints):
+    pass
+
+
 @app.task(ignore_result=True)
 def handle_life_event(resident):
     """
@@ -35,6 +39,8 @@ def handle_life_event(resident):
     if curr_bldg is not None and resident.processing:
         action_status = resident.get_latest_action(curr_bldg)
         action_result = resident.get_action_result(action_status)
+
+        # check if action is still pending
         if action_status is not None and \
            action_result is None and \
            resident.is_action_pending(action_status):
@@ -45,6 +51,13 @@ def handle_life_event(resident):
                              "Doing nothing for now."
                              .format(addr=resident.bldg))
                 return
+        else:
+            # yay, we have a result
+            result_bldgs, placement_hints = action_result
+            create_result_bldgs(result_bldgs, placement_hints)
+
+
+        # if we got here, it means that no action is still pending
         resident.finish_processing(action_status, curr_bldg)
 
     # read all near-by bldgs
