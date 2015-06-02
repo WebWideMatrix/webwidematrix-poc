@@ -7,7 +7,7 @@ logging = get_task_logger(__name__)
 
 
 def create_result_bldgs(result_bldgs, placement_hints):
-    pass
+	pass
 
 
 @app.task(ignore_result=True)
@@ -53,8 +53,7 @@ def handle_life_event(resident):
                 return
         else:
             # yay, we have a result
-            result_bldgs, placement_hints = action_result
-            create_result_bldgs(result_bldgs, placement_hints)
+          create_result_bldgs(action_result)
 
 
         # if we got here, it means that no action is still pending
