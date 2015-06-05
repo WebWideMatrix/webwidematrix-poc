@@ -1,6 +1,7 @@
 from datetime import datetime
 import random
 from mies.buildings.constants import DEFAULT_BLDG_ENERGY
+from mies.buildings.model import logging
 from mies.celery import app
 from mies.mongoconfig import get_db
 
@@ -17,6 +18,8 @@ def update_action_status(bldg, action_status):
             "actions": actions
         }
     })
+    logging.info("Updated bldg {} action status: {}".format(
+        bldg["address"], action_status))
 
 
 def add_new_action_status(bldg, action_status):
@@ -31,20 +34,43 @@ def add_new_action_status(bldg, action_status):
             "actions": actions
         }
     })
+    logging.info("Added new action status to bldg {}: {}".format(
+        bldg["address"], action_status))
 
 
 def update_bldg_processed_status(bldg, energy_change):
     # TODO have a Bldg class & move the method there
     curr_bldg_energy = bldg["energy"] or DEFAULT_BLDG_ENERGY
+    change = {
+        "processed": (energy_change < 0),
+        "energy": curr_bldg_energy + energy_change
+    }
     db = get_db()
     db.buildings.update({
                             "_id": bldg["_id"]
                         }, {
-                            "$set": {
-                                "processed": (energy_change < 0),
-                                "energy": curr_bldg_energy + energy_change
-                            }
+                            "$set": change
                         })
+    logging.info("Updated bldg {} processed status: {}".format(
+        bldg["address"], change))
+
+
+def update_bldg_with_results(bldg, content_type, payload):
+    # TODO have a Bldg class & move the method there
+    change = {}
+    if content_type and content_type != bldg["contentType"]:
+        change["contentType"] = content_type
+    if payload:
+        bldg["payload"].update(payload)
+        change["payload"] = bldg["payload"]
+
+    db = get_db()
+    db.buildings.update({
+                            "_id": bldg["_id"]
+                        }, {
+                            "$set": change
+                        })
+    logging.info("Updated bldg {} with results".format(bldg["address"]))
 
 
 class ActingBehavior:

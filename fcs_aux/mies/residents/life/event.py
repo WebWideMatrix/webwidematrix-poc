@@ -1,19 +1,36 @@
+from collections import defaultdict
 from celery.utils.log import get_task_logger
-from mies.buildings.model import remove_occupant, add_occupant, load_bldg
+from mies.buildings.model import remove_occupant, add_occupant, load_bldg, create_buildings
 from mies.celery import app
+from mies.residents.acting.flow import update_bldg_with_results
 from mies.residents.model import Resident
 
 logging = get_task_logger(__name__)
 
 
-def create_result_bldgs(results):
-    bldgs_to_create = []
-    for r in results:
+def create_result_bldgs(curr_bldg, action_results):
+    for r in action_results:
+        key = r.get("key")
         content_type = r.get("content-type")
         payload = r.get("payload")
         placement_hints = r.get("placement_hints")
 
-        # TODO create bldgs
+        if placement_hints.get("new_bldg"):
+            flr = curr_bldg["flr"]  # same_flr is the default
+            if placement_hints.get("flr_above"):
+                flr_number = int(curr_bldg["flr"][1:]) + 1
+                flr = "l{}".format(flr_number)
+            # same_location is the default
+            position_hints = {
+                "near_x": curr_bldg["x"],
+                "near_y": curr_bldg["y"],
+            }
+            create_buildings.s(content_type, [key], [payload], flr, position_hints).apply_async()
+
+        else:
+            # just update the current bldg
+            update_bldg_with_results(curr_bldg, content_type, payload)
+
 
 
 @app.task(ignore_result=True)
@@ -59,7 +76,7 @@ def handle_life_event(resident):
                 return
         else:
             # yay, we have results
-            create_result_bldgs(action_result)
+            create_result_bldgs(curr_bldg, action_result)
 
         # if we got here, it means that no action is still pending
         resident.finish_processing(action_status, curr_bldg)
