@@ -9,11 +9,13 @@ def fetch_article_action(input_payload):
     logging.info("Fetching article from social post")
     logging.info(input_payload)
     # TODO implement & remove dummy result
+    url = "http://example.org/articles/some.html"
     result_payloads = [
         {
             "content_type": "article-text",
+            "key": url,
             "payload": {
-                "url": "http://example.org/articles/some.html",
+                "url": url,
                 "text": "This is the article text"
             },
             "placement_hints": {
