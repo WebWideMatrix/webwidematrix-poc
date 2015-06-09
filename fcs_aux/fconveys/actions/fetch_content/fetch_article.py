@@ -9,7 +9,7 @@ logging = get_task_logger(__name__)
 
 
 def download_file(url, chunk_size=1024):
-    f = NamedTemporaryFile(delete=False)
+    f = NamedTemporaryFile(delete=False, suffix=".html")
     local_filename = f.name
     r = requests.get(url, stream=True)
     with open(local_filename, 'wb') as f:
@@ -30,9 +30,9 @@ def fetch_article_action(input_payload):
 
     result_payloads = []
     for link in input_payload["urls"]:
-        url = link.expanded_url
-        display_url = link.display_url
-        shortened_url = link.url
+        url = link.get("expanded_url")
+        display_url = link.get("display_url")
+        shortened_url = link.get("url")
 
         # TODO perform a GET request to fetch the link file
         file_name = download_file(url)
