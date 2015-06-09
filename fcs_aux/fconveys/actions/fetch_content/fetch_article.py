@@ -34,22 +34,18 @@ def fetch_article_action(input_payload):
         display_url = link.get("display_url")
         shortened_url = link.get("url")
 
-        # TODO perform a GET request to fetch the link file
         file_name = download_file(url)
         logging.info("Downloaded article into temp file: {}".format(file_name))
 
-        # TODO parse the file with textract
         text = textract.process(file_name)
         logging.info("Extracted article text ({} characters)".format(len(text)))
         logging.info("T"*100)
         logging.info(text)
         logging.info("T"*100)
 
-        # TODO delete the file
         delete_downloaded_file(file_name)
         logging.info("Deleted temp file: {}".format(file_name))
 
-        # TODO append the parsed article text
         result_payloads.append(
             {
                 "content_type": "article-text",

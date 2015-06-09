@@ -19,4 +19,3 @@ def test_fetch_article():
     assert "payload" in got
     assert "text" in got["payload"]
     assert "Things that use real data." in got["payload"]["text"]
-    print got
