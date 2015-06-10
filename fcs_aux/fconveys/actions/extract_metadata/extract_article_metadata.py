@@ -1,4 +1,6 @@
 import logging
+from schemato import Schemato
+from schemato.distillery import ParselyDistiller, NewsDistiller
 from mies.celery import app
 
 
@@ -6,19 +8,24 @@ from mies.celery import app
 def extract_article_metadata_action(input_payload):
     logging.info("Extracting article metadata")
     logging.info(input_payload)
+    assert "url" in input_payload
     url = input_payload.get("url")
 
     result_payloads = []
 
-    # TODO extract metadata using Schemato
+    article = Schemato(url)
+    metadata = ParselyDistiller(article).distill()
+    if not metadata:
+        metadata = NewsDistiller(article).distill()
+    if not metadata:
+        # nothing found :(
+        return []
 
     result_payloads.append(
         {
             "content_type": "article-with-metadata",
             "key": url,
-            "payload": {
-                "url": url,
-            },
+            "payload": metadata,
             "placement_hints": {
                 "new_bldg": False,
             }
