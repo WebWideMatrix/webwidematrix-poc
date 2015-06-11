@@ -14,9 +14,13 @@ def extract_article_metadata_action(input_payload):
     result_payloads = []
 
     article = Schemato(url)
-    metadata = ParselyDistiller(article).distill()
-    if not metadata:
-        metadata = NewsDistiller(article).distill()
+
+    d1 = ParselyDistiller(article)
+    try:
+        metadata = d1.distill()
+    except AttributeError:
+        d2 = NewsDistiller(article)
+        metadata = d2.distill()
     if not metadata:
         # nothing found :(
         return []
