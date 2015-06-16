@@ -3,7 +3,7 @@ import random
 from mies.buildings.constants import DEFAULT_BLDG_ENERGY
 from mies.buildings.model import logging
 from mies.celery import app
-from mies.mongoconfig import get_db
+from mies.mongo_config import get_db
 
 
 def update_action_status(bldg, action_status):

@@ -1,7 +1,7 @@
 from datetime import datetime
 from pymongo import MongoClient
 import pytest
-from mies.mongoconfig import DEFAULT_MONGO_HOST, DEFAULT_MONGO_PORT
+from mies.mongo_config import DEFAULT_MONGO_HOST, DEFAULT_MONGO_PORT
 
 
 @pytest.fixture(scope="module")

@@ -1,5 +1,5 @@
 import logging
-from mies.mongoconfig import get_db
+from mies.mongo_config import get_db
 
 
 STATUS_ACTIVE = "active"

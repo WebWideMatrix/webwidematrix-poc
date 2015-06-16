@@ -5,7 +5,7 @@ from celery.utils.log import get_task_logger
 from mies.buildings.utils import extract_bldg_coordinates, get_flr
 
 from mies.celery import app
-from mies.mongoconfig import get_db
+from mies.mongo_config import get_db
 from mies.buildings.constants import FLOOR_W, FLOOR_H, PROXIMITY, DEFAULT_BLDG_ENERGY
 
 logging = get_task_logger(__name__)

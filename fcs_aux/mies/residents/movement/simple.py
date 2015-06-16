@@ -1,7 +1,7 @@
 import random
 from mies.buildings.model import load_nearby_bldgs, get_nearby_addresses
 from mies.buildings.utils import extract_bldg_coordinates
-from mies.mongoconfig import get_db
+from mies.mongo_config import get_db
 
 
 class MovementBehavior:

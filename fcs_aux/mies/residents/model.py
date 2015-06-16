@@ -1,4 +1,4 @@
-from mies.mongoconfig import get_db
+from mies.mongo_config import get_db
 from mies.residents.acting.flow import ActingBehavior
 from mies.residents.movement.simple import MovementBehavior
 
