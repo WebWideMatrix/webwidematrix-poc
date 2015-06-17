@@ -12,8 +12,8 @@ def build_key(address):
 def get_smell_sources(page_size=100):
     pattern = SMELL_SOURCES_CACHE_PATTERN + "*"
     cache = get_cache()
-    for smell_sources in cache.scan_iter(match=pattern, count=page_size):
-        yield smell_sources
+    for key in cache.scan_iter(match=pattern):
+        yield int(cache.get(key))
 
 
 def get_smell_source(address):
@@ -25,7 +25,7 @@ def get_smell_source(address):
 def set_smell_source(address, strength, expiry=DEFAULT_SMELL_EXPIRY):
     key = build_key(address)
     cache = get_cache()
-    cache.setex(key, strength, expiry)
+    cache.set(key, strength, ex=expiry)
 
 
 def update_smell_source(address, strength_delta):
