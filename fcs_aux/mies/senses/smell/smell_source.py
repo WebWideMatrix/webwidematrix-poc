@@ -9,9 +9,11 @@ def build_key(address):
     return SMELL_SOURCES_CACHE_PATTERN + address
 
 
-def get_all_smell_sources():
+def get_smell_sources():
+    pattern = SMELL_SOURCES_CACHE_PATTERN + "*"
     cache = get_cache()
-    # TODO scan loop
+    for smell_source in cache.scan_iter(match=pattern):
+        yield smell_source
 
 
 def get_smell_source(address):
