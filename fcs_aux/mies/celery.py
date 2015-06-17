@@ -12,4 +12,4 @@ app = Celery('mies',
                  'fconveys.actions.fetch_content.fetch_article',
              ])
 
-app.config_from_object('mies.celeryconfig')
+app.config_from_object('mies.celery_config')

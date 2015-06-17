@@ -1,6 +1,7 @@
 from collections import namedtuple
+from random import choice
 import pytest
-from mies.buildings.constants import DEFAULT_RESIDENT_ENERGY
+from mies.buildings.constants import DEFAULT_RESIDENT_ENERGY, FLOOR_W, FLOOR_H
 
 
 @pytest.fixture()
@@ -103,3 +104,13 @@ def resident_data():
             "energy": DEFAULT_RESIDENT_ENERGY,
             "status": "active"
     }
+
+@pytest.fixture
+def bldg_addresses_on_same_flr():
+    addresses = []
+    base = "g-b(10,10)-l0-b({x},{y})"
+    for i in xrange(100):
+        x = choice(xrange(FLOOR_W))
+        y = choice(xrange(FLOOR_H))
+        addresses.append(base.format(x=x, y=y))
+    return addresses
