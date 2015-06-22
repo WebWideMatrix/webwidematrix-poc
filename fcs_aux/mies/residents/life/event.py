@@ -1,4 +1,3 @@
-from collections import defaultdict
 from celery.utils.log import get_task_logger
 from mies.buildings.model import remove_occupant, add_occupant, load_bldg, create_buildings
 from mies.celery import app
