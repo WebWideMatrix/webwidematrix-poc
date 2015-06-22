@@ -7,6 +7,7 @@ from mies.buildings.utils import extract_bldg_coordinates, get_flr
 from mies.celery import app
 from mies.mongo_config import get_db
 from mies.buildings.constants import FLOOR_W, FLOOR_H, PROXIMITY, DEFAULT_BLDG_ENERGY
+from mies.senses.smell.smell_source import create_smell_source
 
 logging = get_task_logger(__name__)
 
@@ -119,6 +120,8 @@ def create_buildings(content_type, keys, payloads, flr, position_hints=None):
     def _create_batch_of_buildings():
         # TODO handle errors
         db.buildings.insert(buildings)
+        for bldg in buildings:
+            create_smell_source(bldg["address"], bldg["energy"])
         return len(buildings)
 
     created_addresses = []

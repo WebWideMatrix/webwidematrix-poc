@@ -22,7 +22,7 @@ def get_smell_source(address):
     cache.get(key)
 
 
-def set_smell_source(address, strength, expiry=DEFAULT_SMELL_EXPIRY):
+def create_smell_source(address, strength, expiry=DEFAULT_SMELL_EXPIRY):
     key = build_key(address)
     cache = get_cache()
     cache.set(key, strength, ex=expiry)
