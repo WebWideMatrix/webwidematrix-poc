@@ -1,6 +1,6 @@
 from mies.redis_config import get_cache
 
-DEFAULT_SMELL_EXPIRY = 24 * 60 * 60     # 1 day in seconds
+DEFAULT_SMELL_SOURCE_EXPIRY = 24 * 60 * 60     # 1 day in seconds
 
 SMELL_SOURCES_CACHE_PATTERN = "SMELL_SOURCE_"
 
@@ -22,7 +22,7 @@ def get_smell_source(address):
     cache.get(key)
 
 
-def create_smell_source(address, strength, expiry=DEFAULT_SMELL_EXPIRY):
+def create_smell_source(address, strength, expiry=DEFAULT_SMELL_SOURCE_EXPIRY):
     key = build_key(address)
     cache = get_cache()
     cache.set(key, strength, ex=expiry)
