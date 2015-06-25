@@ -4,6 +4,7 @@ from mies.buildings.constants import DEFAULT_BLDG_ENERGY
 from mies.buildings.model import logging
 from mies.celery import app
 from mies.mongo_config import get_db
+from mies.senses.smell.smell_source import update_smell_source
 
 
 def update_action_status(bldg, action_status):
@@ -51,6 +52,7 @@ def update_bldg_processed_status(bldg, energy_change):
                         }, {
                             "$set": change
                         })
+    update_smell_source(bldg["address"], energy_change)
     logging.info("Updated bldg {} processed status: {}".format(
         bldg["address"], change))
 
