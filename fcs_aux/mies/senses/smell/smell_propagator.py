@@ -43,6 +43,8 @@ def invoke():
                     if delta > 0:
                         cache.hincr(new_smells_key, curr_bldg_address, -delta)
 
+        # TODO propagate also vertically
+
     # update the pointer to the new smells
     def update_smells_pointer(pipe):
         current_smells_key = pipe.get(CURRENT_SMELLS_POINTER_KEY)
