@@ -8,6 +8,8 @@ SMELL_SOURCES_CACHE_PATTERN = "SMELL_SOURCE_"
 def build_key(address):
     return SMELL_SOURCES_CACHE_PATTERN + address
 
+def extract_address_from_key(key):
+    return key[len(SMELL_SOURCES_CACHE_PATTERN):]
 
 def get_smell_sources(page_size=100):
     pattern = SMELL_SOURCES_CACHE_PATTERN + "*"

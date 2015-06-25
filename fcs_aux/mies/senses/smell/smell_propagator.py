@@ -1,7 +1,7 @@
 import time
 from mies.celery import app
 from mies.redis_config import get_cache
-from mies.senses.smell.smell_source import get_smell_sources
+from mies.senses.smell.smell_source import get_smell_sources, extract_address_from_key
 
 DEFAULT_SMELL_EXPIRY = 5 * 60     # 5 minutes in seconds
 
@@ -22,8 +22,15 @@ def invoke():
 
     for source in get_smell_sources():
         # increments the containing bldgs smell
+        strength = cache.get(source)
+        if strength < 1:
+            continue
+
+        address = extract_address_from_key(source)
+        cache.hset(new_smells_key, address, strength)
 
         # draws rectangle around each smell source
+
 
         # per each bldg inside it, increments smell according to distance from source
         pass
