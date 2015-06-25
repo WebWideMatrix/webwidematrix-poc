@@ -116,7 +116,8 @@ def test_construct_bldg():
 
 
 @patch('mies.buildings.model.get_db')
-def test_create_buildings(get_db):
+@patch('mies.buildings.model.create_smell_source')
+def test_create_buildings(create_smell_source, get_db):
     db = MagicMock()
     db.buildings.find_one = MagicMock(return_value=None)
     db.buildings.insert = MagicMock(return_value=None)
@@ -136,6 +137,9 @@ def test_create_buildings(get_db):
     got = create_buildings(content_type, keys, payloads, flr)
     assert len(got) == nbuildings
     assert db.buildings.insert.call_count == 4  # 4 batch inserts
+    create_smell_source.assert_has_calls([
+
+    ])
 
 def test_get_nearby_addresses():
     addr = "g-b(1,2)-l0-b(50,50)"
