@@ -1,6 +1,7 @@
 from datetime import datetime
 import random
-from mies.buildings.constants import DEFAULT_BLDG_ENERGY
+
+from mies.constants import DEFAULT_BLDG_ENERGY
 from mies.buildings.model import logging
 from mies.celery import app
 from mies.mongo_config import get_db

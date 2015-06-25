@@ -1,12 +1,12 @@
 from collections import defaultdict
 from datetime import datetime
 import random
+
 from celery.utils.log import get_task_logger
 from mies.buildings.utils import extract_bldg_coordinates, get_flr
-
 from mies.celery import app
 from mies.mongo_config import get_db
-from mies.buildings.constants import FLOOR_W, FLOOR_H, PROXIMITY, DEFAULT_BLDG_ENERGY
+from mies.constants import FLOOR_W, FLOOR_H, PROXIMITY, DEFAULT_BLDG_ENERGY
 from mies.senses.smell.smell_source import create_smell_source
 
 logging = get_task_logger(__name__)

@@ -1,11 +1,11 @@
 from datetime import datetime
+
 from mock import patch, MagicMock
 import pytest
-
 from mies.buildings.model import build_bldg_address, _get_next_free, get_nearby_addresses
 from mies.buildings.model import is_vacant
 from mies.buildings.model import find_spot
-from mies.buildings.constants import FLOOR_W, FLOOR_H, PROXIMITY
+from mies.constants import FLOOR_W, FLOOR_H, PROXIMITY
 from mies.buildings.model import construct_bldg, create_buildings
 from mies.buildings.utils import extract_bldg_coordinates
 

@@ -1,7 +1,8 @@
 from collections import namedtuple
 from random import choice
+
 import pytest
-from mies.buildings.constants import DEFAULT_RESIDENT_ENERGY, FLOOR_W, FLOOR_H
+from mies.constants import DEFAULT_RESIDENT_ENERGY, FLOOR_W, FLOOR_H
 
 
 @pytest.fixture()
