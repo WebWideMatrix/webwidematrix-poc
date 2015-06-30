@@ -1,5 +1,5 @@
 import time
-from mies.buildings.utils import extract_bldg_coordinates
+from mies.buildings.utils import extract_bldg_coordinates, replace_bldg_coordinates
 from mies.celery import app
 from mies.constants import FLOOR_W, FLOOR_H, SMELL_HORIZONTAL_OUTREACH
 from mies.redis_config import get_cache
