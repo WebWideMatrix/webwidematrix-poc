@@ -1,7 +1,8 @@
+from math import sqrt
 import pytest
 from mies.buildings.utils import (get_flr, get_bldg,
                                   get_containing_bldg_address,
-                                  extract_bldg_coordinates, replace_bldg_coordinates)
+                                  extract_bldg_coordinates, replace_bldg_coordinates, calculate_distance)
 
 
 def test_get_flr():
@@ -41,3 +42,11 @@ def test_extract_bldg_coordinates():
     ])
 def test_replace_bldg_coordinates(addr, x, y, expected_result):
     assert replace_bldg_coordinates(addr, x, y) == expected_result
+
+@pytest.mark.parametrize("addr1, addr2, expected_result",
+    [
+        ("g-b(0,2)", "g-b(10,2)", 10),
+        ("g-b(0,0)", "g-b(10,10)", sqrt(200)),
+    ])
+def test_calculate_distance(addr1, addr2, expected_result):
+    assert calculate_distance(addr1, addr2) == expected_result

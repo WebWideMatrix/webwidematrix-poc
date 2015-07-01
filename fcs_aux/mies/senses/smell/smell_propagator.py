@@ -1,5 +1,5 @@
 import time
-from mies.buildings.utils import extract_bldg_coordinates, replace_bldg_coordinates
+from mies.buildings.utils import extract_bldg_coordinates, replace_bldg_coordinates, calculate_distance
 from mies.celery import app
 from mies.constants import FLOOR_W, FLOOR_H, SMELL_HORIZONTAL_OUTREACH
 from mies.redis_config import get_cache
@@ -38,7 +38,7 @@ def invoke():
             for j in xrange(y - (SMELL_HORIZONTAL_OUTREACH / 2), y + (SMELL_HORIZONTAL_OUTREACH / 2)):
                 if 0 > i > FLOOR_W and 0 > j > FLOOR_H:
                     curr_bldg_address = replace_bldg_coordinates(address, i, j)
-                    distance = calc_distance(curr_bldg_address, address)
+                    distance = calculate_distance(curr_bldg_address, address)
                     delta = strength - distance
                     if delta > 0:
                         cache.hincr(new_smells_key, curr_bldg_address, -delta)

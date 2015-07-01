@@ -1,3 +1,4 @@
+from math import sqrt
 
 
 def get_flr(addr):
@@ -53,3 +54,10 @@ def replace_bldg_coordinates(bldg_addr, x, y):
     if flr:
         parts.append(flr)
     return "-".join(parts)
+
+def calculate_distance(addr1, addr2):
+    x1, y1 = extract_bldg_coordinates(addr1)
+    x2, y2 = extract_bldg_coordinates(addr2)
+    if any([x is None for x in (x1, y1, x2, y2)]):
+        return 0
+    return sqrt((x2 - x1)**2 + (y2 - y1)**2)
