@@ -55,6 +55,18 @@ def replace_bldg_coordinates(bldg_addr, x, y):
         parts.append(flr)
     return "-".join(parts)
 
+
+def get_bldg_containers(bldg_addr, include_flrs=True):
+    containers = []
+    parts = bldg_addr.split("-")
+    while len(parts) > 1:
+        parts.pop()
+        if not include_flrs and parts[-1][0] == "l":
+            parts.pop()
+        containers.append("-".join(parts))
+    return containers
+
+
 def calculate_distance(addr1, addr2):
     x1, y1 = extract_bldg_coordinates(addr1)
     x2, y2 = extract_bldg_coordinates(addr2)

@@ -2,7 +2,8 @@ from math import sqrt
 import pytest
 from mies.buildings.utils import (get_flr, get_bldg,
                                   get_containing_bldg_address,
-                                  extract_bldg_coordinates, replace_bldg_coordinates, calculate_distance)
+                                  extract_bldg_coordinates, replace_bldg_coordinates, calculate_distance,
+                                  get_bldg_containers)
 
 
 def test_get_flr():
@@ -32,6 +33,7 @@ def test_extract_bldg_coordinates():
     got = extract_bldg_coordinates(addr)
     assert got == expected
 
+
 @pytest.mark.parametrize("addr, x, y, expected_result",
     [
         ("g", 12, 17, "g"),
@@ -43,6 +45,7 @@ def test_extract_bldg_coordinates():
 def test_replace_bldg_coordinates(addr, x, y, expected_result):
     assert replace_bldg_coordinates(addr, x, y) == expected_result
 
+
 @pytest.mark.parametrize("addr1, addr2, expected_result",
     [
         ("g-b(0,2)", "g-b(10,2)", 10),
@@ -50,3 +53,24 @@ def test_replace_bldg_coordinates(addr, x, y, expected_result):
     ])
 def test_calculate_distance(addr1, addr2, expected_result):
     assert calculate_distance(addr1, addr2) == expected_result
+
+
+def test_get_bldg_containers():
+    addr = "g-b(1,2)-l2-b(3,4)-l0-b(5,6)"
+    expected_including_flrs = [
+        "g-b(1,2)-l2-b(3,4)-l0",
+        "g-b(1,2)-l2-b(3,4)",
+        "g-b(1,2)-l2",
+        "g-b(1,2)",
+        "g",
+    ]
+    expected_not_including_flrs = [
+        "g-b(1,2)-l2-b(3,4)",
+        "g-b(1,2)",
+        "g",
+    ]
+    got = get_bldg_containers(addr, include_flrs=True)
+    assert got == expected_including_flrs
+
+    got = get_bldg_containers(addr, include_flrs=False)
+    assert got == expected_not_including_flrs

@@ -1,5 +1,6 @@
 import time
-from mies.buildings.utils import extract_bldg_coordinates, replace_bldg_coordinates, calculate_distance
+from mies.buildings.utils import extract_bldg_coordinates, replace_bldg_coordinates, calculate_distance, \
+    get_bldg_containers
 from mies.celery import app
 from mies.constants import FLOOR_W, FLOOR_H, SMELL_HORIZONTAL_OUTREACH
 from mies.redis_config import get_cache
@@ -16,6 +17,12 @@ def build_key(address):
     return SMELL_CACHE_PATTERN + address
 
 
+def add_smell_to_bldg_and_containers(address, cache, new_smells_key, strength):
+    cache.hincrby(new_smells_key, address, strength)
+    for addr in get_bldg_containers(address):
+        cache.hincrby(addr, address, strength)
+
+
 @app.task(ignore_result=True)
 def invoke():
     cache = get_cache()
@@ -30,18 +37,22 @@ def invoke():
             continue
 
         address = extract_address_from_key(source)
-        cache.hset(new_smells_key, address, strength)
+        add_smell_to_bldg_and_containers(address, cache, new_smells_key, strength)
+
+        # now propagate the smell, taking out %10 & then 1 per distance unit
+        strength = int(0.9 * strength)
 
         # draws rectangle around each smell source
         x, y = extract_bldg_coordinates(address)
-        for i in xrange(x - (SMELL_HORIZONTAL_OUTREACH / 2), x + (SMELL_HORIZONTAL_OUTREACH / 2)):
-            for j in xrange(y - (SMELL_HORIZONTAL_OUTREACH / 2), y + (SMELL_HORIZONTAL_OUTREACH / 2)):
+        for i in xrange(x - strength, x + strength):
+            for j in xrange(y - strength, y + strength):
                 if 0 > i > FLOOR_W and 0 > j > FLOOR_H:
                     curr_bldg_address = replace_bldg_coordinates(address, i, j)
                     distance = calculate_distance(curr_bldg_address, address)
                     delta = strength - distance
                     if delta > 0:
-                        cache.hincr(new_smells_key, curr_bldg_address, -delta)
+                        add_smell_to_bldg_and_containers(curr_bldg_address, cache,
+                                                         new_smells_key, delta)
 
         # TODO propagate also vertically
 
