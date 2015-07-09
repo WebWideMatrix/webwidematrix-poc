@@ -81,7 +81,8 @@ def handle_life_event(resident):
         resident.finish_processing(action_status, curr_bldg)
 
     # get all near-by bldgs & smells
-    addresses, bldgs = resident.look_around()
+    # Note: assuming same vision & smelling power
+    bldgs = resident.look_around()
     smells = resident.smell_around()
 
     # choose a bldg to move into

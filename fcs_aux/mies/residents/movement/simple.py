@@ -57,6 +57,5 @@ class MovementBehavior:
 
     def look_around(self):
         assert self.location
-        addresses = get_nearby_addresses(self.location, proximity=VISION_POWER)
         bldgs = load_nearby_bldgs(self.location)
-        return addresses, bldgs
+        return bldgs

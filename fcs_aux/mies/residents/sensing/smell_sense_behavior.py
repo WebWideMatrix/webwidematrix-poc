@@ -9,5 +9,5 @@ class SmellingBehavior:
 
     def smell_around(self):
         assert self.location
-        addresses = get_nearby_addresses(self.location, proximity=SMELLING_POWER)
+        addresses = get_nearby_addresses(self.location)
         return {addr: get_bldg_smell(addr) for addr in addresses}
