@@ -80,11 +80,12 @@ def handle_life_event(resident):
         # if we got here, it means that no action is still pending
         resident.finish_processing(action_status, curr_bldg)
 
-    # read all near-by bldgs
+    # get all near-by bldgs & smells
     addresses, bldgs = resident.look_around()
+    smells = resident.smell_around()
 
     # choose a bldg to move into
-    destination_addr, bldg = resident.choose_bldg(bldgs, addresses)
+    destination_addr, bldg = resident.choose_bldg(bldgs, smells)
 
     # update the bldg at the previous location (if existing),
     # that the resident has left the bldg

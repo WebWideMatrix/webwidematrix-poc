@@ -1,21 +1,25 @@
-import random
+import operator
 from mies.buildings.model import load_nearby_bldgs, get_nearby_addresses
 from mies.buildings.utils import extract_bldg_coordinates
 from mies.mongo_config import get_db
 
 
+VISION_POWER = 20
+
+
 class MovementBehavior:
 
-    def choose_bldg(self, bldgs, addresses):
-        candidates = []
+    def choose_bldg(self, bldgs, smells):
+        candidates = {}
         for bldg in bldgs:
-            if not (bldg["occupied"] or bldg["processed"]):
-                candidates.append(bldg)
-        if candidates:
-            bldg = random.choice(candidates)
-            return bldg["address"], bldg
-        else:
-            return random.choice(addresses), None
+            if not bldg["occupied"]:
+                candidates[bldg["address"]] = bldg
+            else:
+                del smells[bldg["address"]]
+
+        most_smelly = max(smells.iteritems(), key=operator.itemgetter(1))[0]
+        bldg = candidates.get(most_smelly)
+        return most_smelly, bldg
 
     def occupy_bldg(self, bldg):
         curr_location = self.location
@@ -53,6 +57,6 @@ class MovementBehavior:
 
     def look_around(self):
         assert self.location
-        addresses = get_nearby_addresses(self.location)
+        addresses = get_nearby_addresses(self.location, proximity=VISION_POWER)
         bldgs = load_nearby_bldgs(self.location)
         return addresses, bldgs

@@ -2,7 +2,7 @@ import time
 from mies.buildings.utils import extract_bldg_coordinates, replace_bldg_coordinates, calculate_distance, \
     get_bldg_containers
 from mies.celery import app
-from mies.constants import FLOOR_W, FLOOR_H, SMELL_HORIZONTAL_OUTREACH
+from mies.constants import FLOOR_W, FLOOR_H
 from mies.redis_config import get_cache
 from mies.senses.smell.smell_source import get_smell_sources, extract_address_from_key
 
@@ -11,6 +11,11 @@ DEFAULT_SMELL_EXPIRY = 5 * 60     # 5 minutes in seconds
 SMELL_CACHE_PATTERN = "SMELL_SOURCE_"
 
 CURRENT_SMELLS_POINTER_KEY = "CURRENT_SMELLS"
+
+
+def get_bldg_smell(addr):
+    cache = get_cache()
+    return cache.hget(CURRENT_SMELLS_POINTER_KEY, addr)
 
 
 def build_key(address):

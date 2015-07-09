@@ -143,8 +143,7 @@ def create_buildings(content_type, keys, payloads, flr, position_hints=None):
     return created_addresses
 
 
-def get_nearby_addresses(address):
-    proximity = 10
+def get_nearby_addresses(address, proximity=10):
     # generate a list of neighbour addresses
     addresses = []
     flr = get_flr(address)
