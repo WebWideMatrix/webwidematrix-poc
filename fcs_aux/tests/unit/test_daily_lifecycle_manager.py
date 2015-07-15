@@ -40,7 +40,7 @@ def test_create_daily_bldg(create_bldgs, update_pipe):
         call({"_id": user_bldg_id}),
         call({"flr": target_flr, "key": today}),
     ])
-    create_bldgs.assert_called_once_with(content_type='daily-feed',
+    create_bldgs.assert_called_once_with(is_composite=True, content_type='daily-feed',
                                          position_hints={'next_free': True},
                                          keys=[today],
                                          flr=target_flr,
@@ -69,6 +69,7 @@ def test_create_bldg(create_bldgs_task):
     create_bldgs_task.return_value = expected
     got = _create_bldg(target_flr, today, data_pipe)
     create_bldgs_task.assert_called_once_with(
+        is_composite=True,
         position_hints={'next_free': True},
         keys=[today],
         flr=target_flr,

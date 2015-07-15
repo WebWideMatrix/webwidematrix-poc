@@ -23,7 +23,8 @@ def _create_bldg(target_flr, today, data_pipe):
     }
     address = create_buildings(content_type=DAILY_FEED, keys=[today],
                                payloads=[payload], flr=target_flr,
-                               position_hints={"next_free": True})
+                               position_hints={"next_free": True},
+                               is_composite=True)
     if type(address) == list:
         address = address[0]
     return address

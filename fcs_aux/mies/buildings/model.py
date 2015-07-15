@@ -69,7 +69,7 @@ def find_spot(flr, state=None, position_hints=None, db=None):
 
 
 def construct_bldg(flr, content_type, key, payload, position_hints=None,
-                   db=None):
+                   is_composite=False, db=None):
     x = 0
     y = 0
     address = None
@@ -93,6 +93,7 @@ def construct_bldg(flr, content_type, key, payload, position_hints=None,
         createdAt=datetime.utcnow(),
         contentType=content_type,
         key=key,
+        isComposite=is_composite,
         payload=payload,
         processed=False,
         occupied=False,
@@ -102,7 +103,8 @@ def construct_bldg(flr, content_type, key, payload, position_hints=None,
 
 
 @app.task(ignore_results=True)
-def create_buildings(content_type, keys, payloads, flr, position_hints=None):
+def create_buildings(content_type, keys, payloads, flr,
+                     position_hints=None, is_composite=False):
     """
     Creates a batch of buildings.
     :param content_type: the content-type of the buildings
@@ -115,6 +117,8 @@ def create_buildings(content_type, keys, payloads, flr, position_hints=None):
     * near_y: y coordinate, near which the buildings will be created
     * next_free: if True, create the buildings in the next
     free place (sequentially)
+    :param is_composite: whether to mark the bldgs as composite ones
+    (i.e., containing levels & inner bldgs)
     :return: the addresses of the created buildings.
     """
     def _create_batch_of_buildings():
@@ -131,7 +135,7 @@ def create_buildings(content_type, keys, payloads, flr, position_hints=None):
     count = 0
     for i, payload in enumerate(payloads):
         bldg = construct_bldg(flr, content_type, keys[i], payload,
-                              position_hints, db)
+                              position_hints, is_composite, db)
         buildings.append(bldg)
         created_addresses.append(bldg["address"])
         if len(buildings) == batch_size:
