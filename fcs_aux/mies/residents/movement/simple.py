@@ -62,3 +62,7 @@ class MovementBehavior:
         assert self.location
         bldgs = load_nearby_bldgs(self.location)
         return bldgs
+
+    def get_inside(self):
+        # TODO change location to random address within l0
+        pass
