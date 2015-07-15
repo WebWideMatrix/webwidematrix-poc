@@ -1,4 +1,5 @@
 import operator
+import random
 from mies.buildings.model import load_nearby_bldgs, get_nearby_addresses
 from mies.buildings.utils import extract_bldg_coordinates
 from mies.mongo_config import get_db
@@ -15,9 +16,11 @@ class MovementBehavior:
             if not bldg["occupied"]:
                 candidates[bldg["address"]] = bldg
             else:
-                del smells[bldg["address"]]
+                smells.pop(bldg["address"])
 
         most_smelly = max(smells.iteritems(), key=operator.itemgetter(1))[0]
+        if most_smelly < 1:
+            most_smelly = random.choice(smells.keys())
         bldg = candidates.get(most_smelly)
         return most_smelly, bldg
 
