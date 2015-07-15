@@ -3,6 +3,7 @@ from mies.buildings.model import remove_occupant, add_occupant, load_bldg, creat
 from mies.celery import app
 from mies.residents.acting.flow import update_bldg_with_results
 from mies.residents.model import Resident
+from mies.senses.smell.smell_propagator import get_bldg_smell
 
 logging = get_task_logger(__name__)
 
@@ -40,6 +41,8 @@ def handle_life_event(resident):
     * Fetch the result of the action
     * Apply the result (update a bldg payload or create new ones)
     * Update energy status
+    * Check whether it's a composite bldg with smell, & if so get inside
+    * Check whether no smell for too long, & if so get outside
     * Look at near-by bldgs
     * Choose a one to process or move to
     * Move to the chosen bldg
@@ -79,6 +82,11 @@ def handle_life_event(resident):
 
         # if we got here, it means that no action is still pending
         resident.finish_processing(action_status, curr_bldg)
+
+    # if it's a composite bldg with smell, get inside
+    if curr_bldg and curr_bldg["isComposite"] and get_bldg_smell(curr_bldg["address"]):
+        resident.get_inside()
+
 
     # get all near-by bldgs & smells
     # Note: assuming same vision & smelling power
