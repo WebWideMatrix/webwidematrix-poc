@@ -70,6 +70,6 @@ def get_bldg_containers(bldg_addr, include_flrs=True):
 def calculate_distance(addr1, addr2):
     x1, y1 = extract_bldg_coordinates(addr1)
     x2, y2 = extract_bldg_coordinates(addr2)
-    if not all((x1, y1, x2, y2)):
+    if not all([x is not None for x in (x1, y1, x2, y2)]):
         return 0
     return sqrt((x2 - x1)**2 + (y2 - y1)**2)
