@@ -83,18 +83,8 @@ def handle_life_event(resident):
         # if we got here, it means that no action is still pending
         resident.finish_processing(action_status, curr_bldg)
 
-    # if it's a composite bldg with smell, get inside
-    if curr_bldg and curr_bldg["isComposite"] and get_bldg_smell(curr_bldg["address"]):
-        resident.get_inside()
-
-
-    # get all near-by bldgs & smells
-    # Note: assuming same vision & smelling power
-    bldgs = resident.look_around()
-    smells = resident.smell_around()
-
     # choose a bldg to move into
-    destination_addr, bldg = resident.choose_bldg(bldgs, smells)
+    destination_addr, bldg = resident.choose_bldg(curr_bldg)
 
     # update the bldg at the previous location (if existing),
     # that the resident has left the bldg

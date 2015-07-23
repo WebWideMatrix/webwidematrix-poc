@@ -200,3 +200,11 @@ def remove_occupant(bldg):
                 "occupied": False
             }
         })
+
+def has_bldgs(flr):
+    db = get_db()
+    count = db.buildings.count({
+        "flr": flr
+    })
+    return count > 0
+

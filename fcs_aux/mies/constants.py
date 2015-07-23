@@ -16,3 +16,5 @@ SMELL_VERTICAL_OUTREACH = 0
 
 # How much does the strength of smell decreases between each neighboring bldgs
 SMELL_DECREASE_STEP = 1
+
+GIVE_UP_ON_FLR = 20
