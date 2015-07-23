@@ -85,12 +85,15 @@ class MovementBehavior:
         return bldgs
 
     def get_inside(self, curr_bldg):
-        has_smell = True
+        has_smell = False
         flr_level = 0
         while not has_smell:
             flr = curr_bldg["address"] + "-l" + str(flr_level)
-            if has_bldgs(flr):
-                has_smell = get_bldg_smell(flr) > 1
+            if not has_bldgs(flr):
+                break
+            has_smell = get_bldg_smell(flr) > 1
+            if not has_smell:
+                flr_level += 1
 
         if has_smell:
             self.location = flr + "-b(0,0)"
