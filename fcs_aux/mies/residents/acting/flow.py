@@ -79,15 +79,8 @@ def update_bldg_with_results(bldg, content_type, payload):
 class ActingBehavior:
 
     def update_processing_status(self, is_processing, energy_gained=0):
-        db = get_db()
-        db.residents.update({
-                                "_id": self._id
-                            }, {
-                                "$set": {
-                                    "processing": is_processing,
-                                    "energy": self.energy + energy_gained
-                                }
-                            })
+        self.processing = is_processing
+        self.energy = self.energy + energy_gained
 
     def finish_processing(self, action_status, bldg):
         bldg_energy = bldg["energy"] or DEFAULT_BLDG_ENERGY

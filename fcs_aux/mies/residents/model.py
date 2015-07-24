@@ -28,9 +28,24 @@ class Resident(dict, ActingBehavior, MovementBehavior, SmellingBehavior):
     def __init__(self, data, **kwargs):
         super(Resident, self).__init__(**kwargs)
         self.update(data)
+        self["_initial"] = data
+        self["_changes"] = {}
 
     def __getattribute__(self, item):
         try:
             return super(Resident, self).__getattribute__(item)
         except:
             return self[item]
+
+    def __setattr__(self, key, value):
+        self["_changes"][key] = value
+        super(Resident, self).__setattr__(key, value)
+
+    def save(self):
+        db = get_db()
+        db.residents.update(
+            {"_id": self._id},
+            {
+                "$set": self["_changes"]
+            })
+        self["_changes"] = {}

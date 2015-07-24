@@ -111,3 +111,5 @@ def handle_life_event(resident):
 
     else:
         resident.occupy_empty_address(destination_addr)
+
+    resident.save()

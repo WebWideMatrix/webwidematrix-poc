@@ -18,9 +18,9 @@ class MovementBehavior:
 
     def choose_bldg(self, curr_bldg):
 
-        # if haven't smelled anything for a long time, gice up & get outside this flr
-        # TODO update movements_without_any_smell
-        if self.movements_without_any_smell > GIVE_UP_ON_FLR:
+        # if haven't smelled anything for a long time, give up
+        # & get outside this flr
+        if self.moves_without_any_smell > GIVE_UP_ON_FLR:
             self.get_outside(curr_bldg)
 
         # if it's a composite bldg with smell, get inside
@@ -42,42 +42,31 @@ class MovementBehavior:
         most_smelly = max(smells.iteritems(), key=operator.itemgetter(1))[0]
         if most_smelly < 1:
             most_smelly = random.choice(smells.keys())
+        self.track_moves_without_smell(most_smelly < 1)
         bldg = candidates.get(most_smelly)
         return most_smelly, bldg
+
+    def track_moves_without_smell(self, smelled_something):
+        if not smelled_something:
+            self.moves_without_any_smell += 1
+        else:
+            self.moves_without_any_smell = 0
 
     def occupy_bldg(self, bldg):
         curr_location = self.location
         x, y = extract_bldg_coordinates(curr_location)
         new_x, new_y = bldg["x"], bldg["y"]
-        velocity = [new_x - x, new_y - y]
-        db = get_db()
-        db.residents.update(
-            {"_id": self._id},
-            {
-                "$set":
-                {
-                    "bldg": str(bldg["_id"]),
-                    "location": bldg["address"],
-                    "velocity": velocity
-                }
-            })
+        self.bldg = str(bldg["_id"])
+        self.location = bldg["address"]
+        self.velocity = [new_x - x, new_y - y]
 
     def occupy_empty_address(self, addr):
         curr_location = self.location
         x, y = extract_bldg_coordinates(curr_location)
         new_x, new_y = extract_bldg_coordinates(addr)
-        velocity = [new_x - x, new_y - y]
-        db = get_db()
-        db.residents.update(
-            {"_id": self._id},
-            {
-                "$set":
-                {
-                    "bldg": None,
-                    "location": addr,
-                    "velocity": velocity
-                }
-            })
+        self.bldg = None
+        self.location = addr
+        self.velocity = [new_x - x, new_y - y]
 
     def look_around(self):
         assert self.location
