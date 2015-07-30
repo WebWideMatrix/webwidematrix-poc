@@ -16,6 +16,13 @@ def get_flr_level(flr_addr):
 
 
 def get_bldg(addr):
+    """
+    TODO rename coz the name may be misleading
+    return the part of the address representing
+    the current bldg, i.e., removes the flr if existing
+    :param addr:
+    :return:
+    """
     parts = addr.split("-")
     if parts[-1][0] == "l":
         parts.pop()
@@ -63,7 +70,19 @@ def replace_bldg_coordinates(bldg_addr, x, y):
 
 
 def replace_flr_level(bldg_addr, flr_level):
-    pass
+    parts = bldg_addr.split("-")
+    if len(parts) <= 2:
+        # ground level, no coordinates
+        return bldg_addr
+    bldg = ""
+    if parts[-1][0] == "b":
+        bldg = parts.pop()
+    parts.pop()
+    part = "l{flr}".format(flr=flr_level)
+    parts.append(part)
+    if bldg:
+        parts.append(bldg)
+    return "-".join(parts)
 
 
 def get_bldg_containers(bldg_addr, include_flrs=True):

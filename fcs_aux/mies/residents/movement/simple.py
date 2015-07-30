@@ -1,6 +1,6 @@
 import operator
 import random
-from mies.buildings.model import load_nearby_bldgs, get_nearby_addresses, has_bldgs
+from mies.buildings.model import load_nearby_bldgs, get_nearby_addresses, has_bldgs, get_bldg_flrs
 from mies.buildings.utils import extract_bldg_coordinates, get_flr, get_flr_level, replace_flr_level
 from mies.constants import GIVE_UP_ON_FLR, MAX_INTERACTION_RATE
 from mies.mongo_config import get_db
@@ -108,7 +108,7 @@ class MovementBehavior:
         flr = get_flr(curr_bldg["address"])
         flr_level = get_flr_level(flr)
         flrs = get_bldg_flrs(curr_bldg)
-        # following code assumes bldg flrs are consecutive & all populated
+        # following code assumes bldg flrs start from 0, are consecutive & all populated
         if len(flrs) == 1:
             return
         elif flr_level == 0:

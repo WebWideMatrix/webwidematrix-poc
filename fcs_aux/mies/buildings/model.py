@@ -3,7 +3,7 @@ from datetime import datetime
 import random
 
 from celery.utils.log import get_task_logger
-from mies.buildings.utils import extract_bldg_coordinates, get_flr
+from mies.buildings.utils import extract_bldg_coordinates, get_flr, get_bldg
 from mies.celery import app
 from mies.mongo_config import get_db
 from mies.constants import FLOOR_W, FLOOR_H, PROXIMITY, DEFAULT_BLDG_ENERGY
@@ -201,6 +201,7 @@ def remove_occupant(bldg):
             }
         })
 
+
 def has_bldgs(flr):
     db = get_db()
     count = db.buildings.count({
@@ -208,3 +209,17 @@ def has_bldgs(flr):
     })
     return count > 0
 
+
+def get_bldg_flrs(bldg):
+    """
+    return the flr levels of a bldg that have bldgs inside them.
+    assumes that the 1st level has bldgs inside it.
+    :param bldg:
+    :return:
+    """
+    result = []
+    bldg_addr = get_bldg(bldg["address"])
+    flr = 0
+    while has_bldgs("{bldg}-l{flr}".format(bldg=bldg_addr, flr=flr)):
+        result.append(flr)
+    return result
