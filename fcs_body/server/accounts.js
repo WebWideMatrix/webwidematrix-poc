@@ -1,5 +1,7 @@
 Accounts.onCreateUser(function (options, user) {
 
+    var INITIAL_RESIDENTS_PER_USER = 10;
+
     console.log(JSON.stringify(options));
 
     user.createdAt = new Date();
@@ -21,7 +23,11 @@ Accounts.onCreateUser(function (options, user) {
     var wrappedCreateLifecycleManager = Async.wrap(createLifecycleManager);
     var lifecycleManagerId = wrappedCreateLifecycleManager(bldgId, dataPipeId);
     var wrappedCreateRsdt = Async.wrap(createRsdt);
-    var rsdtId = wrappedCreateRsdt(initialResidentName(user.profile), bldg);
+    var residents = [];
+    for (var i = 0; i < INITIAL_RESIDENTS_PER_USER; i++) {
+        var rsdtId = wrappedCreateRsdt(initialResidentName(user.profile), bldg);
+        residents.push(rsdtId);
+    }
 
     user.bldg = {
         _id: bldgId,
@@ -29,7 +35,7 @@ Accounts.onCreateUser(function (options, user) {
     };
     user.dataPipes = [dataPipeId];
     user.lifecycleManagers = [lifecycleManagerId];
-    user.residents = [rsdtId];
+    user.residents = residents;
 
     return user;
 });
