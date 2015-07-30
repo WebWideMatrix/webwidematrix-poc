@@ -9,6 +9,12 @@ def get_flr(addr):
     return addr
 
 
+def get_flr_level(flr_addr):
+    parts = flr_addr.split("-")
+    level_str = parts[-1][1:]
+    return int(level_str)
+
+
 def get_bldg(addr):
     parts = addr.split("-")
     if parts[-1][0] == "l":
@@ -54,6 +60,10 @@ def replace_bldg_coordinates(bldg_addr, x, y):
     if flr:
         parts.append(flr)
     return "-".join(parts)
+
+
+def replace_flr_level(bldg_addr, flr_level):
+    pass
 
 
 def get_bldg_containers(bldg_addr, include_flrs=True):

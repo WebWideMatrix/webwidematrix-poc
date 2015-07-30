@@ -3,7 +3,7 @@ import pytest
 from mies.buildings.utils import (get_flr, get_bldg,
                                   get_containing_bldg_address,
                                   extract_bldg_coordinates, replace_bldg_coordinates, calculate_distance,
-                                  get_bldg_containers)
+                                  get_bldg_containers, replace_flr_level)
 
 
 def test_get_flr():
@@ -44,6 +44,18 @@ def test_extract_bldg_coordinates():
     ])
 def test_replace_bldg_coordinates(addr, x, y, expected_result):
     assert replace_bldg_coordinates(addr, x, y) == expected_result
+
+
+@pytest.mark.parametrize("addr, flr_level, expected_result",
+    [
+        ("g", 11, "g"),
+        ("g-b(1,2)", 11, "g-b(1,2)"),
+        ("g-b(1,2)-l0", 11, "g-b(1,2)-l11"),
+        ("g-b(1,2)-l2-b(3,4)", 11, "g-b(1,2)-l11-b(3,4)"),
+        ("g-b(1,2)-l2-b(3,4)-l0", 11, "g-b(1,2)-l2-b(3,4)-l11"),
+    ])
+def test_replace_flr_level(addr, flr_level, expected_result):
+    assert replace_flr_level(addr, flr_level) == expected_result
 
 
 @pytest.mark.parametrize("addr1, addr2, expected_result",

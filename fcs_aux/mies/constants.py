@@ -18,3 +18,11 @@ SMELL_VERTICAL_OUTREACH = 0
 SMELL_DECREASE_STEP = 1
 
 GIVE_UP_ON_FLR = 20
+
+# how much time (in seconds) to store a log of interactions
+# for the calculation of a resident's interaction rate
+INTERACTION_RATE_PERIOD = 60 * 60
+
+# the maximal number of unique residents encountered
+# in the past hour (sort of), before moving to another flr
+MAX_INTERACTION_RATE = 2

@@ -1,5 +1,6 @@
 from mies.mongo_config import get_db
 from mies.residents.acting.flow import ActingBehavior
+from mies.residents.interactions.simple import InteractionBehavior
 from mies.residents.movement.simple import MovementBehavior
 from mies.residents.sensing.smell_sense_behavior import SmellingBehavior
 
@@ -24,7 +25,7 @@ def load_residents(criteria=None, limit=100):
         done = len(results) < limit
 
 
-class Resident(dict, ActingBehavior, MovementBehavior, SmellingBehavior):
+class Resident(dict, ActingBehavior, MovementBehavior, SmellingBehavior, InteractionBehavior):
     def __init__(self, data, **kwargs):
         super(Resident, self).__init__(**kwargs)
         self.update(data)
