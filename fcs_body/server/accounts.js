@@ -25,7 +25,7 @@ Accounts.onCreateUser(function (options, user) {
     var wrappedCreateRsdt = Async.wrap(createRsdt);
     var residents = [];
     for (var i = 0; i < INITIAL_RESIDENTS_PER_USER; i++) {
-        var rsdtId = wrappedCreateRsdt(initialResidentName(user.profile), bldg);
+        var rsdtId = wrappedCreateRsdt(initialResidentName(user.profile, i), bldg);
         residents.push(rsdtId);
     }
 
@@ -58,6 +58,7 @@ getUserDetailsFromTwitter = function(profile, user) {
     return profile;
 };
 
-initialResidentName = function(profile) {
-    return "1a " + profile.screenName;
+initialResidentName = function(profile, i) {
+    var chars = "abcdefghijklmnopqrstuvwxyz";
+    return (Math.floor((i / chars.length)) + 1) + chars.charAt((i % chars.length)) + ' ' + profile.screenName;
 };
