@@ -4,7 +4,7 @@ Buildings = new Meteor.Collection('buildings');
 // DB involving functions
 //
 
-createBldg = function(flr, key, near, contentType, payload, callback) {
+createBldg = function(flr, key, near, contentType, isComposite, payload, callback) {
     var x = 0,
         y = 0,
         address = buildBldgAddress(flr, x, y),
@@ -41,6 +41,7 @@ createBldg = function(flr, key, near, contentType, payload, callback) {
             y: y,
             createdAt: new Date(),
             contentType: contentType,
+            isComposite: isComposite,
             payload: payload,
             processed: false,
             occupied: false,

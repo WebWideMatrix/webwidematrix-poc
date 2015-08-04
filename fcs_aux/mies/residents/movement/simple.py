@@ -20,7 +20,7 @@ class MovementBehavior:
 
         # if haven't smelled anything for a long time, give up
         # & get outside this flr
-        if self.moves_without_any_smell > GIVE_UP_ON_FLR:
+        if "moves_without_any_smell" in self and self.moves_without_any_smell > GIVE_UP_ON_FLR:
             self.get_outside(curr_bldg)
             self.reset_interactions_log()
         # if encountered many residents in the last hour, switch flr

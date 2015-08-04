@@ -1,3 +1,4 @@
+import logging
 import time
 from mies.buildings.utils import extract_bldg_coordinates, replace_bldg_coordinates, calculate_distance, \
     get_bldg_containers
@@ -15,7 +16,12 @@ CURRENT_SMELLS_POINTER_KEY = "CURRENT_SMELLS"
 
 def get_bldg_smell(addr):
     cache = get_cache()
-    return cache.hget(CURRENT_SMELLS_POINTER_KEY, addr)
+    if cache.exists(CURRENT_SMELLS_POINTER_KEY):
+        smells = cache.get(CURRENT_SMELLS_POINTER_KEY)
+        return cache.hget(smells, addr)
+    else:
+        logging.warning("No smells!!!")
+        return 0
 
 
 def build_key(address):

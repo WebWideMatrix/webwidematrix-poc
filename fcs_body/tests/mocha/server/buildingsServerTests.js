@@ -9,7 +9,7 @@ if (!(typeof MochaWeb === 'undefined')) {
                         "age": 43
                     };
                 var wrappedCreateBldg = Async.wrap(createBldg);
-                var bldgId = wrappedCreateBldg(flr, key, null, USER_CONTENT_TYPE, payload);
+                var bldgId = wrappedCreateBldg(flr, key, null, USER_CONTENT_TYPE, false, payload);
                 return {flr: flr, bldgId: bldgId};
             }
 

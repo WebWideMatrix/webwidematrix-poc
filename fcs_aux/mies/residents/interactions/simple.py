@@ -5,7 +5,7 @@ from mies.redis_config import get_cache
 class InteractionBehavior:
 
     def _build_interactions_log_key(self):
-        key = "{self_id}_interactions".format(self._id)
+        key = "{}_interactions".format(self._id)
         return key
 
     def log_interaction(self, resident_id, address):
