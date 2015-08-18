@@ -3,7 +3,7 @@ from datetime import datetime
 import random
 
 from celery.utils.log import get_task_logger
-from mies.buildings.utils import extract_bldg_coordinates, get_flr, get_bldg
+from mies.buildings.utils import extract_bldg_coordinates, get_flr, get_bldg, get_flr_level
 from mies.celery import app
 from mies.mongo_config import get_db
 from mies.constants import FLOOR_W, FLOOR_H, PROXIMITY, DEFAULT_BLDG_ENERGY
@@ -223,3 +223,19 @@ def get_bldg_flrs(bldg):
     while has_bldgs("{bldg}-l{flr}".format(bldg=bldg_addr, flr=flr)):
         result.append(flr)
     return result
+
+
+def update_bldg_stats(flr_address, stats):
+    container_bldg_address = get_bldg(flr_address)
+    assert container_bldg_address != flr_address
+    flr_level = get_flr_level(flr_address)
+    db = get_db()
+    db.buildings.update({
+            "_id": container_bldg_address
+        },
+        {
+            "$set": {
+                "flr_{level}_stats".format(flr_level): stats
+            }
+        }
+    )
