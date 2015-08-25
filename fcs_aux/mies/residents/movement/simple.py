@@ -1,6 +1,7 @@
 import operator
 import random
 from mies.buildings.model import load_nearby_bldgs, get_nearby_addresses, has_bldgs, get_bldg_flrs
+from mies.buildings.stats import decrement_residents, increment_residents
 from mies.buildings.utils import extract_bldg_coordinates, get_flr, get_flr_level, replace_flr_level
 from mies.constants import GIVE_UP_ON_FLR, MAX_INTERACTION_RATE
 from mies.mongo_config import get_db
@@ -64,7 +65,7 @@ class MovementBehavior:
         x, y = extract_bldg_coordinates(curr_location)
         new_x, new_y = bldg["x"], bldg["y"]
         self.bldg = str(bldg["_id"])
-        self.location = bldg["address"]
+        self.move_to(bldg["address"])
         self.velocity = [new_x - x, new_y - y]
 
     def occupy_empty_address(self, addr):
@@ -72,7 +73,7 @@ class MovementBehavior:
         x, y = extract_bldg_coordinates(curr_location)
         new_x, new_y = extract_bldg_coordinates(addr)
         self.bldg = None
-        self.location = addr
+        self.move_to(addr)
         self.velocity = [new_x - x, new_y - y]
 
     def look_around(self):
@@ -123,7 +124,11 @@ class MovementBehavior:
 
         self.switch_to_flr(curr_bldg, destination_flr)
 
-
     def switch_to_flr(self, curr_bldg, flr_level):
         new_addr = replace_flr_level(curr_bldg["address"], flr_level)
-        self.location = new_addr
+        self.move_to(new_addr)
+
+    def move_to(self, address):
+        decrement_residents(self.location)
+        self.location = address
+        increment_residents(self.location)

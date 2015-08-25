@@ -7,6 +7,7 @@ from mies.buildings.utils import extract_bldg_coordinates, get_flr, get_bldg, ge
 from mies.celery import app
 from mies.mongo_config import get_db
 from mies.constants import FLOOR_W, FLOOR_H, PROXIMITY, DEFAULT_BLDG_ENERGY
+from mies.redis_config import get_cache
 from mies.senses.smell.smell_source import create_smell_source
 
 logging = get_task_logger(__name__)
@@ -226,6 +227,16 @@ def get_bldg_flrs(bldg):
 
 
 def update_bldg_stats(flr_address, stats):
+    # ensure not being called more than once per second
+    # TODO implement as decorator
+    cache = get_cache()
+    invocation_cache_key = "FUNC_CACHE_{}_{}".format("update_bldg_stats", flr_address)
+    if cache.get(invocation_cache_key):
+        return
+    else:
+        cache.set(invocation_cache_key, True)
+        cache.expire(invocation_cache_key, 1)
+
     container_bldg_address = get_bldg(flr_address)
     assert container_bldg_address != flr_address
     flr_level = get_flr_level(flr_address)
