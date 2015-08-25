@@ -1,5 +1,6 @@
 from datetime import datetime
 import random
+from mies.buildings.stats import decrement_bldgs, UNPROCESSED, PROCESSED, increment_bldgs, BEING_PROCESSED
 
 from mies.constants import DEFAULT_BLDG_ENERGY
 from mies.buildings.model import logging
@@ -42,9 +43,12 @@ def add_new_action_status(bldg, action_status):
 
 def update_bldg_processed_status(bldg, energy_change):
     # TODO have a Bldg class & move the method there
+    was_processed = bldg["processed"]
+    is_processed = (energy_change < 0)
+
     curr_bldg_energy = bldg["energy"] or DEFAULT_BLDG_ENERGY
     change = {
-        "processed": (energy_change < 0),
+        "processed": is_processed,
         "energy": curr_bldg_energy + energy_change
     }
     db = get_db()
@@ -54,6 +58,10 @@ def update_bldg_processed_status(bldg, energy_change):
                             "$set": change
                         })
     update_smell_source(bldg["address"], energy_change)
+    if not was_processed and is_processed:
+        decrement_bldgs(bldg["flr"], UNPROCESSED)
+        increment_bldgs(bldg["flr"], PROCESSED)
+        # TODO handle also a case of unprocess
     logging.info("Updated bldg {} processed status: {}".format(
         bldg["address"], change))
 
@@ -88,6 +96,7 @@ class ActingBehavior:
         energy_gained = bldg_energy * success
         self.update_processing_status(False, energy_gained)
         update_bldg_processed_status(bldg, -energy_gained)
+        decrement_bldgs(bldg["flr"], BEING_PROCESSED)
 
     def get_latest_action(self, bldg):
         """
@@ -148,7 +157,7 @@ class ActingBehavior:
         # mark resident as processing
         self.update_processing_status(True)
 
-    def start_action(self, action, bldg):
+    def start_processing(self, action, bldg):
         task = app.send_task(action, [bldg["payload"]])
         action_status = {
             "startedAt": datetime.utcnow(),
@@ -157,6 +166,8 @@ class ActingBehavior:
             "result_id": task.task_id
         }
         add_new_action_status(bldg, action_status)
+        self.mark_as_executing()
+        increment_bldgs(bldg["flr"], BEING_PROCESSED)
 
     def get_action_result(self, action_status):
         result_id = action_status["result_id"]

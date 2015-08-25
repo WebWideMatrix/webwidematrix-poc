@@ -3,6 +3,7 @@ from datetime import datetime
 import random
 
 from celery.utils.log import get_task_logger
+from mies.buildings.stats import increment_bldgs, UNPROCESSED
 from mies.buildings.utils import extract_bldg_coordinates, get_flr, get_bldg, get_flr_level
 from mies.celery import app
 from mies.mongo_config import get_db
@@ -127,6 +128,7 @@ def create_buildings(content_type, keys, payloads, flr,
         db.buildings.insert(buildings)
         for bldg in buildings:
             create_smell_source(bldg["address"], bldg["energy"])
+        increment_bldgs(flr, UNPROCESSED, len(buildings))
         return len(buildings)
 
     created_addresses = []

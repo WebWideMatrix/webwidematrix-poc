@@ -103,11 +103,8 @@ def handle_life_event(resident):
             # choose an action to apply to the payload
             action = resident.choose_action(bldg)
 
-            # mark the resident & bldg as processing
-            resident.mark_as_executing()
-
             # apply the action
-            resident.start_action(action, bldg)
+            resident.start_processing(action, bldg)
 
     else:
         resident.occupy_empty_address(destination_addr)
