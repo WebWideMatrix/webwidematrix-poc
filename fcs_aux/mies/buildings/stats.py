@@ -1,4 +1,5 @@
-from mies.buildings.model import update_bldg_stats
+from mies.buildings.utils import get_bldg, get_flr_level
+from mies.mongo_config import get_db
 from mies.redis_config import get_cache
 
 NUM_RESIDENTS_CACHE_KEY = "residents_in_{address}"
@@ -29,6 +30,34 @@ def get_stats(address):
         "processed_bldgs": cache.get(_build_bldgs_cache_key(address, PROCESSED)),
     }
 
+
+def update_bldg_stats(flr_address, stats):
+    # ensure not being called more than once per second
+    # TODO implement as decorator
+    cache = get_cache()
+    invocation_cache_key = "FUNC_CACHE_{}_{}".format("update_bldg_stats", flr_address)
+    if cache.get(invocation_cache_key):
+        return
+    else:
+        cache.set(invocation_cache_key, True)
+        cache.expire(invocation_cache_key, 1)
+
+    container_bldg_address = get_bldg(flr_address)
+    assert container_bldg_address != flr_address
+    flr_level = get_flr_level(flr_address)
+    db = get_db()
+    db.buildings.update({
+            "_id": container_bldg_address
+        },
+        {
+            "$set": {
+                "flr_{level}_stats".format(level=flr_level): stats
+            }
+        }
+    )
+
+
+# TODO implement in decoupled signal handlers
 
 def increment_residents(flr_address, amount=1):
     cache = get_cache()
