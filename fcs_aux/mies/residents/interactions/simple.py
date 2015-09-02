@@ -17,7 +17,7 @@ class InteractionBehavior:
     def reset_interactions_log(self):
         key = self._build_interactions_log_key()
         cache = get_cache()
-        cache.hdel(key)
+        cache.delete(key)
 
     def get_interactions_rate(self):
         key = self._build_interactions_log_key()

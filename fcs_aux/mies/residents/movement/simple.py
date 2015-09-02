@@ -1,10 +1,9 @@
 import operator
 import random
-from mies.buildings.model import load_nearby_bldgs, get_nearby_addresses, has_bldgs, get_bldg_flrs
+from mies.buildings.model import load_nearby_bldgs, has_bldgs, get_bldg_flrs
 from mies.buildings.stats import decrement_residents, increment_residents
 from mies.buildings.utils import extract_bldg_coordinates, get_flr, get_flr_level, replace_flr_level
 from mies.constants import GIVE_UP_ON_FLR, MAX_INTERACTION_RATE
-from mies.mongo_config import get_db
 from mies.senses.smell.smell_propagator import get_bldg_smell
 
 
@@ -21,12 +20,12 @@ class MovementBehavior:
 
         # if haven't smelled anything for a long time, give up
         # & get outside this flr
-        if "moves_without_any_smell" in self and self.moves_without_any_smell > GIVE_UP_ON_FLR:
-            self.get_outside(curr_bldg)
+        if self.movesWithoutSmell > GIVE_UP_ON_FLR:
+            self.get_outside()
             self.reset_interactions_log()
         # if encountered many residents in the last hour, switch flr
         elif self.get_interactions_rate() > MAX_INTERACTION_RATE:
-            self.randomly_switch_flr(curr_bldg)
+            self.randomly_switch_flr()
             self.reset_interactions_log()
 
 
@@ -56,9 +55,9 @@ class MovementBehavior:
 
     def track_moves_without_smell(self, smelled_something):
         if not smelled_something:
-            self.moves_without_any_smell += 1
+            self.movesWithoutSmell += 1
         else:
-            self.moves_without_any_smell = 0
+            self.movesWithoutSmell = 0
 
     def occupy_bldg(self, bldg):
         curr_location = self.location
@@ -97,18 +96,18 @@ class MovementBehavior:
         else:
             raise NothingFoundException()
 
-    def get_outside(self, curr_bldg):
-        flr = get_flr(curr_bldg["address"])
+    def get_outside(self):
+        flr = get_flr(self.location)
         self.location = flr + "-b(0,0)"
 
-    def randomly_switch_flr(self, curr_bldg):
+    def randomly_switch_flr(self):
         """
         Move up or down one flr randomly.
         :return:
         """
-        flr = get_flr(curr_bldg["address"])
+        flr = get_flr(self.location)
         flr_level = get_flr_level(flr)
-        flrs = get_bldg_flrs(curr_bldg)
+        flrs = get_bldg_flrs(self.location)
         # following code assumes bldg flrs start from 0, are consecutive & all populated
         if len(flrs) == 1:
             return
@@ -122,13 +121,16 @@ class MovementBehavior:
             # we're at the middle, so choose randomly whether to go up or down
             destination_flr = random.choice([flr_level - 1, flr_level + 1])
 
-        self.switch_to_flr(curr_bldg, destination_flr)
+        self.switch_to_flr(destination_flr)
 
-    def switch_to_flr(self, curr_bldg, flr_level):
-        new_addr = replace_flr_level(curr_bldg["address"], flr_level)
+    def switch_to_flr(self, flr_level):
+        new_addr = replace_flr_level(self.location, flr_level)
         self.move_to(new_addr)
 
     def move_to(self, address):
-        decrement_residents(self.location)
+        prev_loc = self.location
         self.location = address
-        increment_residents(self.location)
+        if get_flr(prev_loc) != get_flr(address):
+            # switched flr - update stats
+            decrement_residents(prev_loc)
+            increment_residents(self.location)
