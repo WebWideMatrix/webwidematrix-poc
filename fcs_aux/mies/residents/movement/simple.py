@@ -131,6 +131,7 @@ class MovementBehavior:
         prev_loc = self.location
         self.location = address
         if get_flr(prev_loc) != get_flr(address):
+            self.flr = get_flr(address)
             # switched flr - update stats
             decrement_residents(prev_loc)
             increment_residents(self.location)

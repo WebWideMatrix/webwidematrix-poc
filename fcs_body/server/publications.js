@@ -16,11 +16,19 @@ Meteor.publish("buildings", function (addr) {
         bldgAddr = getBldg(addr);
     }
     // publish both flr & its container bldg
-    query = {
+    var query = {
         $or: [
             {flr: flrAddr},
             {address: bldgAddr}
         ]
+    };
+    return Buildings.find(query);
+});
+
+Meteor.publish("residents", function (addr) {
+    var flrAddr = getFlr(addr);
+    var query = {
+        flr: flrAddr
     };
     return Buildings.find(query);
 });

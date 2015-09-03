@@ -12,6 +12,7 @@ createRsdt = function(name, bldg, callback) {
             acceleration: null,
             velocity: null,
             location: bldg.address,
+            flr: bldg.flr,
             energy: DEFAULT_ENERGY,
             status: "active",
             movesWithoutSmell: 0

@@ -68,6 +68,10 @@ getBldgKey = function(bldgAddr) {
     }
 };
 
+loadBldg = function(bldgAddr) {
+    return Buildings.findOne({address: bldgAddr});
+};
+
 //
 //  Non-DB functions
 //
