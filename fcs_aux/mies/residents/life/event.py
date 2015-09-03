@@ -3,7 +3,6 @@ from mies.buildings.model import remove_occupant, add_occupant, load_bldg, creat
 from mies.celery import app
 from mies.residents.acting.flow import update_bldg_with_results
 from mies.residents.model import Resident
-from mies.senses.smell.smell_propagator import get_bldg_smell
 
 logging = get_task_logger(__name__)
 
@@ -37,16 +36,16 @@ def create_result_bldgs(curr_bldg, action_results):
 def handle_life_event(resident):
     """
     Periodic behavior of residents:
-    * Check for a pending action in current bldg
+    * Check for a pending action in current destination_bldg
     * Fetch the result of the action
-    * Apply the result (update a bldg payload or create new ones)
+    * Apply the result (update a destination_bldg payload or create new ones)
     * Update energy status
-    * Check whether it's a composite bldg with smell, & if so get inside
+    * Check whether it's a composite destination_bldg with smell, & if so get inside
     * Check whether no smell for too long, & if so get outside
     * Look at near-by bldgs
     * Choose a one to process or move to
-    * Move to the chosen bldg
-    * Choose an action to apply to the bldg's payload (if any)
+    * Move to the chosen destination_bldg
+    * Choose an action to apply to the destination_bldg's payload (if any)
     * Fire up the action
     :param resident: the acting resident
     :return:
@@ -56,11 +55,11 @@ def handle_life_event(resident):
         resident = Resident(resident)
 
     # TODO use Redis to improve data integrity
-    logging.info("Resident {id} life event invoked..."
-                 .format(id=resident._id))
+    logging.info("Resident {name} life event invoked..."
+                 .format(name=resident.name))
 
     # Check status of previous action.
-    curr_bldg = load_bldg(_id=resident.bldg)
+    curr_bldg = load_bldg(_id=resident.bldg) if resident.bldg else None
     if curr_bldg is not None and resident.processing:
         action_status = resident.get_latest_action(curr_bldg)
         action_result = resident.get_action_result(action_status)
@@ -84,7 +83,7 @@ def handle_life_event(resident):
         resident.finish_processing(action_status, curr_bldg)
 
     # choose a bldg to move into
-    destination_addr, bldg = resident.choose_bldg(curr_bldg)
+    destination_addr, destination_bldg = resident.choose_bldg(curr_bldg)
 
     # update the bldg at the previous location (if existing),
     # that the resident has left the bldg
@@ -93,18 +92,18 @@ def handle_life_event(resident):
 
     # if moved into a bldg, update it to indicate that
     # the residents is inside
-    if bldg:
-        add_occupant(resident._id, bldg["_id"])
+    if destination_bldg:
+        add_occupant(resident._id, destination_bldg["_id"])
 
-        resident.occupy_bldg(bldg)
+        resident.occupy_bldg(destination_bldg)
 
         # if the bldg has payload that requires processing,
-        if "payload" in bldg and not bldg["processed"]:
+        if "payload" in destination_bldg and not destination_bldg["processed"]:
             # choose an action to apply to the payload
-            action = resident.choose_action(bldg)
+            action = resident.choose_action(destination_bldg)
 
             # apply the action
-            resident.start_processing(action, bldg)
+            resident.start_processing(action, destination_bldg)
 
     else:
         resident.occupy_empty_address(destination_addr)

@@ -47,7 +47,7 @@ class MovementBehavior:
                 self.log_interaction(bldg["occupiedBy"], bldg["address"])
 
         most_smelly = max(smells.iteritems(), key=operator.itemgetter(1))[0]
-        if most_smelly < 1:
+        if smells[most_smelly] is None or smells[most_smelly] < 1:
             most_smelly = random.choice(smells.keys())
         self.track_moves_without_smell(most_smelly < 1)
         bldg = candidates.get(most_smelly)
