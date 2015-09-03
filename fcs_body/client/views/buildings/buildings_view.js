@@ -57,6 +57,18 @@ Template.buildingsGrid.helpers({
             // if there's no bldg, just show the address
             return Session.get("currentAddress");
         }
+    },
+    flrsStats: function() {
+        var bldgAddr = getBldg(Session.get("currentAddress"));
+        var bldg = loadBldg(bldgAddr);
+        var stats = "Stats (" + bldgAddr + "): ";
+        if (bldg.flr_0_stats) {
+            stats += bldg.flr_0_stats.residents + " residents, ";
+            stats += bldg.flr_0_stats.unprocessed_bldgs + " unprocessed_bldgs, ";
+            stats += bldg.flr_0_stats.being_processed_bldgs + " being-processed_bldgs, ";
+            stats += bldg.flr_0_stats.processed_bldgs + " processed_bldgs";
+        }
+        return stats;
     }
 });
 
