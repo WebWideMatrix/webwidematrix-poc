@@ -31,6 +31,7 @@ Router.map(function () {
 
     this.route('/buildings/:addr', function () {
         this.subscribe('buildings', this.params.addr).wait();
+        this.subscribe('residents', this.params.addr);
 
         Session.set("currentAddress", this.params.addr);
 
