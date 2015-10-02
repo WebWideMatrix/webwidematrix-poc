@@ -199,6 +199,33 @@ Template.buildingsGrid.rendered = function () {
                     _zoom(translateVector, MAX_ZOOM_IN);
                 }
             }
+
+
+            // let's show also the residents
+            dom.residents = dom.svg.selectAll('.rsdt')
+                .data(Residents.find(query).fetch())
+                .enter()
+                .append("g")
+                .attr("class", "rsdt");
+
+            // draw the residents frame
+            dom.residents
+                .append('circle')
+                .attr({
+                    cx: function (d) {
+                        var loc = extractBldgCoordinates(d.location);
+                        return xScale(loc[0] * SQUARE_WIDTH + SQUARE_WIDTH / 2)
+                    },
+                    cy: function (d) {
+                        var loc = extractBldgCoordinates(d.location);
+                        return yScale(loc[1] * SQUARE_HEIGHT + SQUARE_HEIGHT / 2)
+                    },
+                    r: xScale(SQUARE_WIDTH),
+                    stroke: 'grey',
+                    "stroke-width": 0.01,
+                    fill: 'blue',
+                    "fill-opacity": 0.2
+                });
         });
     }
 

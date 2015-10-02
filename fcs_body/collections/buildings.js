@@ -111,6 +111,7 @@ getContainingBldgAddress = function(addr) {
 };
 
 extractBldgCoordinates = function(bldgAddr) {
+    // FIXME: rename to: extractCoordinatesFromLocation
     var parts = bldgAddr.split("-");
     if (parts.length <= 1) {
         // ground level, no coordinated

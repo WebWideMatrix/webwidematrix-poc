@@ -30,5 +30,5 @@ Meteor.publish("residents", function (addr) {
     var query = {
         flr: flrAddr
     };
-    return Buildings.find(query);
+    return Residents.find(query);
 });
