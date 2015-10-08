@@ -29,26 +29,29 @@ def build_key(address):
 
 
 def add_smell_to_bldg_and_containers(address, cache, new_smells_key, strength):
+    count = 0
     cache.hincrby(new_smells_key, address, strength)
     for addr in get_bldg_containers(address):
         cache.hincrby(addr, address, strength)
+        count += 1
+    return count
 
 
 @app.task(ignore_result=True)
 def invoke():
+    logging.info("Propagating smells...")
+    count = 0
     cache = get_cache()
 
     # create a new hset for the current smells
     new_smells_key = "current_smells_{}".format(time.time())
 
-    for source in get_smell_sources():
+    for source, strength in get_smell_sources():
         # increments the containing bldgs smell
-        strength = cache.get(source)
         if strength < 1:
             continue
-
         address = extract_address_from_key(source)
-        add_smell_to_bldg_and_containers(address, cache, new_smells_key, strength)
+        count += add_smell_to_bldg_and_containers(address, cache, new_smells_key, strength)
 
         # now propagate the smell, taking out %10 & then 1 per distance unit
         strength = int(0.9 * strength)
@@ -62,10 +65,15 @@ def invoke():
                     distance = calculate_distance(curr_bldg_address, address)
                     delta = strength - distance
                     if delta > 0:
-                        add_smell_to_bldg_and_containers(curr_bldg_address, cache,
-                                                         new_smells_key, delta)
+                        count += add_smell_to_bldg_and_containers(curr_bldg_address, cache,
+                                                                  new_smells_key, delta)
+
+
 
         # TODO propagate also vertically
+
+    logging.info("Updated {} bldgs with smell".format(count))
+    logging.info("Number of smell items: {}".format(cache.hlen(new_smells_key)))
 
     # update the pointer to the new smells
     def update_smells_pointer(pipe):
