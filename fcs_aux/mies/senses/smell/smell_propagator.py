@@ -60,9 +60,9 @@ def invoke():
         x, y = extract_bldg_coordinates(address)
         for i in xrange(x - strength, x + strength):
             for j in xrange(y - strength, y + strength):
-                if 0 > i > FLOOR_W and 0 > j > FLOOR_H:
+                if 0 < i < FLOOR_W and 0 < j < FLOOR_H:
                     curr_bldg_address = replace_bldg_coordinates(address, i, j)
-                    distance = calculate_distance(curr_bldg_address, address)
+                    distance = int(calculate_distance(curr_bldg_address, address))
                     delta = strength - distance
                     if delta > 0:
                         count += add_smell_to_bldg_and_containers(curr_bldg_address, cache,

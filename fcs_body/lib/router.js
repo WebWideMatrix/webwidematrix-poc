@@ -33,6 +33,14 @@ Router.map(function () {
         this.subscribe('buildings', this.params.addr).wait();
         this.subscribe('residents', this.params.addr).wait();
 
+        Meteor.call('getSmells', this.params.addr, function(error, result) {
+            if (error)
+                console.log("Couldn't get smells: " + error);
+            else {
+                Session.set("currentSmells", result);
+            }
+        });
+
         Session.set("currentAddress", this.params.addr);
 
         if (this.ready()) {
