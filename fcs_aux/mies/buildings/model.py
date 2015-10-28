@@ -134,6 +134,7 @@ def create_buildings(content_type, keys, payloads, flr,
         # TODO handle errors
         db.buildings.insert(buildings)
         if write_to_cache:
+            # by default, we also want to cache newly created bldgs
             cache = get_cache()
             for bldg in buildings:
                 cache.set(bldg["address"], bldg, ex=cache_ttl)

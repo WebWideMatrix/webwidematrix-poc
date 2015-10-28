@@ -37,6 +37,15 @@ def _update_data_pipe(address, data_pipe):
     })
 
 
+def _build_user_current_bldg_cache_key(user_profile_name):
+    """
+    returns a cache key for mapping a user's profile name to his current
+    bldg address, which is also the cache key of the current bldg.
+    """
+    return "USER_CURRENT_ADDRESS::{user_profile_name}"\
+        .format(user_profile_name=user_profile_name)
+
+
 def create_daily_bldg(db, today, manager):
     # FIXME: support more than one data-pipe
     data_pipe = db.data_pipes.find_one({"_id": manager["dataPipe"]})
@@ -55,10 +64,15 @@ def create_daily_bldg(db, today, manager):
                      "inside {address}"
                      .format(today=today, address=user_bldg_address))
         address = _create_bldg(target_flr, today, data_pipe)
-        cache = get_cache()
-        # TODO write findable cache key mapping user to today's bldg
-        #cache.set()
         _update_data_pipe(address, data_pipe)
+        # in order to look up a user's current bldg in the cache,
+        # add a cache key storing the current bldg for each user
+        user_profile_name = user_bldg["key"]
+        cache = get_cache()
+        cache.set(_build_user_current_bldg_cache_key(user_profile_name),
+                  address)
+        # no need to delete yesterday's daily bldg, because it will expire anyway
+
 
 
 @app.task(ignore_result=True)
