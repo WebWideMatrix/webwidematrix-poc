@@ -8,9 +8,12 @@ from mies.buildings.utils import extract_bldg_coordinates, get_flr, get_bldg, ge
 from mies.celery import app
 from mies.mongo_config import get_db
 from mies.constants import FLOOR_W, FLOOR_H, PROXIMITY, DEFAULT_BLDG_ENERGY
+from mies.redis_config import get_cache
 from mies.senses.smell.smell_source import create_smell_source
 
 logging = get_task_logger(__name__)
+
+ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
 
 class NoSpotLeft(Exception):
@@ -105,7 +108,8 @@ def construct_bldg(flr, content_type, key, payload, position_hints=None,
 
 @app.task(ignore_results=True)
 def create_buildings(content_type, keys, payloads, flr,
-                     position_hints=None, is_composite=False):
+                     position_hints=None, is_composite=False,
+                     write_to_cache=True, cache_ttl=ONE_DAY_IN_SECONDS):
     """
     Creates a batch of buildings.
     :param content_type: the content-type of the buildings
@@ -113,18 +117,26 @@ def create_buildings(content_type, keys, payloads, flr,
     :param payloads: the list of payloads for the buildings
     :param flr: the target floor in which to create the buildings
     :param position_hints: dict of hints where to position
-    the new buildings, such as:
-    * near_x: x coordinate, near which the buildings will be created
-    * near_y: y coordinate, near which the buildings will be created
-    * next_free: if True, create the buildings in the next
-    free place (sequentially)
+      the new buildings, such as:
+      * near_x: x coordinate, near which the buildings will be created
+      * near_y: y coordinate, near which the buildings will be created
+      * next_free: if True, create the buildings in the next
+      free place (sequentially)
     :param is_composite: whether to mark the bldgs as composite ones
-    (i.e., containing levels & inner bldgs)
+      (i.e., containing levels & inner bldgs)
+    :param write_to_cache: whether to store the bldgs also in cache,
+      which by default is True.
+    :param cache_ttl: how much time should the bldgs stay in cache, which
+      by default is 1 day
     :return: the addresses of the created buildings.
     """
     def _create_batch_of_buildings():
         # TODO handle errors
         db.buildings.insert(buildings)
+        if write_to_cache:
+            cache = get_cache()
+            for bldg in buildings:
+                cache.set(bldg["address"], bldg, ex=cache_ttl)
         for bldg in buildings:
             create_smell_source(bldg["address"], bldg["energy"])
         increment_bldgs(flr, UNPROCESSED, len(buildings))

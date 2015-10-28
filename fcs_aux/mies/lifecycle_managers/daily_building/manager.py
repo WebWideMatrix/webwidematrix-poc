@@ -6,6 +6,7 @@ from mies.lifecycle_managers.daily_building import \
     DAILY_FEED_DISPATCHER_LIFEYCLE_MANAGER
 from mies.mongo_config import get_db
 from mies.buildings.model import create_buildings
+from mies.redis_config import get_cache
 
 logging = get_task_logger(__name__)
 
@@ -37,6 +38,7 @@ def _update_data_pipe(address, data_pipe):
 
 
 def create_daily_bldg(db, today, manager):
+    # FIXME: support more than one data-pipe
     data_pipe = db.data_pipes.find_one({"_id": manager["dataPipe"]})
     if data_pipe is None or data_pipe.get("status") != STATUS_ACTIVE:
         # no need to create daily bldg if the data-pipe isn't active
@@ -53,6 +55,9 @@ def create_daily_bldg(db, today, manager):
                      "inside {address}"
                      .format(today=today, address=user_bldg_address))
         address = _create_bldg(target_flr, today, data_pipe)
+        cache = get_cache()
+        # TODO write findable cache key mapping user to today's bldg
+        #cache.set()
         _update_data_pipe(address, data_pipe)
 
 
