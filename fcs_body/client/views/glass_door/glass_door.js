@@ -28,8 +28,18 @@ var tryOpenDay = function(n) {
     }
 };
 
+var tryOpenToday = function() {
+    // assuming the user is logged in
+    var profileName = Meteor.user().profile.screenName;
+    var key = buildUserCurrentBldgCacheKey(profileName);
+    var addr = Redis.get(key);
+
+    redirectTo(addr, "/current/");
+};
+
 Template.glassDoor.events({
     "click .enter-button": function() {
-        tryOpenDay(0);
+//        tryOpenDay(0);
+        tryOpenToday();
     }
 });

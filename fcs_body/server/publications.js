@@ -1,4 +1,6 @@
 
+// MONGO
+
 Meteor.publish("userData", function () {
     return Meteor.users.find({_id: this.userId},
         {fields: {'bldg': 1, 'profile': 1}});
@@ -25,10 +27,17 @@ Meteor.publish("buildings", function (addr) {
     return Buildings.find(query);
 });
 
-Meteor.publish("residents", function (addr) {
-    var flrAddr = getFlr(addr);
-    var query = {
-        flr: flrAddr
-    };
-    return Residents.find(query);
+
+// REDIS
+
+Meteor.publish('current', function (addr) {
+  if (!addr) return [];
+  return Redis.matching(addr + '*');
+});
+
+Meteor.publish('userCurrentBldg', function () {
+  var user = Meteor.users.findOne({_id: this.userId});
+  if (!user) return [];
+  var key = buildUserCurrentBldgCacheKey(user.profile.screenName);
+  return Redis.matching(key);
 });

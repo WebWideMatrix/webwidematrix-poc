@@ -65,12 +65,16 @@ def create_daily_bldg(db, today, manager):
                      .format(today=today, address=user_bldg_address))
         address = _create_bldg(target_flr, today, data_pipe)
         _update_data_pipe(address, data_pipe)
-        # in order to look up a user's current bldg in the cache,
-        # add a cache key storing the current bldg for each user
-        user_profile_name = user_bldg["key"]
-        cache = get_cache()
-        cache.set(_build_user_current_bldg_cache_key(user_profile_name),
-                  address)
+    else:
+        address = existing_bldg["address"]
+
+    # in order to look up a user's current bldg in the cache,
+    # add a cache key storing the current bldg for each user
+    cache = get_cache()
+    user_profile_name = user_bldg["key"]
+    existing_bldg_in_cache = cache.get(_build_user_current_bldg_cache_key(user_profile_name))
+    if existing_bldg_in_cache is None or existing_bldg_in_cache != address:
+        cache.set(_build_user_current_bldg_cache_key(user_profile_name), address)
         # no need to delete yesterday's daily bldg, because it will expire anyway
 
 

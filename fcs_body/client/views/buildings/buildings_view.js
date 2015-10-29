@@ -8,8 +8,11 @@ openExternalURL = function(externalUrl) {
     }
 };
 
-redirectTo = function(newAddress) {
-    window.open("/buildings/" + newAddress, "_top");
+redirectTo = function(newAddress, prefix) {
+    if (!prefix) {
+        prefix = "/buildings/";
+    }
+    window.open(prefix + newAddress, "_top");
 };
 
 bldgRenderFunc = {
@@ -124,16 +127,39 @@ Template.buildingsGrid.rendered = function () {
     var xScale = d3.scale.linear().domain([0, FLOOR_W * SQUARE_WIDTH]).range([0, WIDTH]);
     var yScale = d3.scale.linear().domain([0, FLOOR_H * SQUARE_HEIGHT]).range([0, HEIGHT]);
 
-    if (!self.handle) {
-        self.handle = Meteor.autorun(function () {
+    var getBuildings = function() {
+        var inAFloor = Session.get("currentBldg") != Session.get("currentAddress");
+        if (Session.get("viewingCurrentBuildings")) {
+            var pattern = Session.get("currentAddress");
+            if (inAFloor) {
+                // if we're in a flr, don't render the containing bldg
+                pattern = pattern + "-";
+            }
+            var cursor = Redis.matching(pattern);
+//            var results = [];
+//            cursor.forEach(function(d) {
+//                results.push(d);
+//            });
+//            console.log(results);
+//            return results;
+            console.log(cursor);
+            return cursor;
+        }
+        else {
             var query = {};
-            if (Session.get("currentBldg") != Session.get("currentAddress")) {
+            if (inAFloor) {
                 // if we're in a flr, don't render the containing bldg
                 query = {flr: Session.get("currentAddress")};
             }
+            return Buildings.find(query).fetch();
+        }
+    };
+
+    if (!self.handle) {
+        self.handle = Meteor.autorun(function () {
             // add g elements for all bldgs
             dom.bldgs = dom.svg.selectAll('.bldg')
-                .data(Buildings.find(query).fetch())
+                .data(getBuildings())
                 .enter()
                 .append("g")
                 .attr("class", "bldg")
@@ -144,6 +170,8 @@ Template.buildingsGrid.rendered = function () {
                 .append('rect')
                 .attr({
                     x: function (d) {
+                        console.log("XX");
+                        console.log(d);
                         return xScale(d.x * SQUARE_WIDTH)
                     },
                     y: function (d) {
@@ -201,31 +229,31 @@ Template.buildingsGrid.rendered = function () {
             }
 
 
-            // let's show also the residents
-            dom.residents = dom.svg.selectAll('.rsdt')
-                .data(Residents.find(query).fetch())
-                .enter()
-                .append("g")
-                .attr("class", "rsdt");
-
-            // draw the residents frame
-            dom.residents
-                .append('circle')
-                .attr({
-                    cx: function (d) {
-                        var loc = extractBldgCoordinates(d.location);
-                        return xScale(loc[0] * SQUARE_WIDTH + SQUARE_WIDTH / 2)
-                    },
-                    cy: function (d) {
-                        var loc = extractBldgCoordinates(d.location);
-                        return yScale(loc[1] * SQUARE_HEIGHT + SQUARE_HEIGHT / 2)
-                    },
-                    r: xScale(SQUARE_WIDTH),
-                    stroke: 'grey',
-                    "stroke-width": 0.01,
-                    fill: 'blue',
-                    "fill-opacity": 0.2
-                });
+//            // let's show also the residents
+//            dom.residents = dom.svg.selectAll('.rsdt')
+//                .data(Residents.find(query).fetch())
+//                .enter()
+//                .append("g")
+//                .attr("class", "rsdt");
+//
+//            // draw the residents frame
+//            dom.residents
+//                .append('circle')
+//                .attr({
+//                    cx: function (d) {
+//                        var loc = extractBldgCoordinates(d.location);
+//                        return xScale(loc[0] * SQUARE_WIDTH + SQUARE_WIDTH / 2)
+//                    },
+//                    cy: function (d) {
+//                        var loc = extractBldgCoordinates(d.location);
+//                        return yScale(loc[1] * SQUARE_HEIGHT + SQUARE_HEIGHT / 2)
+//                    },
+//                    r: xScale(SQUARE_WIDTH),
+//                    stroke: 'grey',
+//                    "stroke-width": 0.01,
+//                    fill: 'blue',
+//                    "fill-opacity": 0.2
+//                });
         });
     }
 

@@ -21,6 +21,7 @@ Router.map(function () {
 
     this.route('/', function () {
         this.subscribe('userData').wait();
+        this.subscribe('userCurrentBldg').wait();
 
         if (this.ready()) {
             this.render('glassDoor');
@@ -31,16 +32,22 @@ Router.map(function () {
 
     this.route('/buildings/:addr', function () {
         this.subscribe('buildings', this.params.addr).wait();
-        this.subscribe('residents', this.params.addr).wait();
 
-        Meteor.call('getSmells', this.params.addr, function(error, result) {
-            if (error)
-                console.log("Couldn't get smells: " + error);
-            else {
-                Session.set("currentSmells", result);
-            }
-        });
+        Session.set("viewingCurrentBuildings", false);
+        Session.set("currentAddress", this.params.addr);
 
+        if (this.ready()) {
+            this.render('buildingsView');
+        } else {
+            this.render('Loading');
+        }
+    });
+
+    this.route('/current/:addr', function() {
+        console.log("XX Subscribing to: " + this.params.addr);
+        this.subscribe('current', this.params.addr).wait();
+
+        Session.set("viewingCurrentBuildings", true);
         Session.set("currentAddress", this.params.addr);
 
         if (this.ready()) {
