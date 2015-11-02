@@ -32,7 +32,7 @@ def add_smell_to_bldg_and_containers(address, cache, new_smells_key, strength):
     count = 0
     cache.hincrby(new_smells_key, address, strength)
     for addr in get_bldg_containers(address):
-        cache.hincrby(addr, address, strength)
+        cache.hincrby(new_smells_key, addr, strength)
         count += 1
     return count
 
