@@ -32,6 +32,7 @@ Meteor.publish("buildings", function (addr) {
 
 Meteor.publish('current', function (addr) {
   if (!addr) return [];
+  //  FIXME: validate not asking for too much - always publish just 1 flr
   return Redis.matching(addr + '*');
 });
 

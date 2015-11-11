@@ -44,7 +44,6 @@ Router.map(function () {
     });
 
     this.route('/current/:addr', function() {
-        console.log("XX Subscribing to: " + this.params.addr);
         this.subscribe('current', this.params.addr).wait();
 
         Session.set("viewingCurrentBuildings", true);

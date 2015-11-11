@@ -135,15 +135,7 @@ Template.buildingsGrid.rendered = function () {
                 // if we're in a flr, don't render the containing bldg
                 pattern = pattern + "-";
             }
-            var cursor = Redis.matching(pattern);
-//            var results = [];
-//            cursor.forEach(function(d) {
-//                results.push(d);
-//            });
-//            console.log(results);
-//            return results;
-            console.log(cursor);
-            return cursor;
+            return Redis.matching(pattern).fetch();
         }
         else {
             var query = {};
