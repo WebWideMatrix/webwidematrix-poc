@@ -18,6 +18,9 @@ class MovementBehavior:
 
     def choose_bldg(self, curr_bldg):
 
+        # get the current bldg for the user
+
+
         # if haven't smelled anything for a long time, give up
         # & get outside this flr
         if self.movesWithoutSmell > GIVE_UP_ON_FLR:

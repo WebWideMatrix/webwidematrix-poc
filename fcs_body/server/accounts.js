@@ -25,7 +25,7 @@ Accounts.onCreateUser(function (options, user) {
     var wrappedCreateRsdt = Async.wrap(createRsdt);
     var residents = [];
     for (var i = 0; i < INITIAL_RESIDENTS_PER_USER; i++) {
-        var rsdtId = wrappedCreateRsdt(initialResidentName(user.profile, i), bldg);
+        var rsdtId = wrappedCreateRsdt(initialResidentName(user.profile, i), bldg, user._id);
         residents.push(rsdtId);
     }
 

@@ -37,13 +37,13 @@ def _update_data_pipe(address, data_pipe):
     })
 
 
-def _build_user_current_bldg_cache_key(user_profile_name):
+def _build_user_current_bldg_cache_key(user_id):
     """
-    returns a cache key for mapping a user's profile name to his current
+    returns a cache key for mapping a user's id to his current
     bldg address, which is also the cache key of the current bldg.
     """
-    return "USER_CURRENT_ADDRESS::{user_profile_name}"\
-        .format(user_profile_name=user_profile_name)
+    return "USER_CURRENT_ADDRESS::{user_id}"\
+        .format(user_id=user_id)
 
 
 def create_daily_bldg(db, today, manager):
