@@ -47,6 +47,7 @@ def _build_user_current_bldg_cache_key(user_id):
 
 
 def create_daily_bldg(db, today, manager):
+    user_id = manager["userId"]
     # FIXME: support more than one data-pipe
     data_pipe = db.data_pipes.find_one({"_id": manager["dataPipe"]})
     if data_pipe is None or data_pipe.get("status") != STATUS_ACTIVE:
@@ -71,10 +72,9 @@ def create_daily_bldg(db, today, manager):
     # in order to look up a user's current bldg in the cache,
     # add a cache key storing the current bldg for each user
     cache = get_cache()
-    user_profile_name = user_bldg["key"]
-    existing_bldg_in_cache = cache.get(_build_user_current_bldg_cache_key(user_profile_name))
+    existing_bldg_in_cache = cache.get(_build_user_current_bldg_cache_key(user_id))
     if existing_bldg_in_cache is None or existing_bldg_in_cache != address:
-        cache.set(_build_user_current_bldg_cache_key(user_profile_name), address)
+        cache.set(_build_user_current_bldg_cache_key(user_id), address)
         # no need to delete yesterday's daily bldg, because it will expire anyway
 
 

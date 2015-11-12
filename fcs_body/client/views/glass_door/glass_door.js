@@ -7,8 +7,8 @@ Template.glassDoor.helpers({
 
 var tryOpenToday = function() {
     // assuming the user is logged in
-    var profileName = Meteor.user().profile.screenName;
-    var key = buildUserCurrentBldgCacheKey(profileName);
+    var userId = Meteor.userId();
+    var key = buildUserCurrentBldgCacheKey(userId);
     var addr = Redis.get(key);
 
 //    redirectTo(addr + "-l0", "/current/");    unfortunately, redis-livedata has issues,

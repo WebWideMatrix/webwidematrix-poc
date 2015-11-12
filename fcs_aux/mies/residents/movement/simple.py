@@ -5,7 +5,8 @@ from mies.buildings.stats import decrement_residents, increment_residents
 from mies.buildings.utils import extract_bldg_coordinates, get_flr, get_flr_level, replace_flr_level
 from mies.constants import GIVE_UP_ON_FLR, MAX_INTERACTION_RATE
 from mies.senses.smell.smell_propagator import get_bldg_smell
-
+from fcs_aux.mies.lifecycle_managers.daily_building.manager import _build_user_current_bldg_cache_key
+from fcs_aux.mies.redis_config import get_cache
 
 VISION_POWER = 20
 
@@ -19,7 +20,13 @@ class MovementBehavior:
     def choose_bldg(self, curr_bldg):
 
         # get the current bldg for the user
-
+        user_id = self.userId
+        curr_user_bldg_key = _build_user_current_bldg_cache_key(user_id)
+        cache = get_cache()
+        curr_user_bldg_address = cache.get(curr_user_bldg_key)
+        if not curr_bldg.startswith(curr_user_bldg_address):
+            # this means we're in some old bldg, move to the current one
+            self.move_to(curr_user_bldg_address + "-l0")
 
         # if haven't smelled anything for a long time, give up
         # & get outside this flr

@@ -37,8 +37,7 @@ Meteor.publish('current', function (addr) {
 });
 
 Meteor.publish('userCurrentBldg', function () {
-  var user = Meteor.users.findOne({_id: this.userId});
-  if (!user) return [];
-  var key = buildUserCurrentBldgCacheKey(user.profile.screenName);
+  if (!this.userId) return [];
+  var key = buildUserCurrentBldgCacheKey(this.userId);
   return Redis.matching(key);
 });

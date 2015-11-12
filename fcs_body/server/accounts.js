@@ -4,9 +4,14 @@ Accounts.onCreateUser(function (options, user) {
 
     console.log(JSON.stringify(options));
 
+    var userId = user._id,
+        username = user.profile.screenName;
+
     user.createdAt = new Date();
 
     user.profile = getUserDetails(options, user);
+
+    console.log("Handling new user: " + userId + " " + username);
 
     var tokens = {
         accessToken: user.services.twitter.accessToken,
@@ -14,18 +19,18 @@ Accounts.onCreateUser(function (options, user) {
     };
 
     var wrappedCreateBldg = Async.wrap(createBldg);
-    var bldgId = wrappedCreateBldg(INITIAL_FLOOR, user.profile.screenName, null,
+    var bldgId = wrappedCreateBldg(INITIAL_FLOOR, username, null,
         USER_CONTENT_TYPE, true, user.profile);
     var bldg = Buildings.findOne({_id: bldgId});
 
     var wrappedCreateDataPipe = Async.wrap(createDataPipe);
-    var dataPipeId = wrappedCreateDataPipe(tokens);
+    var dataPipeId = wrappedCreateDataPipe(userId, tokens);
     var wrappedCreateLifecycleManager = Async.wrap(createLifecycleManager);
-    var lifecycleManagerId = wrappedCreateLifecycleManager(bldgId, dataPipeId);
+    var lifecycleManagerId = wrappedCreateLifecycleManager(userId, bldgId, dataPipeId);
     var wrappedCreateRsdt = Async.wrap(createRsdt);
     var residents = [];
     for (var i = 0; i < INITIAL_RESIDENTS_PER_USER; i++) {
-        var rsdtId = wrappedCreateRsdt(initialResidentName(user.profile, i), bldg, user._id);
+        var rsdtId = wrappedCreateRsdt(initialResidentName(username, i), bldg, userId);
         residents.push(rsdtId);
     }
 
@@ -58,7 +63,7 @@ getUserDetailsFromTwitter = function(profile, user) {
     return profile;
 };
 
-initialResidentName = function(profile, i) {
+initialResidentName = function(username, i) {
     var chars = "abcdefghijklmnopqrstuvwxyz";
-    return (Math.floor((i / chars.length)) + 1) + chars.charAt((i % chars.length)) + ' ' + profile.screenName;
+    return (Math.floor((i / chars.length)) + 1) + chars.charAt((i % chars.length)) + ' ' + username;
 };

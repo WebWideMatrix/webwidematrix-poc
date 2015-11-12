@@ -1,4 +1,4 @@
 
-buildUserCurrentBldgCacheKey = function(profileName) {
-    return "USER_CURRENT_ADDRESS::" + profileName;
+buildUserCurrentBldgCacheKey = function(userId) {
+    return "USER_CURRENT_ADDRESS::" + userId;
 };

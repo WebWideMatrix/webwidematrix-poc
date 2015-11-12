@@ -1,7 +1,7 @@
 DataPipes = new Meteor.Collection('data_pipes');
 
 
-createDataPipe = function(tokens, callback) {
+createDataPipe = function(userId, tokens, callback) {
 
     var _getSchedule = function() {
         // assuming a fixed 10 min interval for now
@@ -15,6 +15,7 @@ createDataPipe = function(tokens, callback) {
     var _createDataPipe = function() {
         return {
             type: "PersonalTwitterFeed",
+            userId: userId,
             status: "active",
             schedule: _getSchedule(),
             tokens: tokens,
