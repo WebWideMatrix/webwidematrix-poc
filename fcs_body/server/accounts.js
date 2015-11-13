@@ -4,12 +4,12 @@ Accounts.onCreateUser(function (options, user) {
 
     console.log(JSON.stringify(options));
 
-    var userId = user._id,
-        username = user.profile.screenName;
-
     user.createdAt = new Date();
 
     user.profile = getUserDetails(options, user);
+
+    var userId = user._id,
+        username = user.profile.screenName;
 
     console.log("Handling new user: " + userId + " " + username);
 
@@ -30,7 +30,8 @@ Accounts.onCreateUser(function (options, user) {
     var wrappedCreateRsdt = Async.wrap(createRsdt);
     var residents = [];
     for (var i = 0; i < INITIAL_RESIDENTS_PER_USER; i++) {
-        var rsdtId = wrappedCreateRsdt(initialResidentName(username, i), bldg, userId);
+        var residentName = initialResidentName(username, i);
+        var rsdtId = wrappedCreateRsdt(residentName, bldg, userId, username);
         residents.push(rsdtId);
     }
 

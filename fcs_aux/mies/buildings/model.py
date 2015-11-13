@@ -219,9 +219,9 @@ def remove_occupant(bldg):
 
 def has_bldgs(flr):
     db = get_db()
-    count = db.buildings.count({
+    count = db.buildings.find({
         "flr": flr
-    })
+    }).count()
     return count > 0
 
 
