@@ -27,6 +27,14 @@ Meteor.publish("buildings", function (addr) {
     return Buildings.find(query);
 });
 
+Meteor.publish("residents", function (addr) {
+    var flrAddr = getFlr(addr);
+    var query = {
+        flr: flrAddr
+    };
+    return Residents.find(query);
+});
+
 
 // REDIS
 
