@@ -20,30 +20,6 @@ def _build_resident_location_cache_key(addr):
     return "OCCUPIED_{}".format(addr)
 
 
-# FIXME: move to logging helpers
-def render_area(layer1, *more_layers):
-    def render_val(v):
-        if v is None:
-            return ""
-        if type(v) == str:
-            return "R"
-        return v
-
-    flr = []
-    for row in xrange(FLOOR_H):
-        flr.append([""]*FLOOR_W)
-    for addr, val in layer1.iteritems():
-        x, y = extract_bldg_coordinates(addr)
-        flr[y][x] = render_val(val)
-
-    for layer in more_layers:
-        for addr, val in layer.iteritems():
-            x, y = extract_bldg_coordinates(addr)
-            flr[y][x] = "{}-{}".format(flr[y][x], render_val(val))
-
-    logging.info('\n'.join([''.join(['{:4}'.format(item) for item in row])
-                            for row in flr]))
-
 
 class MovementBehavior:
 
@@ -83,7 +59,7 @@ class MovementBehavior:
         neighbours = self.look_for_neighbours_around()  # dict: addr->neighbour
 
         logging.info("XX smells:")
-        logging.info(render_area(smells, bldgs, neighbours))
+        logging.info(self.log_perception(smells, bldgs, neighbours))
 
         most_smelly_addr = None
         max_smell = -1
@@ -112,6 +88,50 @@ class MovementBehavior:
         self.track_moves_without_smell(max_smell <= 0)
         bldg = bldgs.get(most_smelly_addr)
         return most_smelly_addr, bldg
+
+    def log_perception(self, smells, bldgs, rsdts):
+        min_x, min_y = 1000, 1000
+        max_x, max_y = 0, 0
+
+        def render_cell(addr, smell):
+            cell = ""
+            if addr == self.location:
+                cell = "*"
+            else:
+                if bldgs.get(addr):
+                    cell = "{}B".format(cell)
+                if rsdts.get(addr):
+                    cell = "{}R".format(cell)
+                if cell == "":
+                    cell = smell or ""
+            return cell
+
+        def update_actual_range(x, y, min_x, min_y, max_x, max_y):
+            if x < min_x: min_x = x
+            if x > max_x: max_x = x
+            if y < min_y: min_y = y
+            if y > max_y: max_y = y
+            return min_x, min_y, max_x, max_y
+
+        flr = []
+        for row in xrange(FLOOR_H):
+            flr.append(["."]*FLOOR_W)
+
+        for addr, smell in smells.iteritems():
+            x, y = extract_bldg_coordinates(addr)
+            min_x, min_y, max_x, max_y = \
+                update_actual_range(x, y, min_x, min_y, max_x, max_y)
+            flr[y][x] = render_cell(addr, smell)
+
+        logging.info('---')
+        logging.info("Rendering {} in range: {},{} - {},{}"
+                     .format(self.name, min_x, min_y, max_x, max_y))
+        area = []
+        for j in range(min_y, max_y):
+            area.append(flr[j][min_x:max_x])
+        logging.info('\n\n' + '\n'.join([''.join(['{:2}'.format(item) for item in row])
+                                         for row in area]))
+        logging.info('---')
 
     def track_moves_without_smell(self, smelled_something):
         if not smelled_something:
