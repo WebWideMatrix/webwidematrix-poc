@@ -25,4 +25,4 @@ INTERACTION_RATE_PERIOD = 60 * 60
 
 # the threshold number of unique residents recently encountered
 # that when exceeded will cause a resident to move to another flr
-MAX_INTERACTION_RATE = 1
+MAX_INTERACTION_RATE = 5

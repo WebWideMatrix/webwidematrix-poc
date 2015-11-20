@@ -237,7 +237,7 @@ def has_bldgs(flr):
     return count > 0
 
 
-def get_bldg_flrs(bldg):
+def get_bldg_flrs(bldg_addr):
     """
     return the flr levels of a bldg that have bldgs inside them.
     assumes that the 1st level has bldgs inside it.
@@ -245,7 +245,6 @@ def get_bldg_flrs(bldg):
     :return:
     """
     result = []
-    bldg_addr = get_bldg(bldg["address"])
     flr = 0
     while has_bldgs("{bldg}-l{flr}".format(bldg=bldg_addr, flr=flr)):
         result.append(flr)

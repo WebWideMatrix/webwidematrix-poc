@@ -40,7 +40,6 @@ def fetch_article_action(input_payload):
         text = textract.process(file_name)
         logging.info("Extracted article text ({} characters)".format(len(text)))
         logging.info("T"*100)
-        logging.info(text)
         logging.info("T"*100)
 
         delete_downloaded_file(file_name)

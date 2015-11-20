@@ -4,7 +4,7 @@ import random
 from mies.buildings.model import load_nearby_bldgs, has_bldgs, get_bldg_flrs, get_nearby_addresses
 from mies.buildings.stats import decrement_residents, increment_residents
 from mies.buildings.utils import extract_bldg_coordinates, get_flr, get_flr_level, replace_flr_level
-from mies.constants import GIVE_UP_ON_FLR, MAX_INTERACTION_RATE
+from mies.constants import GIVE_UP_ON_FLR, MAX_INTERACTION_RATE, FLOOR_H, FLOOR_W
 from mies.senses.smell.smell_propagator import get_bldg_smell
 from mies.lifecycle_managers.daily_building.manager import _build_user_current_bldg_cache_key
 from mies.redis_config import get_cache
@@ -18,6 +18,31 @@ class NothingFoundException(Exception):
 
 def _build_resident_location_cache_key(addr):
     return "OCCUPIED_{}".format(addr)
+
+
+# FIXME: move to logging helpers
+def render_area(layer1, *more_layers):
+    def render_val(v):
+        if v is None:
+            return ""
+        if type(v) == str:
+            return "R"
+        return v
+
+    flr = []
+    for row in xrange(FLOOR_H):
+        flr.append([""]*FLOOR_W)
+    for addr, val in layer1.iteritems():
+        x, y = extract_bldg_coordinates(addr)
+        flr[y][x] = render_val(val)
+
+    for layer in more_layers:
+        for addr, val in layer.iteritems():
+            x, y = extract_bldg_coordinates(addr)
+            flr[y][x] = "{}-{}".format(flr[y][x], render_val(val))
+
+    logging.info('\n'.join([''.join(['{:4}'.format(item) for item in row])
+                            for row in flr]))
 
 
 class MovementBehavior:
@@ -58,7 +83,7 @@ class MovementBehavior:
         neighbours = self.look_for_neighbours_around()  # dict: addr->neighbour
 
         logging.info("XX smells:")
-        logging.info(smells)
+        logging.info(render_area(smells, bldgs, neighbours))
 
         most_smelly_addr = None
         max_smell = -1
@@ -72,9 +97,10 @@ class MovementBehavior:
             elif bldgs.get(addr) and bldgs[addr]["occupied"]:
                 occupied.append(addr)
                 self.log_interaction(bldgs[addr]["occupiedBy"], addr)
-            elif smell > max_smell:
-                most_smelly_addr = addr
-                max_smell = smell
+            elif smell is not None:
+                if smell > max_smell:
+                    most_smelly_addr = addr
+                    max_smell = smell
 
         # don't consider occupied addresses
         for addr in occupied:
