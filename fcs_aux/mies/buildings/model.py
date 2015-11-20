@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
+import json
 import random
 
 from celery.utils.log import get_task_logger
@@ -137,7 +138,7 @@ def create_buildings(content_type, keys, payloads, flr,
             # by default, we also want to cache newly created bldgs
             cache = get_cache()
             for bldg in buildings:
-                cache.set(bldg["address"], bldg, ex=cache_ttl)
+                cache.set(bldg["address"], json.dumps(bldg), ex=cache_ttl)
         for bldg in buildings:
             create_smell_source(bldg["address"], bldg["energy"])
         increment_bldgs(flr, UNPROCESSED, len(buildings))
@@ -162,7 +163,7 @@ def create_buildings(content_type, keys, payloads, flr,
     return created_addresses
 
 
-def get_nearby_addresses(address, proximity=10):
+def get_nearby_addresses(address, proximity=50):
     # generate a list of neighbour addresses
     addresses = []
     flr = get_flr(address)
@@ -182,13 +183,24 @@ def load_bldg(**kwargs):
 
 def load_nearby_bldgs(address):
     addresses = get_nearby_addresses(address)
-    # query for any bldg whose address is one of these addresses
+    # query the cache for any bldg whose address is one of these addresses
+    result = {}
+    # cache = get_cache()
+    # for addr in addresses:
+    #     bldg = cache.get(addr)
+    #     if bldg is not None:
+    #         result[addr] = json.loads(unicode)
+
+    # TODO if it's not the current work cache, query the DB
     db = get_db()
-    return db.buildings.find({
+    bldgs = db.buildings.find({
         "address": {
             "$in": addresses
         }
     })
+    for b in bldgs:
+        result[b["address"]] = b
+    return result
 
 
 def add_occupant(bldg_id, resident_id):

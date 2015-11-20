@@ -1,7 +1,7 @@
 import logging
 import operator
 import random
-from mies.buildings.model import load_nearby_bldgs, has_bldgs, get_bldg_flrs
+from mies.buildings.model import load_nearby_bldgs, has_bldgs, get_bldg_flrs, get_nearby_addresses
 from mies.buildings.stats import decrement_residents, increment_residents
 from mies.buildings.utils import extract_bldg_coordinates, get_flr, get_flr_level, replace_flr_level
 from mies.constants import GIVE_UP_ON_FLR, MAX_INTERACTION_RATE
@@ -14,6 +14,10 @@ VISION_POWER = 20
 
 class NothingFoundException(Exception):
     pass
+
+
+def _build_resident_location_cache_key(addr):
+    return "OCCUPIED_{}".format(addr)
 
 
 class MovementBehavior:
@@ -48,23 +52,40 @@ class MovementBehavior:
 
         # get all near-by bldgs & smells
         # Note: assuming same vision & smelling power
-        bldgs = self.look_around()
-        smells = self.smell_around()
 
-        candidates = {}
-        for bldg in bldgs:
-            if not bldg["occupied"]:
-                candidates[bldg["address"]] = bldg
-            else:
-                smells.pop(bldg["address"])
-                self.log_interaction(bldg["occupiedBy"], bldg["address"])
+        bldgs = self.look_around()      # dict: addr->bldg
+        smells = self.smell_around()    # dict: addr->smell
+        neighbours = self.look_for_neighbours_around()  # dict: addr->neighbour
 
-        most_smelly = max(smells.iteritems(), key=operator.itemgetter(1))[0]
-        if smells[most_smelly] is None or smells[most_smelly] < 1:
-            most_smelly = random.choice(smells.keys())
-        self.track_moves_without_smell(most_smelly < 1)
-        bldg = candidates.get(most_smelly)
-        return most_smelly, bldg
+        logging.info("XX smells:")
+        logging.info(smells)
+
+        most_smelly_addr = None
+        max_smell = -1
+        occupied = []
+        for addr, smell in smells.iteritems():
+            # don't move to a place caught by another resident
+            if neighbours.get(addr):
+                occupied.append(addr)
+                self.log_interaction(neighbours[addr], addr)
+            # double check whether this is a bldg & it's occupied
+            elif bldgs.get(addr) and bldgs[addr]["occupied"]:
+                occupied.append(addr)
+                self.log_interaction(bldgs[addr]["occupiedBy"], addr)
+            elif smell > max_smell:
+                most_smelly_addr = addr
+                max_smell = smell
+
+        # don't consider occupied addresses
+        for addr in occupied:
+            del smells[addr]
+
+        if max_smell <= 0:
+            most_smelly_addr = random.choice(smells.keys())
+
+        self.track_moves_without_smell(max_smell <= 0)
+        bldg = bldgs.get(most_smelly_addr)
+        return most_smelly_addr, bldg
 
     def track_moves_without_smell(self, smelled_something):
         if not smelled_something:
@@ -90,8 +111,18 @@ class MovementBehavior:
 
     def look_around(self):
         assert self.location
-        bldgs = load_nearby_bldgs(self.location)
-        return bldgs
+        return load_nearby_bldgs(self.location)
+
+    def look_for_neighbours_around(self):
+        assert self.location
+        cache = get_cache()
+        addresses = get_nearby_addresses(self.location)
+        result = {}
+        for addr in addresses:
+            rsdt = cache.get(_build_resident_location_cache_key(addr))
+            if rsdt:
+                result[addr] = rsdt
+        return result
 
     def get_inside(self, curr_bldg):
         has_smell = False
@@ -143,6 +174,10 @@ class MovementBehavior:
     def move_to(self, address):
         prev_loc = self.location
         self.location = address
+        # record in cache that a resident is in that location
+        cache = get_cache()
+        cache.delete(_build_resident_location_cache_key(prev_loc))
+        cache.set(_build_resident_location_cache_key(address), self.name, ex=600)
         if get_flr(prev_loc) != get_flr(address):
             self.flr = get_flr(address)
             # switched flr - update stats

@@ -18,7 +18,9 @@ def get_bldg_smell(addr):
     cache = get_cache()
     if cache.exists(CURRENT_SMELLS_POINTER_KEY):
         smells = cache.get(CURRENT_SMELLS_POINTER_KEY)
-        return cache.hget(smells, addr)
+        smell = cache.hget(smells, addr)
+        if smell is not None:
+            return int(smell)
     else:
         logging.warning("No smells!!!")
         return 0
