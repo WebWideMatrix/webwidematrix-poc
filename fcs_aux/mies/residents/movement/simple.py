@@ -164,10 +164,15 @@ class MovementBehavior:
         cache = get_cache()
         addresses = get_nearby_addresses(self.location)
         result = {}
+        logging.info("r"*100)
+        logging.info("r"*100)
         for addr in addresses:
             rsdt = cache.get(_build_resident_location_cache_key(addr))
             if rsdt:
+                logging.info(rsdt)
                 result[addr] = rsdt
+        logging.info("r"*100)
+        logging.info("r"*100)
         return result
 
     def get_inside(self, curr_bldg):
@@ -219,11 +224,12 @@ class MovementBehavior:
 
     def move_to(self, address):
         prev_loc = self.location
+        cache = get_cache()
+        ret = cache.delete(_build_resident_location_cache_key(prev_loc))
+        logging.info("Delete returned: {}".format(ret))
         self.location = address
         # record in cache that a resident is in that location
-        cache = get_cache()
-        cache.delete(_build_resident_location_cache_key(prev_loc))
-        cache.set(_build_resident_location_cache_key(address), self.name, ex=600)
+        cache.set(_build_resident_location_cache_key(address), self.name, ex=60)
         if get_flr(prev_loc) != get_flr(address):
             self.flr = get_flr(address)
             # switched flr - update stats

@@ -1,6 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
-import json
+from bson.json_util import dumps, loads
 import random
 
 from celery.utils.log import get_task_logger
@@ -138,7 +138,8 @@ def create_buildings(content_type, keys, payloads, flr,
             # by default, we also want to cache newly created bldgs
             cache = get_cache()
             for bldg in buildings:
-                cache.set(bldg["address"], json.dumps(bldg), ex=cache_ttl)
+                # FIXME: create a Building class & instance & cache its serialization
+                cache.set(bldg["address"], dumps(bldg), ex=cache_ttl)
         for bldg in buildings:
             create_smell_source(bldg["address"], bldg["energy"])
         increment_bldgs(flr, UNPROCESSED, len(buildings))
@@ -185,21 +186,21 @@ def load_nearby_bldgs(address):
     addresses = get_nearby_addresses(address)
     # query the cache for any bldg whose address is one of these addresses
     result = {}
-    # cache = get_cache()
-    # for addr in addresses:
-    #     bldg = cache.get(addr)
-    #     if bldg is not None:
-    #         result[addr] = json.loads(unicode)
+    cache = get_cache()
+    for addr in addresses:
+        bldg = cache.get(addr)
+        if bldg is not None:
+            result[addr] = loads(bldg)
 
-    # TODO if it's not the current work cache, query the DB
-    db = get_db()
-    bldgs = db.buildings.find({
-        "address": {
-            "$in": addresses
-        }
-    })
-    for b in bldgs:
-        result[b["address"]] = b
+    if not result:
+        db = get_db()
+        bldgs = db.buildings.find({
+            "address": {
+                "$in": addresses
+            }
+        })
+        for b in bldgs:
+            result[b["address"]] = b
     return result
 
 
