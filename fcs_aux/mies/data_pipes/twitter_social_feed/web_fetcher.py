@@ -103,9 +103,11 @@ def pull_from_data_pipes(page):
                 target_flr = dp["connectedBldg"] + "-l0"
                 logging.info("Sending {} buildings to {}.."
                              .format(len(payloads), target_flr))
-                create_buildings.s(TWITTER_SOCIAL_POST,
-                                   keys, payloads, target_flr) \
-                    .apply_async()
+                # create_buildings.s(TWITTER_SOCIAL_POST,
+                #                    keys, payloads, target_flr) \
+                #     .apply_async()
+                create_buildings(TWITTER_SOCIAL_POST,
+                                 keys, payloads, target_flr)
                 if new_latest_id is not None:
                     update_data_pipe(dp["_id"],
                                      {"latestId": new_latest_id})

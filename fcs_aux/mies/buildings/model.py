@@ -110,7 +110,7 @@ def construct_bldg(flr, content_type, key, payload, position_hints=None,
 @app.task(ignore_results=True)
 def create_buildings(content_type, keys, payloads, flr,
                      position_hints=None, is_composite=False,
-                     write_to_cache=True, cache_ttl=ONE_DAY_IN_SECONDS):
+                     write_to_cache=True, cache_period=ONE_DAY_IN_SECONDS):
     """
     Creates a batch of buildings.
     :param content_type: the content-type of the buildings
@@ -139,12 +139,13 @@ def create_buildings(content_type, keys, payloads, flr,
             cache = get_cache()
             for bldg in buildings:
                 # FIXME: create a Building class & instance & cache its serialization
-                cache.set(bldg["address"], dumps(bldg), ex=cache_ttl)
+                cache.set(bldg["address"], dumps(bldg), ex=cache_period)
         for bldg in buildings:
             create_smell_source(bldg["address"], bldg["energy"])
         increment_bldgs(flr, UNPROCESSED, len(buildings))
         return len(buildings)
 
+    logging.info("C"*100)
     created_addresses = []
     db = get_db()
     batch_size = 10
