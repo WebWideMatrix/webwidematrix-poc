@@ -60,25 +60,33 @@ def handle_life_event(resident):
 
     # Check status of previous action.
     curr_bldg = load_bldg(_id=resident.bldg) if resident.bldg else None
+    logging.info("0"*100)
     if curr_bldg is not None and resident.processing:
+        logging.info("1"*100)
         action_status = resident.get_latest_action(curr_bldg)
+        logging.info(action_status*10)
         action_result = resident.get_action_result(action_status)
-
+        logging.info(action_result)
         # check if action is still pending
         if action_status is not None and \
                         action_result is None and \
                 resident.is_action_pending(action_status):
+            logging.info("2"*100)
             if resident.should_discard_action(action_status):
                 resident.discard_action(curr_bldg, action_status)
+                logging.info("3"*100)
             else:
+                logging.info("4"*100)
                 logging.info("Action in {addr} is still pending. "
                              "Doing nothing for now."
                              .format(addr=resident.bldg))
                 return
         else:
+            logging.info("5"*100)
             # yay, we have results
             create_result_bldgs(curr_bldg, action_result)
 
+        logging.info("6"*100)
         # if we got here, it means that no action is still pending
         resident.finish_processing(action_status, curr_bldg)
 
