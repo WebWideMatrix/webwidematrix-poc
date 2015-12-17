@@ -175,8 +175,18 @@ Template.buildingsGrid.rendered = function () {
                     },
                     width: xScale(SQUARE_WIDTH),
                     height: yScale(SQUARE_HEIGHT),
-                    stroke: 'grey',
-                    "stroke-width": 0.01,
+                    stroke: function(d) {
+                        if (d.processed)
+                            return 'green';
+                        else
+                            return 'grey';
+                    },
+                    "stroke-width": function(d) {
+                        if (d.processed)
+                            return 0.5;
+                        else
+                            return 0.01;
+                    },
                     fill: function (d) {
                         if (d.contentType)
                             return "white";
@@ -247,7 +257,12 @@ Template.buildingsGrid.rendered = function () {
                     r: xScale(SQUARE_WIDTH),
                     stroke: 'grey',
                     "stroke-width": 0.01,
-                    fill: 'blue',
+                    fill: function(d) {
+                        if (d.processing)
+                            return 'yellow';
+                        else
+                            return 'blue';
+                    },
                     "fill-opacity": 0.2
                 });
         });
