@@ -1,5 +1,7 @@
+from bson import ObjectId
 from celery.utils.log import get_task_logger
 from mies.buildings.model import remove_occupant, add_occupant, load_bldg, create_buildings
+from mies.buildings.utils import get_flr_level, replace_flr_level
 from mies.celery import app
 from mies.residents.acting.flow import update_bldg_with_results
 from mies.residents.model import Resident
@@ -17,8 +19,8 @@ def create_result_bldgs(curr_bldg, action_results):
         if placement_hints.get("new_bldg"):
             flr = curr_bldg["flr"]  # same_flr is the default
             if placement_hints.get("flr_above"):
-                flr_number = int(curr_bldg["flr"][1:]) + 1
-                flr = "l{}".format(flr_number)
+                flr_level = get_flr_level(curr_bldg["flr"])
+                flr = replace_flr_level(curr_bldg["flr"], flr_level + 1)
             # same_location is the default
             position_hints = {
                 "near_x": curr_bldg["x"],
@@ -59,12 +61,14 @@ def handle_life_event(resident):
                  .format(name=resident.name))
 
     # Check status of previous action.
-    curr_bldg = load_bldg(_id=resident.bldg) if resident.bldg else None
+    curr_bldg = load_bldg(_id=ObjectId(resident.bldg)) if resident.bldg else None
     logging.info("0"*100)
+    logging.info(resident.bldg)
+    logging.info(resident.processing)
     if curr_bldg is not None and resident.processing:
         logging.info("1"*100)
         action_status = resident.get_latest_action(curr_bldg)
-        logging.info(action_status*10)
+        logging.info(action_status)
         action_result = resident.get_action_result(action_status)
         logging.info(action_result)
         # check if action is still pending

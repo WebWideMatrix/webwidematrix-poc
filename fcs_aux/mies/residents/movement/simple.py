@@ -140,10 +140,13 @@ class MovementBehavior:
             self.movesWithoutSmell = 0
 
     def occupy_bldg(self, bldg):
+        logging.info("OCCUPY "*10)
+        logging.info(bldg)
         curr_location = self.location
         x, y = extract_bldg_coordinates(curr_location)
         new_x, new_y = bldg["x"], bldg["y"]
         self.bldg = str(bldg["_id"])
+        logging.info(self.bldg)
         self.move_to(bldg["address"])
         self.velocity = [new_x - x, new_y - y]
 

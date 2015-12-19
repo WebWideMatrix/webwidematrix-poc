@@ -25,7 +25,7 @@ pep8==1.5.7
 Pillow==3.0.0
 py==1.4.26
 pyflakes==0.8.1
-pymongo==2.7.2
+pymongo==3.2
 pyparsing==2.0.6
 pytest==2.6.4
 python-docx==0.8.5

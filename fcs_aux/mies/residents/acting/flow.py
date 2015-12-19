@@ -92,9 +92,15 @@ class ActingBehavior:
 
     def finish_processing(self, action_status, bldg):
         bldg_energy = bldg["energy"] or DEFAULT_BLDG_ENERGY
-        success = action_status["successLevel"]
+        logging.info("I GOT MY "*10)
+        logging.info(action_status)
+        #success = action_status["successLevel"]
+        # TODO figure out the success level & store in action status
+        success = 1
         energy_gained = bldg_energy * success
         self.update_processing_status(False, energy_gained)
+        logging.info("BONN"*20)
+        logging.info(energy_gained)
         update_bldg_processed_status(bldg, -energy_gained)
         decrement_bldgs(bldg["flr"], BEING_PROCESSED)
 

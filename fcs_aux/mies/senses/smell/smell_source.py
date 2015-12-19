@@ -35,4 +35,7 @@ def create_smell_source(address, strength, expiry=DEFAULT_SMELL_SOURCE_EXPIRY):
 def update_smell_source(address, strength_delta):
     key = build_key(address)
     cache = get_cache()
-    cache.hincrby(key, strength_delta)
+    if strength_delta > 0:
+        cache.incr(key, strength_delta)
+    else:
+        cache.decr(key, strength_delta)
