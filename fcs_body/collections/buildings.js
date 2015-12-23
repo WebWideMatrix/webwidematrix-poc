@@ -110,6 +110,25 @@ getContainingBldgAddress = function(addr) {
     return parts.join("-");
 };
 
+
+getOneFlrUp = function(addr) {
+    // FIXME implement properly
+    var parts = addr.split("-");
+    var flrPart = parts.pop();
+    var flrLevel = parseInt(flrPart.substring(1, flrPart.length));
+    parts.push("l" + (flrLevel + 1));
+    return parts.join("-");
+};
+
+getOneFlrDown = function(addr) {
+    // FIXME implement properly
+    var parts = addr.split("-");
+    var flrPart = parts.pop();
+    var flrLevel = parseInt(flrPart.substring(1, flrPart.length));
+    parts.push("l" + (flrLevel - 1));
+    return parts.join("-");
+};
+
 extractBldgCoordinates = function(bldgAddr) {
     // FIXME: rename to: extractCoordinatesFromLocation
     var parts = bldgAddr.split("-");

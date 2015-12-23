@@ -8,8 +8,17 @@
     <div id="navigation" style="float: right">
         <span class="label label-info">{{bldgKey}}</span>
         <div class="btn-group" role="group" aria-label="...">
+            <button type="button" class="btn btn-default navigate-out-of">
+                <img src="/images/left_up2.png" width="16px">
+            </button>
             <button type="button" class="btn btn-default navigate-up">
-                <img src="/images/arrow_go_outof.png" width="16px">
+                <img src="/images/up.png" width="16px">
+            </button>
+            <button type="button" class="btn btn-default building">
+                <img src="/images/building.png" width="16px">
+            </button>
+            <button type="button" class="btn btn-default navigate-down">
+                <img src="/images/down.png" width="16px">
             </button>
             {{flrsStats}}
         </div>
@@ -21,4 +30,5 @@
     <p class="help-block">
         <strong>Tip:</strong> Use the mouse scroll to zoom, and drag the view to move around
     </p>
+    <span class="small"><a href="https://icons8.com/free-ios-7-icons-in-vector">iOS icons by Icons8</a></span>
 </template>

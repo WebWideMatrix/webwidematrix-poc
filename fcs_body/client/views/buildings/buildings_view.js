@@ -24,6 +24,14 @@ bldgRenderFunc = {
             "height: 10px; \">" + text + "</p>";
         return html;
     },
+    'article-text': function(d) {
+        var text = d.payload.title;
+        var html = "<p " +
+            "style=\"color: #" + d.payload.user.profile_text_color + "; " +
+            "background-color: #" + d.payload.user.profile_background_color + "; " +
+            "height: 10px; \">" + text + "</p>";
+        return html;
+    },
     'daily-feed': function(d) {
         var html = "<table style='border-color: red; height: 5px;' " +
             "width='5px;'>";
@@ -80,8 +88,16 @@ Template.buildingsGrid.events({
         var externalUrl = $(event.currentTarget).attr("href");
         openExternalURL(externalUrl);
     },
-    "click .navigate-up": function() {
+    "click .navigate-out-of": function() {
         var newAddress = getContainingBldgAddress(Session.get("currentAddress"));
+        redirectTo(newAddress);
+    },
+    "click .navigate-up": function() {
+        var newAddress = getOneFlrUp(Session.get("currentAddress"));
+        redirectTo(newAddress);
+    },
+    "click .navigate-down": function() {
+        var newAddress = getOneFlrDown(Session.get("currentAddress"));
         redirectTo(newAddress);
     }
 });
