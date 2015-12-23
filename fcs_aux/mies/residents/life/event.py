@@ -70,7 +70,7 @@ def handle_life_event(resident):
         action_status = resident.get_latest_action(curr_bldg)
         logging.info(action_status)
         action_result = resident.get_action_result(action_status)
-        logging.info(action_result)
+        # logging.info(action_result)
         # check if action is still pending
         if action_status is not None and \
                         action_result is None and \
@@ -95,7 +95,11 @@ def handle_life_event(resident):
         resident.finish_processing(action_status, curr_bldg)
 
     # choose a bldg to move into
+    logging.info("~~BEFORE~~"*10)
+    logging.info("BBBefore {}".format(resident.location))
     destination_addr, destination_bldg = resident.choose_bldg(curr_bldg)
+    logging.info("~~AFTER~~"*10)
+    logging.info("AAAfter {}".format(resident.location))
 
     # update the bldg at the previous location (if existing),
     # that the resident has left the bldg

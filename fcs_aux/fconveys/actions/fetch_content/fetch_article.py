@@ -47,7 +47,7 @@ def fetch_article_action(input_payload):
 
         result_payloads.append(
             {
-                "content_type": "article-text",
+                "contentType": "article-text",
                 "key": url,
                 "payload": {
                     "url": url,

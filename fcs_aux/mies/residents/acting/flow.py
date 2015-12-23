@@ -129,7 +129,8 @@ class ActingBehavior:
         """
         if (datetime.utcnow() - action_status["startedAt"]).seconds > 60 * 60 * 24:
             return True
-        if action_status["result"] == "ERROR":
+        # TODO How come there wasn't a result key???
+        if action_status.get("result") == "ERROR":
             return True
         return False
 

@@ -1,5 +1,4 @@
 import logging
-import operator
 import random
 from mies.buildings.model import load_nearby_bldgs, has_bldgs, get_bldg_flrs, get_nearby_addresses
 from mies.buildings.stats import decrement_residents, increment_residents
@@ -32,8 +31,16 @@ class MovementBehavior:
         curr_user_bldg_key = _build_user_current_bldg_cache_key(user_id)
         cache = get_cache()
         curr_user_bldg_address = cache.get(curr_user_bldg_key)
-        if curr_bldg is None or not curr_bldg["address"].startswith(curr_user_bldg_address):
+        logging.info("   &&&CUR_BLDG {}".format(curr_bldg))
+        if curr_bldg:
+            logging.info("   &&&CUR_BLDG_ADDR {}".format(curr_bldg["address"]))
+            logging.info("   &&&CUR_BLDG_ADDR_STARTSW {}".format(curr_bldg["address"].startswith(curr_user_bldg_address)))
+
+        # if curr_bldg is None or not curr_bldg["address"].startswith(curr_user_bldg_address):
+        # TODO WHY curr bldg & not curr location???
+        if curr_bldg is not None and not curr_bldg["address"].startswith(curr_user_bldg_address):
             # this means we're in some old bldg, move to the current one
+            logging.info("---------^^^^^^^*********"*100)
             self.move_to(curr_user_bldg_address + "-l0")
 
         # if haven't smelled anything for a long time, give up
@@ -90,12 +97,14 @@ class MovementBehavior:
         return most_smelly_addr, bldg
 
     def log_perception(self, smells, bldgs, rsdts):
+        logging.info("LP "*100)
+        logging.info("ATTTTTT: {}".format(self.location))
         min_x, min_y = 1000, 1000
         max_x, max_y = 0, 0
 
-        def render_cell(addr, smell):
+        def render_cell(addr, smell, self_location):
             cell = ""
-            if addr == self.location:
+            if addr == self_location:
                 cell = "*"
             else:
                 if bldgs.get(addr):
@@ -121,7 +130,7 @@ class MovementBehavior:
             x, y = extract_bldg_coordinates(addr)
             min_x, min_y, max_x, max_y = \
                 update_actual_range(x, y, min_x, min_y, max_x, max_y)
-            flr[y][x] = render_cell(addr, smell)
+            flr[y][x] = render_cell(addr, smell, self.location)
 
         logging.info('---')
         logging.info("Rendering {} in range: {},{} - {},{}"
@@ -160,6 +169,8 @@ class MovementBehavior:
 
     def look_around(self):
         assert self.location
+        logging.info("LA "*30)
+        logging.info("AAAAT {}".format(self.location))
         return load_nearby_bldgs(self.location)
 
     def look_for_neighbours_around(self):
@@ -207,7 +218,7 @@ class MovementBehavior:
         flr_level = get_flr_level(flr)
         flrs = get_bldg_flrs(self.location)
         # following code assumes bldg flrs start from 0, are consecutive & all populated
-        if len(flrs) == 1:
+        if len(flrs) <= 1:
             return
         elif flr_level == 0:
             # we're at the bottom flr, move up
