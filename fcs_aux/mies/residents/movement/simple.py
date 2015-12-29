@@ -40,7 +40,11 @@ class MovementBehavior:
         if not self.location.startswith(curr_user_bldg_address):
             # this means we're in some old bldg, move to the current one
             logging.info("---------^^^^^^^*********"*100)
+            logging.info(self.name)
+            logging.info(id(self))
+            logging.info(self.location)
             self.move_to(curr_user_bldg_address + "-l0-b(0,0)")
+            logging.info(self.location)
 
         # if haven't smelled anything for a long time, give up
         # & get outside this flr

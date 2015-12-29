@@ -52,9 +52,14 @@ def handle_life_event(resident):
     :param resident: the acting resident
     :return:
     """
-
+    logging.info(" a "*100)
+    logging.info(type(resident))
+    logging.info(resident)
     if not isinstance(resident, Resident):
+        logging.info(" a1 "*100)
         resident = Resident(resident)
+        logging.info(type(resident))
+        logging.info(resident)
 
     # TODO use Redis to improve data integrity
     logging.info("Resident {name} life event invoked..."

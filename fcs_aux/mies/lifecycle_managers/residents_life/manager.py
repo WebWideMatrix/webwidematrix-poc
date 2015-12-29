@@ -17,7 +17,9 @@ def invoke():
         "status": STATUS_ACTIVE
     }
     for page in load_residents(criteria):
+        logging.info(" - "*100)
         for resident in page:
+            logging.info(" | "*100)
             logging.info(type(resident))
             logging.info(resident)
             handle_life_event.s(resident).apply_async()
