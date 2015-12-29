@@ -112,7 +112,7 @@ getContainingBldgAddress = function(addr) {
 
 
 getOneFlrUp = function(addr) {
-    // FIXME implement properly
+    // FIXME implement properly: use utility functions, & check for edges
     var parts = addr.split("-");
     var flrPart = parts.pop();
     var flrLevel = parseInt(flrPart.substring(1, flrPart.length));
@@ -121,7 +121,7 @@ getOneFlrUp = function(addr) {
 };
 
 getOneFlrDown = function(addr) {
-    // FIXME implement properly
+    // FIXME implement properly: use utility functions, & check for edges
     var parts = addr.split("-");
     var flrPart = parts.pop();
     var flrLevel = parseInt(flrPart.substring(1, flrPart.length));
