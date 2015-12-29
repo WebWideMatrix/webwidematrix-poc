@@ -37,11 +37,10 @@ class MovementBehavior:
             logging.info("   &&&CUR_BLDG_ADDR_STARTSW {}".format(curr_bldg["address"].startswith(curr_user_bldg_address)))
 
         # if curr_bldg is None or not curr_bldg["address"].startswith(curr_user_bldg_address):
-        # TODO WHY curr bldg & not curr location???
-        if curr_bldg is not None and not curr_bldg["address"].startswith(curr_user_bldg_address):
+        if not self.location.startswith(curr_user_bldg_address):
             # this means we're in some old bldg, move to the current one
             logging.info("---------^^^^^^^*********"*100)
-            self.move_to(curr_user_bldg_address + "-l0")
+            self.move_to(curr_user_bldg_address + "-l0-b(0,0)")
 
         # if haven't smelled anything for a long time, give up
         # & get outside this flr
