@@ -10,6 +10,9 @@ logging = get_task_logger(__name__)
 
 
 def create_result_bldgs(curr_bldg, action_results):
+    if action_results is None:
+        logging.warn("No results for {}".format(curr_bldg["address"]))
+        return
     for r in action_results:
         key = r.get("key")
         content_type = r.get("content-type")

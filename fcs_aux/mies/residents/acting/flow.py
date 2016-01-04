@@ -127,7 +127,8 @@ class ActingBehavior:
         :param action_status:
         :return:
         """
-        if (datetime.utcnow() - action_status["startedAt"]).seconds > 60 * 60 * 24:
+        if (datetime.utcnow() - action_status["startedAt"]).days > 0 or \
+           (datetime.utcnow() - action_status["startedAt"]).seconds > 60 * 60:
             return True
         # TODO How come there wasn't a result key???
         if action_status.get("result") == "ERROR":
