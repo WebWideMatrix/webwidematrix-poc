@@ -59,7 +59,11 @@ def invoke():
         strength = int(0.9 * strength)
 
         # draws rectangle around each smell source
-        x, y = extract_bldg_coordinates(address)
+        try:
+            x, y = extract_bldg_coordinates(address)
+        except:
+            logging.error("This address is weird, can't propagate its smell: {}".format(address))
+            continue
         for i in xrange(x - strength, x + strength):
             for j in xrange(y - strength, y + strength):
                 if 0 < i < FLOOR_W and 0 < j < FLOOR_H:
