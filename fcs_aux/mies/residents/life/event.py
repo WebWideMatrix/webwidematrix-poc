@@ -15,7 +15,7 @@ def create_result_bldgs(curr_bldg, action_results):
         return
     for r in action_results:
         key = r.get("key")
-        content_type = r.get("content-type")
+        content_type = r.get("contentType")
         payload = r.get("payload")
         placement_hints = r.get("placement_hints")
 
@@ -26,8 +26,8 @@ def create_result_bldgs(curr_bldg, action_results):
                 flr = replace_flr_level(curr_bldg["flr"], flr_level + 1)
             # same_location is the default
             position_hints = {
-                "near_x": curr_bldg["x"],
-                "near_y": curr_bldg["y"],
+                "at_x": curr_bldg["x"],
+                "at_y": curr_bldg["y"],
             }
             create_buildings.s(content_type, [key], [payload], flr, position_hints).apply_async()
 

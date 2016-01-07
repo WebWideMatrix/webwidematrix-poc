@@ -52,10 +52,15 @@ def find_spot(flr, state=None, position_hints=None, db=None):
         state = _create_trials_state()
     # calculate the address according to the hints
     position_hints = position_hints or {}
+    at_x = position_hints.get('at_x')
+    at_y = position_hints.get('at_y')
     near_x = position_hints.get('near_x')
     near_y = position_hints.get('near_y')
     next_free = position_hints.get('next_free') or False
-    if near_x is not None and near_y is not None:
+    if at_x is not None and at_y is not None:
+        x = at_x
+        y = at_y
+    elif near_x is not None and near_y is not None:
         state['near_lookups_count'] += 1
         # have we almost exhausted the near by spots?
         if state['near_lookups_count'] > (2 * state['proximity'])**2:

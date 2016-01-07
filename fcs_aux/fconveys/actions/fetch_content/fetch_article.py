@@ -20,8 +20,10 @@ def download_file(url, chunk_size=1024):
                 f.flush()
     return local_filename
 
+
 def delete_downloaded_file(file_name):
      os.unlink(file_name)
+
 
 @app.task(name='fetch-article')
 def fetch_article_action(input_payload):
