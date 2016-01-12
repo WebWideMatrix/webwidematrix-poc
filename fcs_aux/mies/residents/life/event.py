@@ -29,12 +29,13 @@ def create_result_bldgs(curr_bldg, action_results):
                 "at_x": curr_bldg["x"],
                 "at_y": curr_bldg["y"],
             }
-            create_buildings.s(content_type, [key], [payload], flr, position_hints).apply_async()
+            create_buildings.s(content_type, [key], [payload], flr, position_hints).apply_async(
+                queue='bldg_creation', routing_key='bldg.create'
+            )
 
         else:
             # just update the current bldg
             update_bldg_with_results(curr_bldg, content_type, payload)
-
 
 
 @app.task(ignore_result=True)

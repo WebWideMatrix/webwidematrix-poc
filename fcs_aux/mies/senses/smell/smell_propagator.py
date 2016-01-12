@@ -1,5 +1,7 @@
 import logging
 import time
+from datetime import datetime
+
 from mies.buildings.utils import extract_bldg_coordinates, replace_bldg_coordinates, calculate_distance, \
     get_bldg_containers
 from mies.celery import app
@@ -41,6 +43,8 @@ def add_smell_to_bldg_and_containers(address, cache, new_smells_key, strength):
 
 @app.task(ignore_result=True)
 def invoke():
+    t1 = datetime.utcnow()
+    logging.info("Smell"*200)
     logging.info("Propagating smells...")
     count = 0
     cache = get_cache()
@@ -78,8 +82,11 @@ def invoke():
 
         # TODO propagate also vertically
 
+    t2 = datetime.utcnow()
+    logging.info("Smell propagation task took: {}".format((t2-t1).seconds))
     logging.info("Updated {} bldgs with smell".format(count))
     logging.info("Number of smell items: {}".format(cache.hlen(new_smells_key)))
+    logging.info("S."*200)
 
     # update the pointer to the new smells
     def update_smells_pointer(pipe):

@@ -1,4 +1,5 @@
 from datetime import timedelta
+from kombu import Queue
 
 BROKER_URL = 'redis://localhost:6379/0'
 
@@ -11,6 +12,18 @@ CELERY_CREATE_MISSING_QUEUES = True
 
 CELERY_ENABLE_UTC = True
 CELERY_TIMEZONE = 'UTC'
+
+CELERY_DEFAULT_QUEUE = 'default'
+CELERY_QUEUES = (
+    Queue('default',    routing_key='task.#'),
+    Queue('life_events', routing_key='life.#'),
+    Queue('smell_propagation', routing_key='smell.#'),
+    Queue('bldg_creation', routing_key='bldg.#'),
+    Queue('data_pipes', routing_key='pipe.#'),
+)
+CELERY_DEFAULT_EXCHANGE = 'tasks'
+CELERY_DEFAULT_EXCHANGE_TYPE = 'topic'
+CELERY_DEFAULT_ROUTING_KEY = 'task.default'
 
 DATA_PIPES_INTERVAL = 10
 

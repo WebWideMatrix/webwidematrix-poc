@@ -22,4 +22,4 @@ def invoke():
             logging.info(" | "*100)
             logging.info(type(resident))
             logging.info(resident)
-            handle_life_event.s(resident).apply_async()
+            handle_life_event.s(resident).apply_async(queue='life_events', routing_key='life.events')
