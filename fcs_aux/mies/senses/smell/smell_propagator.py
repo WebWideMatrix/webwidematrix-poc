@@ -52,15 +52,21 @@ def invoke():
     # create a new hset for the current smells
     new_smells_key = "current_smells_{}".format(time.time())
 
-    for source, strength in get_smell_sources():
+    sources = get_smell_sources()
+    times = []
+    for source, strength in sources:
         # increments the containing bldgs smell
         if strength < 1:
             continue
-        address = extract_address_from_key(source)
-        count += add_smell_to_bldg_and_containers(address, cache, new_smells_key, strength)
 
         # now propagate the smell, taking out %10 & then 1 per distance unit
         strength = int(0.9 * strength)
+        if strength < 1:
+            continue
+
+        t11 = datetime.utcnow()
+        address = extract_address_from_key(source)
+        count += add_smell_to_bldg_and_containers(address, cache, new_smells_key, strength)
 
         # draws rectangle around each smell source
         try:
@@ -68,22 +74,20 @@ def invoke():
         except:
             logging.error("This address is weird, can't propagate its smell: {}".format(address))
             continue
-        for i in xrange(x - strength, x + strength):
-            for j in xrange(y - strength, y + strength):
-                if 0 < i < FLOOR_W and 0 < j < FLOOR_H:
-                    curr_bldg_address = replace_bldg_coordinates(address, i, j)
-                    distance = int(calculate_distance(curr_bldg_address, address))
-                    delta = strength - distance
-                    if delta > 0:
-                        count += add_smell_to_bldg_and_containers(curr_bldg_address, cache,
-                                                                  new_smells_key, delta)
 
+        count = propagate_smell_around_source(address, cache, count, new_smells_key, strength, x, y)
+
+        t22 = datetime.utcnow()
+        times.append((t22-t11).microseconds)
 
 
         # TODO propagate also vertically
 
     t2 = datetime.utcnow()
-    logging.info("Smell propagation task took: {}".format((t2-t1).seconds))
+    if times:
+        logging.info("Smell propagation of {} sources took: {}".format(len(times), (t2-t1).microseconds))
+        logging.info("Slowest source took: {}, fastest took: {}".format(max(times), min(times)))
+        logging.info("Average time it took to propagate a smell source: {}".format(sum(times) / len(times)))
     logging.info("Updated {} bldgs with smell".format(count))
     logging.info("Number of smell items: {}".format(cache.hlen(new_smells_key)))
     logging.info("S."*200)
@@ -94,3 +98,34 @@ def invoke():
         pipe.set(CURRENT_SMELLS_POINTER_KEY, new_smells_key)
         pipe.delete(current_smells_key)
     cache.transaction(update_smells_pointer, CURRENT_SMELLS_POINTER_KEY)
+
+
+def propagate_smell_around_source(address, cache, count, new_smells_key, strength, x, y):
+    count += add_smell_to_bldg_and_containers(address, cache,
+                                              new_smells_key, strength)
+
+    # draw (strength-1) rings around the smell source, each having decreased strength
+    for dist in xrange(1, strength):
+        ring_strength = strength - dist
+
+        for i in xrange(x - dist, x + dist + 1):
+            # add top row
+            addr = replace_bldg_coordinates(address, i, y - dist)
+            count += add_smell_to_bldg_and_containers(addr, cache,
+                                                      new_smells_key, ring_strength)
+            # add bottom row
+            addr = replace_bldg_coordinates(address, i, y + dist)
+            count += add_smell_to_bldg_and_containers(addr, cache,
+                                                      new_smells_key, ring_strength)
+
+        for j in xrange(y - (dist - 1), y + (dist - 1) + 1):
+            # add left col
+            addr = replace_bldg_coordinates(address, x - dist, j)
+            count += add_smell_to_bldg_and_containers(addr, cache,
+                                                      new_smells_key, ring_strength)
+            # add right col
+            addr = replace_bldg_coordinates(address, x + dist, j)
+            count += add_smell_to_bldg_and_containers(addr, cache,
+                                                      new_smells_key, ring_strength)
+
+    return count

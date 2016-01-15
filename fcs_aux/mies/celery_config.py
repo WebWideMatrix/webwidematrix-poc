@@ -25,7 +25,7 @@ CELERY_DEFAULT_EXCHANGE = 'tasks'
 CELERY_DEFAULT_EXCHANGE_TYPE = 'topic'
 CELERY_DEFAULT_ROUTING_KEY = 'task.default'
 
-DATA_PIPES_INTERVAL = 10
+DATA_PIPES_INTERVAL = 5
 
 CELERYBEAT_SCHEDULE = {
     'invoke_data_pipes_every_few_minutes': {
@@ -35,7 +35,7 @@ CELERYBEAT_SCHEDULE = {
     },
     'invoke_daily_lifecycle_manager_every_hour': {
         'task': 'mies.lifecycle_managers.daily_building.manager.invoke',
-        'schedule': timedelta(minutes=30),  # FIXME: should be 1 hour
+        'schedule': timedelta(minutes=3),  # FIXME: should be 1 hour
     },
     'invoke_residents_life_event_every_minute': {
         'task': 'mies.lifecycle_managers.residents_life.manager.invoke',
@@ -43,6 +43,6 @@ CELERYBEAT_SCHEDULE = {
     },
     'invoke_smell_propagator_every_minute': {
         'task': 'mies.senses.smell.smell_propagator.invoke',
-        'schedule': timedelta(minutes=1),
+        'schedule': timedelta(minutes=5),
     }
 }
