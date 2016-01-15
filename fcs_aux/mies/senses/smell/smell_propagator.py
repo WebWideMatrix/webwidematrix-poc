@@ -78,16 +78,18 @@ def invoke():
         count = propagate_smell_around_source(address, cache, count, new_smells_key, strength, x, y)
 
         t22 = datetime.utcnow()
-        times.append((t22-t11).microseconds)
+        delta = t22 - t11
+        times.append(delta.seconds * 1000 + delta.microseconds / 1000)
 
 
         # TODO propagate also vertically
 
     t2 = datetime.utcnow()
     if times:
-        logging.info("Smell propagation of {} sources took: {}".format(len(times), (t2-t1).microseconds))
-        logging.info("Slowest source took: {}, fastest took: {}".format(max(times), min(times)))
-        logging.info("Average time it took to propagate a smell source: {}".format(sum(times) / len(times)))
+        delta = t2 - t1
+        logging.info("Smell propagation of {} sources took: {}ms".format(len(times), delta.seconds * 1000 + delta.microseconds / 1000))
+        logging.info("Slowest source took: {}ms, fastest took: {}ms".format(max(times), min(times)))
+        logging.info("Average time it took to propagate a smell source: {}ms".format(sum(times) / len(times)))
     logging.info("Updated {} bldgs with smell".format(count))
     logging.info("Number of smell items: {}".format(cache.hlen(new_smells_key)))
     logging.info("S."*200)
@@ -106,26 +108,30 @@ def propagate_smell_around_source(address, cache, count, new_smells_key, strengt
 
     # draw (strength-1) rings around the smell source, each having decreased strength
     for dist in xrange(1, strength):
-        ring_strength = strength - dist
+        count += draw_circle(x, y, dist, address, count, cache, new_smells_key, strength - dist)
 
-        for i in xrange(x - dist, x + dist + 1):
-            # add top row
-            addr = replace_bldg_coordinates(address, i, y - dist)
-            count += add_smell_to_bldg_and_containers(addr, cache,
-                                                      new_smells_key, ring_strength)
-            # add bottom row
-            addr = replace_bldg_coordinates(address, i, y + dist)
-            count += add_smell_to_bldg_and_containers(addr, cache,
-                                                      new_smells_key, ring_strength)
+    return count
 
-        for j in xrange(y - (dist - 1), y + (dist - 1) + 1):
-            # add left col
-            addr = replace_bldg_coordinates(address, x - dist, j)
-            count += add_smell_to_bldg_and_containers(addr, cache,
-                                                      new_smells_key, ring_strength)
-            # add right col
-            addr = replace_bldg_coordinates(address, x + dist, j)
-            count += add_smell_to_bldg_and_containers(addr, cache,
-                                                      new_smells_key, ring_strength)
+
+def draw_circle(x0, y0, radius, address, count, *args):
+    x = radius
+    y = 0
+    decisionOver2 = 1 - x   # Decision criterion divided by 2 evaluated at x=r, y=0
+
+    while x >= y:
+        count += add_smell_to_bldg_and_containers(replace_bldg_coordinates(address, x + x0,  y + y0), *args)
+        count += add_smell_to_bldg_and_containers(replace_bldg_coordinates(address, y + x0,  x + y0), *args)
+        count += add_smell_to_bldg_and_containers(replace_bldg_coordinates(address, -x + x0,  y + y0), *args)
+        count += add_smell_to_bldg_and_containers(replace_bldg_coordinates(address, -y + x0,  x + y0), *args)
+        count += add_smell_to_bldg_and_containers(replace_bldg_coordinates(address, -x + x0, -y + y0), *args)
+        count += add_smell_to_bldg_and_containers(replace_bldg_coordinates(address, -y + x0, -x + y0), *args)
+        count += add_smell_to_bldg_and_containers(replace_bldg_coordinates(address, x + x0, -y + y0), *args)
+        count += add_smell_to_bldg_and_containers(replace_bldg_coordinates(address, y + x0, -x + y0), *args)
+        y += 1
+        if decisionOver2 <= 0:
+            decisionOver2 += 2 * y + 1   # Change in decision criterion for y -> y+1
+        else:
+            x -= 1
+            decisionOver2 += 2 * (y - x) + 1   # Change for y -> y+1, x -> x-1
 
     return count
