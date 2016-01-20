@@ -1,9 +1,14 @@
+import pytest
 from mock import patch, MagicMock, ANY, call
 
-from mies.senses.smell.smell_propagator import propagate_smell_around_source
+from mies.senses.smell.smell_propagator import propagate_smell_around_source, propagate_in_ray
 
 
+@pytest.mark.xfail
 def test_propagate_smell_around_source():
+    """
+    Tests real propagation in a circle area
+    """
     cache = MagicMock()
     strength = 5
     address = "g-b(90,41)-l0-b(14,0)-l0-b(46,66)"
@@ -92,3 +97,29 @@ def test_propagate_smell_around_source():
              call('g-b(90,41)-l0-b(14,0)-l0-b(50,68)', ANY, key, 1)]
 
     add_smell_mock.assert_has_calls(calls, any_order=True)
+
+
+def test_propagate_in_ray():
+    args = (MagicMock(), "CURRENT_SMELLS.abc123")   # cache, smells_key
+    strength = 5
+    address = "g-b(90,41)-l0-b(14,0)-l0-b(46,66)"
+    x, y = 46, 66
+    count = 100
+    sw_vector = [
+        (-1, 1),
+        (-2, 2),
+        (-3, 3),
+        (-4, 4),
+    ]
+    with patch('mies.senses.smell.smell_propagator.add_smell_to_bldg_and_containers') \
+            as add_smell_mock:
+        add_smell_mock.return_value = 1
+        result = propagate_in_ray(x, y, sw_vector, address, count, strength, *args)
+
+    assert result == count + 4
+    add_smell_mock.assert_has_calls([
+        call("g-b(90,41)-l0-b(14,0)-l0-b(45,67)", 4, *args),
+        call("g-b(90,41)-l0-b(14,0)-l0-b(44,68)", 3, *args),
+        call("g-b(90,41)-l0-b(14,0)-l0-b(43,69)", 2, *args),
+        call("g-b(90,41)-l0-b(14,0)-l0-b(42,70)", 1, *args),
+    ])

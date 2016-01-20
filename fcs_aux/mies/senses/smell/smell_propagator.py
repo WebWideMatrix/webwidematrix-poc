@@ -32,7 +32,7 @@ def build_key(address):
     return SMELL_CACHE_PATTERN + address
 
 
-def add_smell_to_bldg_and_containers(address, cache, new_smells_key, strength):
+def add_smell_to_bldg_and_containers(address, strength, cache, new_smells_key):
     count = 0
     cache.hincrby(new_smells_key, address, strength)
     for addr in get_bldg_containers(address):
@@ -66,7 +66,7 @@ def invoke():
 
         t11 = datetime.utcnow()
         address = extract_address_from_key(source)
-        count += add_smell_to_bldg_and_containers(address, cache, new_smells_key, strength)
+        count += add_smell_to_bldg_and_containers(address, strength, cache, new_smells_key)
 
         # draws rectangle around each smell source
         try:
@@ -103,35 +103,45 @@ def invoke():
 
 
 def propagate_smell_around_source(address, cache, count, new_smells_key, strength, x, y):
-    count += add_smell_to_bldg_and_containers(address, cache,
-                                              new_smells_key, strength)
+    count += add_smell_to_bldg_and_containers(address, strength, cache, new_smells_key)
 
-    # draw (strength-1) rings around the smell source, each having decreased strength
-    for dist in xrange(1, strength):
-        count += draw_circle(x, y, dist, address, count, cache, new_smells_key, strength - dist)
+    # draw rays of length (strength-1) the smell source, as approximation of real
+    # propagation (for efficiency reasons)
+    decreasing = range(-1, -strength, -1)
+    increasing = range(1, strength)
+    zeroes = [0] * (strength - 1)
+    vectors = [
+        zip(zeroes, decreasing),       # N
+        zip(increasing, decreasing),   # NE
+        zip(increasing, zeroes),       # E
+        zip(increasing, increasing),   # SE
+        zip(zeroes, increasing),       # S
+        zip(decreasing, increasing),   # SW
+        zip(decreasing, zeroes),       # W
+        zip(decreasing, decreasing),   # NW
+    ]
+    for v in vectors:
+        count += propagate_in_ray(x, y, v, address, count, strength, cache, new_smells_key)
 
     return count
 
 
-def draw_circle(x0, y0, radius, address, count, *args):
-    x = radius
-    y = 0
-    decisionOver2 = 1 - x   # Decision criterion divided by 2 evaluated at x=r, y=0
-
-    while x >= y:
-        count += add_smell_to_bldg_and_containers(replace_bldg_coordinates(address, x + x0,  y + y0), *args)
-        count += add_smell_to_bldg_and_containers(replace_bldg_coordinates(address, y + x0,  x + y0), *args)
-        count += add_smell_to_bldg_and_containers(replace_bldg_coordinates(address, -x + x0,  y + y0), *args)
-        count += add_smell_to_bldg_and_containers(replace_bldg_coordinates(address, -y + x0,  x + y0), *args)
-        count += add_smell_to_bldg_and_containers(replace_bldg_coordinates(address, -x + x0, -y + y0), *args)
-        count += add_smell_to_bldg_and_containers(replace_bldg_coordinates(address, -y + x0, -x + y0), *args)
-        count += add_smell_to_bldg_and_containers(replace_bldg_coordinates(address, x + x0, -y + y0), *args)
-        count += add_smell_to_bldg_and_containers(replace_bldg_coordinates(address, y + x0, -x + y0), *args)
-        y += 1
-        if decisionOver2 <= 0:
-            decisionOver2 += 2 * y + 1   # Change in decision criterion for y -> y+1
-        else:
-            x -= 1
-            decisionOver2 += 2 * (y - x) + 1   # Change for y -> y+1, x -> x-1
-
+def propagate_in_ray(x0, y0, vector, address, count, strength, *args):
+    """
+    Set a ray of decreasing smells in some vector from the given location
+    :param x0: the center x location
+    :param y0: the center y location
+    :param vector: an array of points (Xdelta, Ydelta), representing a
+           vector from the origin in some direction
+    :param address: the full address of the location
+    :param count: the current count of modifications, that should be updated
+    :param strength: the initial smell strength
+    :param args: the args to the function that updates smell
+    :return: updated count
+    """
+    for s, delta in enumerate(vector):
+        decreased_strength = strength - s - 1
+        x, y = x0 + delta[0], y0 + delta[1]
+        addr = replace_bldg_coordinates(address, x, y)
+        count += add_smell_to_bldg_and_containers(addr, decreased_strength, *args)
     return count
