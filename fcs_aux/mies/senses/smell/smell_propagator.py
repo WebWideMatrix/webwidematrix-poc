@@ -1,13 +1,10 @@
 import logging
-import time
 from datetime import datetime
 
-from mies.buildings.utils import extract_bldg_coordinates, replace_bldg_coordinates, calculate_distance, \
+from mies.buildings.utils import extract_bldg_coordinates, replace_bldg_coordinates, \
     get_bldg_containers
-from mies.celery import app
 from mies.redis_config import get_cache
-from mies.senses.smell.smell_source import get_smell_sources, extract_address_from_key, create_smell_source, \
-    create_or_update_smell_source
+from mies.senses.smell.smell_source import create_or_update_smell_source
 
 DEFAULT_SMELL_EXPIRY = 5 * 60     # 5 minutes in seconds
 
@@ -41,7 +38,7 @@ def add_smell_to_bldg_and_containers(address, strength_delta, cache, new_smells_
     return count
 
 
-def propagate_smell(address, energy):
+def propagate_smell(address, energy, energy_change):
     strength = energy
     delta = create_or_update_smell_source(address, strength)
     _propagate_smell_in_footprint_area(address, strength, delta)

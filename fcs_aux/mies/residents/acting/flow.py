@@ -1,12 +1,13 @@
 from datetime import datetime
 import random
-from mies.buildings.stats import decrement_bldgs, UNPROCESSED, PROCESSED, increment_bldgs, BEING_PROCESSED
+from mies.buildings.stats import decrement_bldgs, UNPROCESSED, \
+    PROCESSED, increment_bldgs, BEING_PROCESSED
 
 from mies.constants import DEFAULT_BLDG_ENERGY
 from mies.buildings.model import logging
 from mies.celery import app
 from mies.mongo_config import get_db
-from mies.senses.smell.smell_source import update_smell_source
+from mies.senses.smell.smell_propagator import propagate_smell
 
 
 def update_action_status(bldg, action_status):
@@ -47,9 +48,10 @@ def update_bldg_processed_status(bldg, energy_change):
     is_processed = (energy_change < 0)
 
     curr_bldg_energy = bldg["energy"] or DEFAULT_BLDG_ENERGY
+    new_energy = curr_bldg_energy + energy_change
     change = {
         "processed": is_processed,
-        "energy": curr_bldg_energy + energy_change
+        "energy": new_energy
     }
     db = get_db()
     db.buildings.update({
@@ -57,7 +59,7 @@ def update_bldg_processed_status(bldg, energy_change):
                         }, {
                             "$set": change
                         })
-    update_smell_source(bldg["address"], energy_change)
+    propagate_smell(bldg["address"], new_energy, energy_change)
     if not was_processed and is_processed:
         decrement_bldgs(bldg["flr"], UNPROCESSED)
         increment_bldgs(bldg["flr"], PROCESSED)

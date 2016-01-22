@@ -5,13 +5,12 @@ import random
 
 from celery.utils.log import get_task_logger
 from mies.buildings.stats import increment_bldgs, UNPROCESSED
-from mies.buildings.utils import extract_bldg_coordinates, get_flr, get_bldg, get_flr_level
+from mies.buildings.utils import extract_bldg_coordinates, get_flr
 from mies.celery import app
 from mies.mongo_config import get_db
 from mies.constants import FLOOR_W, FLOOR_H, PROXIMITY, DEFAULT_BLDG_ENERGY
 from mies.redis_config import get_cache
 from mies.senses.smell.smell_propagator import propagate_smell
-from mies.senses.smell.smell_source import create_smell_source
 
 logging = get_task_logger(__name__)
 
@@ -147,7 +146,7 @@ def create_buildings(content_type, keys, payloads, flr,
                 # FIXME: create a Building class & instance & cache its serialization
                 cache.set(bldg["address"], dumps(bldg), ex=cache_period)
         for bldg in buildings:
-            propagate_smell(bldg["address"], bldg["energy"])
+            propagate_smell(bldg["address"], bldg["energy"], bldg["energy"])
         increment_bldgs(flr, UNPROCESSED, len(buildings))
         return len(buildings)
 
