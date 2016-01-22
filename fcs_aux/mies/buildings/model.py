@@ -10,6 +10,7 @@ from mies.celery import app
 from mies.mongo_config import get_db
 from mies.constants import FLOOR_W, FLOOR_H, PROXIMITY, DEFAULT_BLDG_ENERGY
 from mies.redis_config import get_cache
+from mies.senses.smell.smell_propagator import propagate_smell
 from mies.senses.smell.smell_source import create_smell_source
 
 logging = get_task_logger(__name__)
@@ -146,7 +147,7 @@ def create_buildings(content_type, keys, payloads, flr,
                 # FIXME: create a Building class & instance & cache its serialization
                 cache.set(bldg["address"], dumps(bldg), ex=cache_period)
         for bldg in buildings:
-            create_smell_source(bldg["address"], bldg["energy"])
+            propagate_smell(bldg["address"], bldg["energy"])
         increment_bldgs(flr, UNPROCESSED, len(buildings))
         return len(buildings)
 

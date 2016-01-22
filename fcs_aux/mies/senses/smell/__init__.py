@@ -8,16 +8,15 @@ Smell
 
 - smell:
 -- an hashset in Redis
--- updated by smell propagator task
--- values expire after few minutes
+-- updated on smell source changes
+-- values expire after a day
 
-- smell propagator:
--- periodic task
--- clears all smells
--- per each smell source:
---- increments the containing bldgs smell
---- draws rectangle around each smell source
---- per each bldg inside it, increments smell according to distance from source
+- smell propagation:
+-- define a foot print area around smell source
+-- can be a circle of gradient decreasing strength
+-- or rays of gradient decreasing strength
+-- on smell source creation or strength increase: increase smell in footprint area
+-- on smell source strength decrease: decrease smell in footprint area
 
 - residents
 -- create more than 1, per number of levels (at least until we have proper reproduction & navigation)

@@ -17,7 +17,6 @@ CELERY_DEFAULT_QUEUE = 'default'
 CELERY_QUEUES = (
     Queue('default',    routing_key='task.#'),
     Queue('life_events', routing_key='life.#'),
-    Queue('smell_propagation', routing_key='smell.#'),
     Queue('bldg_creation', routing_key='bldg.#'),
     Queue('data_pipes', routing_key='pipe.#'),
 )
@@ -40,9 +39,5 @@ CELERYBEAT_SCHEDULE = {
     'invoke_residents_life_event_every_minute': {
         'task': 'mies.lifecycle_managers.residents_life.manager.invoke',
         'schedule': timedelta(minutes=1),
-    },
-    'invoke_smell_propagator_every_minute': {
-        'task': 'mies.senses.smell.smell_propagator.invoke',
-        'schedule': timedelta(minutes=3),
     }
 }
