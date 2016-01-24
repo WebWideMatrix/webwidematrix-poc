@@ -16,8 +16,7 @@ CURRENT_SMELLS_POINTER_KEY = "CURRENT_SMELLS"
 def get_bldg_smell(addr):
     cache = get_cache()
     if cache.exists(CURRENT_SMELLS_POINTER_KEY):
-        smells = cache.get(CURRENT_SMELLS_POINTER_KEY)
-        smell = cache.hget(smells, addr)
+        smell = cache.hget(CURRENT_SMELLS_POINTER_KEY, addr)
         if smell is not None:
             return int(smell)
     else:
@@ -29,16 +28,20 @@ def build_key(address):
     return SMELL_CACHE_PATTERN + address
 
 
-def add_smell_to_bldg_and_containers(address, strength_delta, cache, new_smells_key):
+def add_smell_to_bldg_and_containers(address, strength_delta,
+                                     cache, new_smells_key):
     count = 0
-    cache.hincrby(new_smells_key, address, strength_delta)
+    if not cache.exists(new_smells_key):
+        cache.hset(new_smells_key, address, strength_delta)
+    else:
+        cache.hincrby(new_smells_key, address, strength_delta)
     for addr in get_bldg_containers(address):
         cache.hincrby(new_smells_key, addr, strength_delta)
         count += 1
     return count
 
 
-def propagate_smell(address, energy, energy_change):
+def propagate_smell(address, energy):
     strength = energy
     delta = create_or_update_smell_source(address, strength)
     _propagate_smell_in_footprint_area(address, strength, delta)
@@ -46,10 +49,9 @@ def propagate_smell(address, energy, energy_change):
 
 def _propagate_smell_in_footprint_area(address, strength, strength_delta):
     t1 = datetime.utcnow()
-    logging.info("Smell"*200)
     logging.info("Propagating smell change...")
     cache = get_cache()
-    smells_key = "current_smells"
+    smells_key = CURRENT_SMELLS_POINTER_KEY
     count = 0
 
     try:
@@ -65,8 +67,6 @@ def _propagate_smell_in_footprint_area(address, strength, strength_delta):
     duration_in_ms = dur.seconds * 1000 + dur.microseconds / 1000
     logging.info("Smell propagation took: {}ms".format(duration_in_ms))
     logging.info("Updated {} bldgs with smell".format(count))
-    logging.info("Number of smell items: {}".format(cache.hlen(smells_key)))
-    logging.info("S."*200)
     return count
 
 

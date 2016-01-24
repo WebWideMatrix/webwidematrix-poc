@@ -59,7 +59,7 @@ def update_bldg_processed_status(bldg, energy_change):
                         }, {
                             "$set": change
                         })
-    propagate_smell(bldg["address"], new_energy, energy_change)
+    propagate_smell(bldg["address"], new_energy)
     if not was_processed and is_processed:
         decrement_bldgs(bldg["flr"], UNPROCESSED)
         increment_bldgs(bldg["flr"], PROCESSED)

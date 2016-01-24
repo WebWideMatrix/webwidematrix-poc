@@ -23,7 +23,10 @@ def get_smell_sources(page_size=100):
 def get_smell_source(address):
     key = build_key(address)
     cache = get_cache()
-    return cache.get(key)
+    s = cache.get(key)
+    if s is not None:
+        return int(s)
+    return None
 
 
 def create_smell_source(address, strength, expiry=DEFAULT_SMELL_SOURCE_EXPIRY):

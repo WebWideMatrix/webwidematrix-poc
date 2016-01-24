@@ -146,7 +146,7 @@ def create_buildings(content_type, keys, payloads, flr,
                 # FIXME: create a Building class & instance & cache its serialization
                 cache.set(bldg["address"], dumps(bldg), ex=cache_period)
         for bldg in buildings:
-            propagate_smell(bldg["address"], bldg["energy"], bldg["energy"])
+            propagate_smell(bldg["address"], bldg["energy"])
         increment_bldgs(flr, UNPROCESSED, len(buildings))
         return len(buildings)
 
