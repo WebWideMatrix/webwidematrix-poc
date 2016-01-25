@@ -35,10 +35,19 @@ def add_smell_to_bldg_and_containers(address, strength_delta,
         cache.hset(new_smells_key, address, strength_delta)
     else:
         cache.hincrby(new_smells_key, address, strength_delta)
-    for addr in get_bldg_containers(address):
+    containers = get_bldg_containers(address)
+    for addr in containers:
         cache.hincrby(new_smells_key, addr, strength_delta)
         count += 1
     return count
+
+
+def add_smell_to_bldg(address, strength_delta, cache, new_smells_key):
+    if not cache.exists(new_smells_key):
+        cache.hset(new_smells_key, address, strength_delta)
+    else:
+        cache.hincrby(new_smells_key, address, strength_delta)
+    return 1
 
 
 def propagate_smell(address, energy):
@@ -150,12 +159,13 @@ def _propagate_smell_around_source(address, x, y, cache, strength, strength_delt
         zip(decreasing, decreasing),   # NW
     ]
     for v in vectors:
-        count += propagate_in_ray(x, y, v, address, count, strength_delta, cache, smells_key)
+        logging.info("Rrraaayy {}".format(count))
+        count += propagate_in_ray(x, y, v, address, strength_delta, cache, smells_key)
 
     return count
 
 
-def propagate_in_ray(x0, y0, vector, address, count, strength_delta, *args):
+def propagate_in_ray(x0, y0, vector, address, strength_delta, *args):
     """
     Set a ray of decreasing smells in some vector from the given location
     :param x0: the center x location
@@ -168,6 +178,7 @@ def propagate_in_ray(x0, y0, vector, address, count, strength_delta, *args):
     :param args: the args to the function that updates smell
     :return: updated count
     """
+    count = 0
     for s, delta in enumerate(vector):
         if strength_delta > 0:
             # smell increased, so propagate it (gradient decrease)
@@ -178,5 +189,5 @@ def propagate_in_ray(x0, y0, vector, address, count, strength_delta, *args):
 
         x, y = x0 + delta[0], y0 + delta[1]
         addr = replace_bldg_coordinates(address, x, y)
-        count += add_smell_to_bldg_and_containers(addr, current_strength_delta, *args)
+        count += add_smell_to_bldg(addr, current_strength_delta, *args)
     return count
