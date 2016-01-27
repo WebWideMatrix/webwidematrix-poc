@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from bson import ObjectId
 from celery.utils.log import get_task_logger
 from mies.buildings.model import remove_occupant, add_occupant, load_bldg, create_buildings
@@ -29,10 +31,15 @@ def create_result_bldgs(curr_bldg, action_results):
                 "at_x": curr_bldg["x"],
                 "at_y": curr_bldg["y"],
             }
-            create_buildings.s(content_type, [key], [payload], flr, position_hints).apply_async(
-                queue='bldg_creation', routing_key='bldg.create'
-            )
-
+            # FIXME: this was getting stuck in the queue. Must be done async.
+            # create_buildings.s(content_type, [key], [payload], flr, position_hints).apply_async(
+            #     queue='bldg_creation', routing_key='bldg.create'
+            # )
+            t1 = datetime.utcnow()
+            create_buildings(content_type, [key], [payload], flr, position_hints)
+            t2 = datetime.utcnow()
+            delta = t2 - t1
+            logging.info("Creating result buildings took: {}".format(delta.seconds))
         else:
             # just update the current bldg
             update_bldg_with_results(curr_bldg, content_type, payload)

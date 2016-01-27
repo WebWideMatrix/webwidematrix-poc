@@ -53,6 +53,8 @@ def add_smell_to_bldg(address, strength_delta, cache, new_smells_key):
 def propagate_smell(address, energy):
     strength = energy
     delta = create_or_update_smell_source(address, strength)
+    if delta < 0:
+        logging.info("NEG "*400)
     _propagate_smell_in_footprint_area(address, strength, delta)
 
 
