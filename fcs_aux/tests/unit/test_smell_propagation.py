@@ -1,7 +1,7 @@
 import pytest
 from mock import patch, MagicMock, ANY, call
 
-from mies.senses.smell.smell_propagator import propagate_smell_around_source, propagate_in_ray
+from mies.senses.smell.smell_propagator import _propagate_smell_around_source, propagate_in_ray
 
 
 @pytest.mark.xfail
@@ -20,7 +20,7 @@ def test_propagate_smell_around_source():
             as add_smell_mock:
         add_smell_mock.return_value = 1
 
-        result = propagate_smell_around_source(address, cache, count, key,
+        result = _propagate_smell_around_source(address, cache, count, key,
                                                strength, x, y)
 
     assert result == 169

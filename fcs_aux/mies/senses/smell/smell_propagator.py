@@ -145,11 +145,15 @@ def _propagate_smell_in_footprint_area(address, strength, strength_delta):
 def _propagate_smell_around_source(address, x, y, cache, strength, strength_delta, smells_key):
     count = add_smell_to_bldg_and_containers(address, strength, cache, smells_key)
 
+    original_strength = strength
+    if strength_delta < 0:
+        original_strength = strength - strength_delta
+
     # draw rays of length (strength-1) the smell source, as approximation of real
     # propagation (for efficiency reasons)
-    decreasing = range(-1, -strength, -1)
-    increasing = range(1, strength)
-    zeroes = [0] * (strength - 1)
+    decreasing = range(-1, -original_strength, -1)
+    increasing = range(1, original_strength)
+    zeroes = [0] * (original_strength - 1)
     vectors = [
         zip(zeroes, decreasing),       # N
         zip(increasing, decreasing),   # NE
