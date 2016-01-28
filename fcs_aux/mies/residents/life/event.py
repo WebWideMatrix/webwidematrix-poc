@@ -63,6 +63,7 @@ def handle_life_event(resident):
     :param resident: the acting resident
     :return:
     """
+    t1 = datetime.utcnow()
     logging.info(" a "*100)
     logging.info(type(resident))
     logging.info(resident)
@@ -141,3 +142,7 @@ def handle_life_event(resident):
         resident.occupy_empty_address(destination_addr)
 
     resident.save()
+    t2 = datetime.utcnow()
+    delta = t2 - t1
+    logging.info("Resident life event took: {}".format(delta.seconds))
+
