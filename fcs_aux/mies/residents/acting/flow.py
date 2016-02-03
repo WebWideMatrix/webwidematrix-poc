@@ -168,7 +168,12 @@ class ActingBehavior:
         self.update_processing_status(True)
 
     def start_processing(self, action, bldg):
-        task = app.send_task(action, [bldg["raw"]])
+        if bldg.get("raw") is None:
+            # TODO increment metric
+            logging.warning("Invoking actions but couldn't find raw payload, "
+                            "using result payload instead")
+        payload = bldg["raw"] if bldg.get("raw") else bldg["paylaod"]
+        task = app.send_task(action, [payload])
         action_status = {
             "startedAt": datetime.utcnow(),
             "startedBy": self._id,
