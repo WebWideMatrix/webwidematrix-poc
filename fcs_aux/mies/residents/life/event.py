@@ -36,7 +36,7 @@ def create_result_bldgs(curr_bldg, action_results):
             #     queue='bldg_creation', routing_key='bldg.create'
             # )
             t1 = datetime.utcnow()
-            create_buildings(content_type, [key], [payload], flr, position_hints)
+            create_buildings(content_type, [key], [summary_payload], [raw_payload], flr, position_hints)
             t2 = datetime.utcnow()
             delta = t2 - t1
             logging.info("Creating result buildings took: {}".format(delta.seconds))
@@ -144,5 +144,5 @@ def handle_life_event(resident):
     resident.save()
     t2 = datetime.utcnow()
     delta = t2 - t1
-    logging.info("Resident life event took: {}".format(delta.seconds))
-
+    duration_in_ms = delta.seconds * 1000 + delta.microseconds / 1000
+    logging.info("Resident life event took: {}ms".format(duration_in_ms))

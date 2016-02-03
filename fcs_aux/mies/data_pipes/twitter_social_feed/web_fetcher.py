@@ -8,7 +8,7 @@ from mies.data_pipes.twitter_social_feed import TWITTER_SOCIAL_POST
 from mies.data_pipes.model import update_data_pipe
 
 
-def extract_payload_from_post(post):
+def extract_raw_payload_from_post(post):
     payload = {
         "external_url": "http://twitter.com/{user}/status/{id}"
         .format(user=post.user.screen_name, id=post.id),
@@ -43,6 +43,18 @@ def extract_payload_from_post(post):
     return payload
 
 
+def extract_summary_from_post_raw_payload(raw_paylaod):
+    summary = {
+        "text": raw_paylaod["text"],
+        "external_url": raw_paylaod["external_url"],
+        "user": {
+            "profile_text_color": raw_paylaod["profile_text_color"],
+            "profile_background_color": raw_paylaod["profile_background_color"],
+        }
+    }
+    return summary
+
+
 def pull_from_data_pipes(page):
     """
     Receives a page of data-pipes.
@@ -70,7 +82,8 @@ def pull_from_data_pipes(page):
         batch_count = 0
         while not done:
             keys = []
-            payloads = []
+            summary_payloads = []
+            raw_payloads = []
             batch_count += 1
             if latest_id is not None:
                 args["since_id"] = latest_id
@@ -87,7 +100,9 @@ def pull_from_data_pipes(page):
                 if not done:
                     max_id = post.id
                     keys.append(post.id)
-                    payloads.append(extract_payload_from_post(post))
+                    raw = extract_raw_payload_from_post(post)
+                    raw_payloads.append(raw)
+                    summary_payloads.append(extract_summary_from_post_raw_payload(raw))
                     count += 1
             else:
                 done = True
@@ -107,7 +122,7 @@ def pull_from_data_pipes(page):
                 #                    keys, payloads, target_flr) \
                 #     .apply_async()
                 create_buildings(TWITTER_SOCIAL_POST,
-                                 keys, payloads, target_flr)
+                                 keys, summary_payloads, raw_payloads, target_flr)
                 if new_latest_id is not None:
                     update_data_pipe(dp["_id"],
                                      {"latestId": new_latest_id})

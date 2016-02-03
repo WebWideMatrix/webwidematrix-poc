@@ -78,8 +78,9 @@ def find_spot(flr, state=None, position_hints=None, db=None):
     return build_bldg_address(flr, x, y), x, y
 
 
-def construct_bldg(flr, content_type, key, payload, position_hints=None,
-                   is_composite=False, db=None):
+def construct_bldg(flr, content_type, key, summary_payload, raw_payload=None,
+                   result_payload=None, position_hints=None, is_composite=False,
+                   db=None):
     x = 0
     y = 0
     address = None
@@ -113,14 +114,18 @@ def construct_bldg(flr, content_type, key, payload, position_hints=None,
 
 
 @app.task(ignore_results=True)
-def create_buildings(content_type, keys, payloads, flr,
+def create_buildings(content_type, keys, summary_payloads, raw_payloads, flr,
                      position_hints=None, is_composite=False,
                      write_to_cache=True, cache_period=ONE_DAY_IN_SECONDS):
     """
     Creates a batch of buildings.
     :param content_type: the content-type of the buildings
     :param keys: the list of keys for the buildings
-    :param payloads: the list of payloads for the buildings
+    :param summary_payloads: the list of summary-payloads for the buildings: basic
+    summary details of the building content. These get persisted in the database.
+    :param raw_payloads: the list of raw-payloads for the buildings: the full
+    content of the building. This doesn't get persisted in the databased, but only
+    transiently stored in cache.
     :param flr: the target floor in which to create the buildings
     :param position_hints: dict of hints where to position
       the new buildings, such as:
@@ -142,8 +147,10 @@ def create_buildings(content_type, keys, payloads, flr,
         if write_to_cache:
             # by default, we also want to cache newly created bldgs
             cache = get_cache()
-            for bldg in buildings:
+            for j, bldg in enumerate(buildings):
                 # FIXME: create a Building class & instance & cache its serialization
+                # the cache should also contain the raw-payload
+                bldg["raw_payload"] = raw_payloads[j]
                 cache.set(bldg["address"], dumps(bldg), ex=cache_period)
         for bldg in buildings:
             propagate_smell(bldg["address"], bldg["energy"])
@@ -156,9 +163,10 @@ def create_buildings(content_type, keys, payloads, flr,
     batch_size = 10
     buildings = []
     count = 0
-    for i, payload in enumerate(payloads):
-        bldg = construct_bldg(flr, content_type, keys[i], payload,
-                              position_hints, is_composite, db)
+    for i, summary_payload in enumerate(summary_payloads):
+        bldg = construct_bldg(flr, content_type, keys[i], summary_payload,
+                              position_hints=position_hints, is_composite=is_composite,
+                              db=db)
         buildings.append(bldg)
         created_addresses.append(bldg["address"])
         if len(buildings) == batch_size:
