@@ -15,7 +15,7 @@ def extract_raw_payload_from_post(post):
         "text": post.text,
         "language": post.lang,
         "external_id": str(post.id),
-        "created_at": post.id,
+        "created_at": post.created_at,
         "in_reply_to_id": post.in_reply_to_status_id,
         "in_reply_to_screen_name": post.in_reply_to_screen_name,
         "favorite_count": post.favorite_count,
@@ -46,11 +46,37 @@ def extract_raw_payload_from_post(post):
 def extract_summary_from_post_raw_payload(raw_paylaod):
     summary = {
         "text": raw_paylaod["text"],
-        "external_url": raw_paylaod["external_url"],
+        "created_at": raw_paylaod["created_at"],
         "user": {
-            "profile_text_color": raw_paylaod["profile_text_color"],
-            "profile_background_color": raw_paylaod["profile_background_color"],
+            "name": raw_paylaod["user"]["name"],
+            "screen_name": raw_paylaod["user"]["screen_name"],
+            "profile_text_color": raw_paylaod["user"]["profile_text_color"],
+            "profile_background_color": raw_paylaod["user"]["profile_background_color"],
         }
+    }
+    return summary
+
+
+def extract_result_from_post_raw_payload(raw_paylaod):
+    summary = {
+        "text": raw_paylaod["text"],
+        "external_id": raw_paylaod["external_id"],
+        "created_at": raw_paylaod["created_at"],
+        "external_url": raw_paylaod["external_url"],
+        "in_reply_to_id": raw_paylaod["in_reply_to_id"],
+        "in_reply_to_screen_name": raw_paylaod["in_reply_to_screen_name"],
+        "favorite_count": raw_paylaod["favorite_count"],
+        "reshare_count": raw_paylaod["reshare_count"],
+        "user": {
+            "name": raw_paylaod["user"]["name"],
+            "screen_name": raw_paylaod["user"]["screen_name"],
+            "profile_text_color": raw_paylaod["user"]["profile_text_color"],
+            "profile_background_color": raw_paylaod["user"]["profile_background_color"],
+        },
+        "financial_symbols": raw_paylaod["financial_symbols"],
+        "user_mentions": raw_paylaod["user_mentions"],
+        "hashtags": raw_paylaod["hashtags"],
+        "urls": raw_paylaod["urls"],
     }
     return summary
 
@@ -84,6 +110,7 @@ def pull_from_data_pipes(page):
             keys = []
             summary_payloads = []
             raw_payloads = []
+            result_payloads = []
             batch_count += 1
             if latest_id is not None:
                 args["since_id"] = latest_id
@@ -103,6 +130,7 @@ def pull_from_data_pipes(page):
                     raw = extract_raw_payload_from_post(post)
                     raw_payloads.append(raw)
                     summary_payloads.append(extract_summary_from_post_raw_payload(raw))
+                    result_payloads.append(extract_result_from_post_raw_payload(raw))
                     count += 1
             else:
                 done = True
@@ -110,19 +138,19 @@ def pull_from_data_pipes(page):
             if latest_id is None and new_latest_id is not None:
                 done = True
 
-            if payloads:
+            if summary_payloads:
                 logging.info("P"*100)
-                logging.info("Got {} posts".format(len(payloads)))
+                logging.info("Got {} posts".format(len(summary_payloads)))
                 logging.info("P"*100)
                 # TODO check whether the connected bldg is a flr or a bldg
                 target_flr = dp["connectedBldg"] + "-l0"
                 logging.info("Sending {} buildings to {}.."
-                             .format(len(payloads), target_flr))
+                             .format(len(summary_payloads), target_flr))
                 # create_buildings.s(TWITTER_SOCIAL_POST,
                 #                    keys, payloads, target_flr) \
                 #     .apply_async()
                 create_buildings(TWITTER_SOCIAL_POST,
-                                 keys, summary_payloads, raw_payloads, target_flr)
+                                 keys, summary_payloads, raw_payloads, result_payloads, target_flr)
                 if new_latest_id is not None:
                     update_data_pipe(dp["_id"],
                                      {"latestId": new_latest_id})

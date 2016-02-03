@@ -18,7 +18,9 @@ def create_result_bldgs(curr_bldg, action_results):
     for r in action_results:
         key = r.get("key")
         content_type = r.get("contentType")
-        payload = r.get("payload")
+        summary_payload = r.get("summary_payload")
+        raw_payload = r.get("raw_payload")
+        result_payload = r.get("result_payload")
         placement_hints = r.get("placement_hints")
 
         if placement_hints.get("new_bldg"):
@@ -36,13 +38,15 @@ def create_result_bldgs(curr_bldg, action_results):
             #     queue='bldg_creation', routing_key='bldg.create'
             # )
             t1 = datetime.utcnow()
-            create_buildings(content_type, [key], [summary_payload], [raw_payload], flr, position_hints)
+            create_buildings(content_type, [key], [summary_payload], [raw_payload],
+                             [result_payload], flr, position_hints)
             t2 = datetime.utcnow()
             delta = t2 - t1
             logging.info("Creating result buildings took: {}".format(delta.seconds))
         else:
             # just update the current bldg
-            update_bldg_with_results(curr_bldg, content_type, payload)
+            update_bldg_with_results(curr_bldg, content_type, summary_payload,
+                                     raw_payload, result_payload)
 
 
 @app.task(ignore_result=True)
