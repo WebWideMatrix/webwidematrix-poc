@@ -168,7 +168,7 @@ class ActingBehavior:
         self.update_processing_status(True)
 
     def start_processing(self, action, bldg):
-        task = app.send_task(action, [bldg["payload"]])
+        task = app.send_task(action, [bldg["raw"]])
         action_status = {
             "startedAt": datetime.utcnow(),
             "startedBy": self._id,
