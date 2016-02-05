@@ -47,6 +47,7 @@ def extract_summary_from_post_raw_payload(raw_paylaod):
     summary = {
         "text": raw_paylaod["text"],
         "created_at": raw_paylaod["created_at"],
+        "external_url": raw_paylaod["external_url"],
         "user": {
             "name": raw_paylaod["user"]["name"],
             "screen_name": raw_paylaod["user"]["screen_name"],

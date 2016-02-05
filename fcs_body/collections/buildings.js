@@ -147,8 +147,8 @@ extractBldgCoordinates = function(bldgAddr) {
 };
 
 getBldgLink = function(d) {
-    if (d.payload.external_url) {
-        return d.payload.external_url;
+    if (d.summary.external_url) {
+        return d.summary.external_url;
     }
     else {
         // if no external link, link to the 1st flr of the bldg

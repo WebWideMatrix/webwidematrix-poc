@@ -24,7 +24,12 @@ Meteor.publish("buildings", function (addr) {
             {address: bldgAddr}
         ]
     };
-    return Buildings.find(query);
+    var fields = {
+        fields: {
+            "payload": 0
+        }
+    };
+    return Buildings.find(query, fields);
 });
 
 Meteor.publish("residents", function (addr) {

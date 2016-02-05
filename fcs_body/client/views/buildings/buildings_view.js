@@ -17,18 +17,18 @@ redirectTo = function(newAddress, prefix) {
 
 bldgRenderFunc = {
     'twitter-social-post': function(d) {
-        var text = d.payload.text;
+        var text = d.summary.text;
         var html = "<p " +
-            "style=\"color: #" + d.payload.user.profile_text_color + "; " +
-            "background-color: #" + d.payload.user.profile_background_color + "; " +
+            "style=\"color: #" + d.summary.user.profile_text_color + "; " +
+            "background-color: #" + d.summary.user.profile_background_color + "; " +
             "height: 10px; \">" + text + "</p>";
         return html;
     },
     'article-text': function(d) {
-        var text = d.payload.title;
+        var text = d.summary.title;
         var html = "<p " +
-            "style=\"color: #" + d.payload.user.profile_text_color + "; " +
-            "background-color: #" + d.payload.user.profile_background_color + "; " +
+            "style=\"color: #" + d.summary.user.profile_text_color + "; " +
+            "background-color: #" + d.summary.user.profile_background_color + "; " +
             "height: 10px; \">" + text + "</p>";
         return html;
     },
@@ -46,9 +46,8 @@ bldgRenderFunc = {
         return html;
     },
     'user': function(d) {
-        var imgUrl = d.payload.picture;
         var html = "<div style=\"height: 6px; width: 6px;\">";
-        html += "<img src=\"" + d.payload.picture + "\" width=6px " +
+        html += "<img src=\"" + d.summary.picture + "\" width=6px " +
             "height=6px title=\"" + d.key + "\">";
         html += "</div>";
         return html;
