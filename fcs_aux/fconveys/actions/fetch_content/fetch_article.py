@@ -51,11 +51,19 @@ def fetch_article_action(input_payload):
             {
                 "contentType": "article-text",
                 "key": url,
+                "summary": {
+                    "url": url,
+                    "display_url": display_url,
+                    "shortened_url": shortened_url,
+                },
+                "raw": {
+                    "text": text
+                },
                 "payload": {
                     "url": url,
                     "display_url": display_url,
                     "shortened_url": shortened_url,
-                    "text": text
+                    "raw_text_size": len(text)
                 },
                 "placement_hints": {
                     "new_bldg": True,

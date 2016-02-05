@@ -1,12 +1,15 @@
 from datetime import datetime
 import random
+from json import dumps
+
 from mies.buildings.stats import decrement_bldgs, UNPROCESSED, \
     PROCESSED, increment_bldgs, BEING_PROCESSED
 
 from mies.constants import DEFAULT_BLDG_ENERGY
-from mies.buildings.model import logging
+from mies.buildings.model import logging, ONE_DAY_IN_SECONDS
 from mies.celery import app
 from mies.mongo_config import get_db
+from mies.redis_config import get_cache
 from mies.senses.smell.smell_propagator import propagate_smell
 
 
@@ -68,13 +71,18 @@ def update_bldg_processed_status(bldg, energy_change):
         bldg["address"], change))
 
 
-def update_bldg_with_results(bldg, content_type, payload):
+def update_bldg_with_results(bldg, content_type, summary_payload,
+                             raw_payload, result_payload,
+                             cache_period=ONE_DAY_IN_SECONDS):
     # TODO have a Bldg class & move the method there
     change = {}
     if content_type and content_type != bldg["contentType"]:
         change["contentType"] = content_type
-    if payload:
-        bldg["payload"].update(payload)
+    if summary_payload is not None:
+        bldg["summary"].update(summary_payload)
+        change["summary"] = bldg["summary"]
+    if result_payload is not None:
+        bldg["payload"].update(result_payload)
         change["payload"] = bldg["payload"]
 
     db = get_db()
@@ -83,6 +91,11 @@ def update_bldg_with_results(bldg, content_type, payload):
                         }, {
                             "$set": change
                         })
+    # if raw payload also changed, update it in cache
+    if raw_payload is not None:
+        bldg["raw"] = raw_payload
+    cache = get_cache()
+    cache.set(bldg["address"], dumps(bldg), ex=cache_period)
     logging.info("Updated bldg {} with results".format(bldg["address"]))
 
 
@@ -172,7 +185,9 @@ class ActingBehavior:
             # TODO increment metric
             logging.warning("Invoking actions but couldn't find raw payload, "
                             "using result payload instead")
-        payload = bldg["raw"] if bldg.get("raw") else bldg["paylaod"]
+        payload = bldg["paylaod"]
+        if "raw" in bldg:
+            payload.update(bldg["raw"])
         task = app.send_task(action, [payload])
         action_status = {
             "startedAt": datetime.utcnow(),
