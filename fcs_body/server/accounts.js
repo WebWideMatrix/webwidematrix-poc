@@ -20,7 +20,7 @@ Accounts.onCreateUser(function (options, user) {
 
     var wrappedCreateBldg = Async.wrap(createBldg);
     var bldgId = wrappedCreateBldg(INITIAL_FLOOR, username, null,
-        USER_CONTENT_TYPE, true, user.profile);
+        USER_CONTENT_TYPE, true, user.profile, user.profile);
     var bldg = Buildings.findOne({_id: bldgId});
 
     var wrappedCreateDataPipe = Async.wrap(createDataPipe);

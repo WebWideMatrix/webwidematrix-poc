@@ -4,7 +4,7 @@ Buildings = new Meteor.Collection('buildings');
 // DB involving functions
 //
 
-createBldg = function(flr, key, near, contentType, isComposite, payload, callback) {
+createBldg = function(flr, key, near, contentType, isComposite, summary, payload, callback) {
     var x = 0,
         y = 0,
         address = buildBldgAddress(flr, x, y),
@@ -42,6 +42,7 @@ createBldg = function(flr, key, near, contentType, isComposite, payload, callbac
             createdAt: new Date(),
             contentType: contentType,
             isComposite: isComposite,
+            summary: payload,
             payload: payload,
             processed: false,
             occupied: false,
@@ -147,7 +148,7 @@ extractBldgCoordinates = function(bldgAddr) {
 };
 
 getBldgLink = function(d) {
-    if (d.summary.external_url) {
+    if (d.summary && d.summary.external_url) {
         return d.summary.external_url;
     }
     else {

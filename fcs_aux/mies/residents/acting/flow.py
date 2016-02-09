@@ -185,7 +185,7 @@ class ActingBehavior:
             # TODO increment metric
             logging.warning("Invoking actions but couldn't find raw payload, "
                             "using result payload instead")
-        payload = bldg["paylaod"]
+        payload = bldg["payload"]
         if "raw" in bldg:
             payload.update(bldg["raw"])
         task = app.send_task(action, [payload])
