@@ -42,7 +42,7 @@ createBldg = function(flr, key, near, contentType, isComposite, summary, payload
             createdAt: new Date(),
             contentType: contentType,
             isComposite: isComposite,
-            summary: payload,
+            summary: summary,
             payload: payload,
             processed: false,
             occupied: false,
