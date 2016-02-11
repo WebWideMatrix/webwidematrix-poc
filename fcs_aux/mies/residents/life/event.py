@@ -1,14 +1,16 @@
 from datetime import datetime
+from billiard import current_process
 
 from bson import ObjectId
-from celery.utils.log import get_task_logger
+from kombu import uuid
+from structlog import get_logger
 from mies.buildings.model import remove_occupant, add_occupant, load_bldg, create_buildings
 from mies.buildings.utils import get_flr_level, replace_flr_level
 from mies.celery import app
 from mies.residents.acting.flow import update_bldg_with_results
 from mies.residents.model import Resident
 
-logging = get_task_logger(__name__)
+logging = get_logger()
 
 
 def create_result_bldgs(curr_bldg, action_results):
@@ -67,6 +69,12 @@ def handle_life_event(resident):
     :param resident: the acting resident
     :return:
     """
+    life_event_id = uuid()
+    global logging
+    # if you need the worker id: worker=(current_process().index+1)
+    logging = logging.bind(resident=resident["name"],
+                           life_event_id=life_event_id)
+
     t1 = datetime.utcnow()
     logging.info(" a "*100)
     logging.info(type(resident))

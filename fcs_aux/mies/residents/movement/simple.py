@@ -1,4 +1,4 @@
-import logging
+from structlog import get_logger
 import random
 from mies.buildings.model import load_nearby_bldgs, has_bldgs, get_bldg_flrs, get_nearby_addresses
 from mies.buildings.stats import decrement_residents, increment_residents
@@ -9,6 +9,8 @@ from mies.lifecycle_managers.daily_building.manager import _build_user_current_b
 from mies.redis_config import get_cache
 
 VISION_POWER = 20
+
+logging = get_logger()
 
 
 class NothingFoundException(Exception):
@@ -23,6 +25,10 @@ def _build_resident_location_cache_key(addr):
 class MovementBehavior:
 
     def choose_bldg(self, curr_bldg):
+
+        global logging
+        # if you need the worker id: worker=(current_process().index+1)
+        logging = logging.bind(resident=self.name)
 
         # get the current bldg for the user
         logging.info("Choosing bldg for {}".format(self.name))
