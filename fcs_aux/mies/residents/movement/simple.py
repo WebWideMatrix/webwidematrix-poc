@@ -1,3 +1,4 @@
+import logging as raw_logging
 from structlog import get_logger
 import random
 from mies.buildings.model import load_nearby_bldgs, has_bldgs, get_bldg_flrs, get_nearby_addresses
@@ -147,8 +148,8 @@ class MovementBehavior:
         area = []
         for j in range(min_y, max_y):
             area.append(flr[j][min_x:max_x])
-        logging.info('\n\n' + '\n'.join([''.join(['{:2}'.format(item) for item in row])
-                                         for row in area]))
+        raw_logging.info('\n\n' + '\n'.join([''.join(['{:2}'.format(item) for item in row])
+                                             for row in area]))
         logging.info('---')
 
     def track_moves_without_smell(self, smelled_something):

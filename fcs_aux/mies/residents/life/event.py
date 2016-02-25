@@ -20,9 +20,9 @@ def create_result_bldgs(curr_bldg, action_results):
     for r in action_results:
         key = r.get("key")
         content_type = r.get("contentType")
-        summary_payload = r.get("summary_payload")
-        raw_payload = r.get("raw_payload")
-        result_payload = r.get("result_payload")
+        summary_payload = r.get("summary")
+        raw_payload = r.get("raw")
+        result_payload = r.get("payload")
         placement_hints = r.get("placement_hints")
 
         if placement_hints.get("new_bldg"):

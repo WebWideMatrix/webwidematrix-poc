@@ -1,5 +1,7 @@
 from collections import defaultdict
 from datetime import datetime
+
+import sys
 from bson.json_util import dumps, loads
 import random
 
@@ -11,6 +13,10 @@ from mies.mongo_config import get_db
 from mies.constants import FLOOR_W, FLOOR_H, PROXIMITY, DEFAULT_BLDG_ENERGY
 from mies.redis_config import get_cache
 from mies.senses.smell.smell_propagator import propagate_smell
+
+MAX_PAYLOAD_SIZE = 10000
+
+MAX_SUMMARY_SIZE = 1000
 
 logging = get_task_logger(__name__)
 
@@ -86,8 +92,12 @@ def construct_bldg(flr, content_type, key, summary_payload, raw_payload=None,
     address = None
     trials_state = _create_trials_state()
     while address is None:
+        logging.info("Finding spot")
         address, x, y = find_spot(flr, trials_state, position_hints, db)
         if not is_vacant(address, db):
+            # if hints to use specific location, & it's caught, then move on
+            position_hints.pop("at_x")
+            position_hints.pop("at_y")
             address = None
 
     # TODO revise to avoid infinite loop if no spot is available
@@ -96,6 +106,15 @@ def construct_bldg(flr, content_type, key, summary_payload, raw_payload=None,
     #              .format(content_type=content_type,
     #                      address=address,
     #                      text=payload["text"]))
+    if sys.getsizeof(summary_payload) > MAX_SUMMARY_SIZE:
+        logging.error("Summary is too big!")
+        raise RuntimeError("Summary is too big! ({} bytes)"
+                           .format(sys.getsizeof(summary_payload)))
+    if sys.getsizeof(result_payload) > MAX_PAYLOAD_SIZE:
+        logging.error("Payload is too big!")
+        logging.info(result_payload)
+        raise RuntimeError("Payload is too big! ({} bytes)"
+                           .format(sys.getsizeof(result_payload)))
     return dict(
         address=address,
         flr=flr,
