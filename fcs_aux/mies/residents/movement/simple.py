@@ -1,4 +1,6 @@
 import logging as raw_logging
+from datetime import datetime
+
 from structlog import get_logger
 import random
 from mies.buildings.model import load_nearby_bldgs, has_bldgs, get_bldg_flrs, get_nearby_addresses
@@ -56,31 +58,68 @@ class MovementBehavior:
         # if haven't smelled anything for a long time, give up
         # & get outside this flr
         if self.movesWithoutSmell > GIVE_UP_ON_FLR:
+            logging.info("->"*100)
+            logging.info("Giving up on flr: nothing smelled for {} ticks".format(self.movesWithoutSmell))
             self.get_outside()
             self.reset_interactions_log()
         # if encountered many residents in the last hour, switch flr
         elif self.get_interactions_rate() > MAX_INTERACTION_RATE:
+            logging.info("^"*100)
+            logging.info("|"*100)
+            logging.info("Switching flr due to high interaction rate")
             self.randomly_switch_flr()
             self.reset_interactions_log()
 
-
         # if it's a composite bldg with smell, get inside
         if curr_bldg and curr_bldg["isComposite"] and get_bldg_smell(curr_bldg["address"]):
+            logging.info("At a composite bldg - getting inside...")
             self.get_inside(curr_bldg)
 
         # get all near-by bldgs & smells
         # Note: assuming same vision & smelling power
 
         bldgs = self.look_around()      # dict: addr->bldg
+        logging.info("Found {} bldgs around".format(len(bldgs)))
         smells = self.smell_around()    # dict: addr->smell
+        logging.info("Smelled {} smells".format(len(smells)))
         neighbours = self.look_for_neighbours_around()  # dict: addr->neighbour
+        logging.info("Saw {} neighbours".format(len(neighbours)))
 
+        self.track_moves_without_smell(len(smells) > 0)
+
+        if bldgs:
+            max_energy = 0
+            most_energy_addr = None
+            occupied = []
+            for addr, bldg in bldgs.iteritems():
+                # don't move to a place caught by another resident
+                if neighbours.get(addr):
+                    occupied.append(addr)
+                    self.log_interaction(neighbours[addr], addr)
+                elif bldg["occupied"]:
+                    occupied.append(addr)
+                    self.log_interaction(bldg["occupiedBy"], addr)
+                elif bldg["energy"] and bldg["energy"] > 0:
+                    if bldg["energy"] > max_energy:
+                        max_energy = bldg["energy"]
+                        most_energy_addr = addr
+            if max_energy > 0:
+                logging.info("Saw food, eating.")
+                return most_energy_addr, bldgs[most_energy_addr]
+
+        logging.info("No food in sight, moving by smell")
         logging.info("XX smells:")
+        t1 = datetime.utcnow()
         logging.info(self.log_perception(smells, bldgs, neighbours))
+        t2 = datetime.utcnow()
+        delta = t2 - t1
+        duration_in_ms = delta.seconds * 1000 + delta.microseconds / 1000
+        logging.info("Logging perception took: {}ms".format(duration_in_ms))
 
         most_smelly_addr = None
         max_smell = -1
         occupied = []
+        t1 = datetime.utcnow()
         for addr, smell in smells.iteritems():
             # don't move to a place caught by another resident
             if neighbours.get(addr):
@@ -94,15 +133,21 @@ class MovementBehavior:
                 if smell > max_smell:
                     most_smelly_addr = addr
                     max_smell = smell
+        t2 = datetime.utcnow()
+        delta = t2 - t1
+        duration_in_ms = delta.seconds * 1000 + delta.microseconds / 1000
+        logging.info("Finding max smell took: {}ms".format(duration_in_ms))
+        logging.info("Found max smell {} at {}".format(max_smell, most_smelly_addr))
 
         # don't consider occupied addresses
         for addr in occupied:
             del smells[addr]
 
         if max_smell <= 0:
+            logging.info("No available smell, going randomly about")
+            # FIXME: smells is probably empty - need to choose from area around
             most_smelly_addr = random.choice(smells.keys())
 
-        self.track_moves_without_smell(max_smell <= 0)
         bldg = bldgs.get(most_smelly_addr)
         return most_smelly_addr, bldg
 

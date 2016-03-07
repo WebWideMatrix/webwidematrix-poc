@@ -95,10 +95,11 @@ def construct_bldg(flr, content_type, key, summary_payload, raw_payload=None,
         logging.info("Finding spot")
         address, x, y = find_spot(flr, trials_state, position_hints, db)
         if not is_vacant(address, db):
-            # if hints to use specific location, & it's caught, then move on
-            position_hints.pop("at_x")
-            position_hints.pop("at_y")
             address = None
+            if position_hints is not None:
+                # if hints to use specific location, & it's caught, then move on
+                position_hints.pop("at_x")
+                position_hints.pop("at_y")
 
     # TODO revise to avoid infinite loop if no spot is available
 

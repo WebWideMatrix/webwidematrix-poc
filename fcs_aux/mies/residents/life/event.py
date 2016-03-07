@@ -138,12 +138,14 @@ def handle_life_event(resident):
     # if moved into a bldg, update it to indicate that
     # the residents is inside
     if destination_bldg:
+        logging.info("Occupying bldg at: {}".format(destination_addr))
         add_occupant(resident._id, destination_bldg["_id"])
 
         resident.occupy_bldg(destination_bldg)
 
         # if the bldg has payload that requires processing,
         if "payload" in destination_bldg and not destination_bldg["processed"]:
+            logging.info("Yay, found something to eat!!!!!!!!!!!!!!!")
             # choose an action to apply to the payload
             action = resident.choose_action(destination_bldg)
 
@@ -151,6 +153,7 @@ def handle_life_event(resident):
             resident.start_processing(action, destination_bldg)
 
     else:
+        logging.info("Moving to empty address: {}".format(destination_addr))
         resident.occupy_empty_address(destination_addr)
 
     resident.save()

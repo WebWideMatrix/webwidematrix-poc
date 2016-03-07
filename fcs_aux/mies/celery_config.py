@@ -15,6 +15,7 @@ CELERY_DEFAULT_QUEUE = 'default'
 CELERY_QUEUES = (
     Queue('default',    routing_key='task.#'),
     Queue('life_events', routing_key='life.#'),
+    Queue('actions', routing_key='actions.#'),
     Queue('bldg_creation', routing_key='bldg.#'),
     Queue('data_pipes', routing_key='pipe.#'),
 )

@@ -188,7 +188,7 @@ class ActingBehavior:
         payload = bldg["payload"]
         if "raw" in bldg:
             payload.update(bldg["raw"])
-        task = app.send_task(action, [payload])
+        task = app.send_task(action, [payload], queue="actions")
         action_status = {
             "startedAt": datetime.utcnow(),
             "startedBy": self._id,
