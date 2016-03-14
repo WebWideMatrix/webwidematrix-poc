@@ -38,5 +38,9 @@ CELERYBEAT_SCHEDULE = {
     'invoke_residents_life_event_every_minute': {
         'task': 'mies.lifecycle_managers.residents_life.manager.invoke',
         'schedule': timedelta(minutes=1),
+    },
+    'invoke_health_monitor_every_minute': {
+        'task': 'mies.lifecycle_managers.health_monitoring.manager.invoke',
+        'schedule': timedelta(minutes=1),
     }
 }
