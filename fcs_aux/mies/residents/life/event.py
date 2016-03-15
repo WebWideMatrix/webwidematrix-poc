@@ -4,7 +4,7 @@ from bson import ObjectId
 from kombu import uuid
 from structlog import get_logger
 from mies.buildings.model import remove_occupant, add_occupant, load_bldg, create_buildings
-from mies.buildings.utils import get_flr_level, replace_flr_level
+from mies.buildings.utils import get_flr_level, replace_flr_level, time_print
 from mies.celery import app
 from mies.redis_config import get_cache
 from mies.residents.acting.flow import update_bldg_with_results
@@ -42,12 +42,8 @@ def create_result_bldgs(curr_bldg, action_results):
             # create_buildings.s(content_type, [key], [payload], flr, position_hints).apply_async(
             #     queue='bldg_creation', routing_key='bldg.create'
             # )
-            t1 = datetime.utcnow()
             create_buildings(content_type, [key], [summary_payload], [raw_payload],
                              [result_payload], flr, position_hints)
-            t2 = datetime.utcnow()
-            delta = t2 - t1
-            logging.info("Creating result buildings took: {}".format(delta.seconds))
         else:
             # just update the current bldg
             update_bldg_with_results(curr_bldg, content_type, summary_payload,
@@ -147,16 +143,19 @@ def handle_life_event(resident):
         else:
             logging.info("5"*100)
             # yay, we have results
-            create_result_bldgs(curr_bldg, action_result)
+            with time_print(logging, "create result bldg"):
+                create_result_bldgs(curr_bldg, action_result)
 
         logging.info("6"*100)
         # if we got here, it means that no action is still pending
-        resident.finish_processing(action_status, curr_bldg)
+        with time_print(logging, "finish processing"):
+            resident.finish_processing(action_status, curr_bldg)
 
     # choose a bldg to move into
     logging.info("~~BEFORE~~"*10)
     logging.info("BBBefore {}".format(resident.location))
-    destination_addr, destination_bldg = resident.choose_bldg(curr_bldg)
+    with time_print(logging, "choose bldg"):
+        destination_addr, destination_bldg = resident.choose_bldg(curr_bldg)
     logging.info("~~AFTER~~"*10)
     logging.info("AAAfter {}".format(resident.location))
 
@@ -177,11 +176,12 @@ def handle_life_event(resident):
         if "payload" in destination_bldg and not destination_bldg["processed"]:
             logging.info("Yay, found something to eat!!!!!!!!!!!!!!!")
             # choose an action to apply to the payload
-            action = resident.choose_action(destination_bldg)
+            with time_print(logging, "choose action"):
+                action = resident.choose_action(destination_bldg)
 
             # apply the action
-            resident.start_processing(action, destination_bldg)
-
+            with time_print(logging, "sending action"):
+                resident.start_processing(action, destination_bldg)
     else:
         logging.info("Moving to empty address: {}".format(destination_addr))
         resident.occupy_empty_address(destination_addr)

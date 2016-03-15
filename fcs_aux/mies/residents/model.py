@@ -1,3 +1,5 @@
+import logging
+
 from mies.mongo_config import get_db
 from mies.residents.acting.flow import ActingBehavior
 from mies.residents.interactions.simple import InteractionBehavior
@@ -43,6 +45,7 @@ class Resident(dict, ActingBehavior, MovementBehavior, SmellingBehavior, Interac
         super(Resident, self).__setattr__(key, value)
 
     def save(self):
+        logging.info("Saving resident {}".format(self._id))
         db = get_db()
         db.residents.update(
             {"_id": self._id},
