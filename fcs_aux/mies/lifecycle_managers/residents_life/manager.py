@@ -16,10 +16,7 @@ def invoke():
     criteria = {
         "status": STATUS_ACTIVE
     }
+    # TODO fan-out: fire each page in its own task, which will fire individual tick tasks
     for page in load_residents(criteria):
-        logging.info(" - "*100)
         for resident in page:
-            logging.info(" | "*100)
-            logging.info(type(resident))
-            logging.info(resident)
             handle_life_event.s(resident).apply_async(queue='life_events', routing_key='life.events')

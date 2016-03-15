@@ -28,8 +28,11 @@ def measure_coverage(db, cache):
             "flr": flr,
             "processed": True
         }).count()
-        results.append(float(processed) / float(unprocessed))
-    return float(sum(results)) / float(len(results))
+        if unprocessed:
+            results.append(float(processed) / float(unprocessed))
+    if results:
+        return float(sum(results)) / float(len(results))
+    return 0
 
 
 def measure_ingress_vs_egress(db, cache):
@@ -50,7 +53,9 @@ def measure_ingress_vs_egress(db, cache):
             "createdAt": {"$gte": start_time}
         }).count()
         results.append(ingress - egress)
-    return float(sum(results)) / float(len(results))
+    if results:
+        return float(sum(results)) / float(len(results))
+    return 0
 
 
 def log_metrics(metrics, results):

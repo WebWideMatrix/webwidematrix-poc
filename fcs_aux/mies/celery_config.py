@@ -23,7 +23,7 @@ CELERY_DEFAULT_EXCHANGE = 'tasks'
 CELERY_DEFAULT_EXCHANGE_TYPE = 'topic'
 CELERY_DEFAULT_ROUTING_KEY = 'task.default'
 
-DATA_PIPES_INTERVAL = 10
+DATA_PIPES_INTERVAL = 5
 
 CELERYBEAT_SCHEDULE = {
     'invoke_data_pipes_every_few_minutes': {
@@ -37,7 +37,7 @@ CELERYBEAT_SCHEDULE = {
     },
     'invoke_residents_life_event_every_minute': {
         'task': 'mies.lifecycle_managers.residents_life.manager.invoke',
-        'schedule': timedelta(minutes=1),
+        'schedule': timedelta(seconds=10),
     },
     'invoke_health_monitor_every_minute': {
         'task': 'mies.lifecycle_managers.health_monitoring.manager.invoke',
