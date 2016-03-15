@@ -27,8 +27,8 @@ bldgRenderFunc = {
     'article-text': function(d) {
         var text = d.summary.display_url;
         var html = "<p " +
-            "style=\"color: #" + d.summary.user.profile_text_color + "; " +
-            "background-color: #" + d.summary.user.profile_background_color + "; " +
+            "style=\"color: blue; " +
+            "background-color: white; " +
             "height: 10px; \">" + text + "</p>";
         return html;
     },

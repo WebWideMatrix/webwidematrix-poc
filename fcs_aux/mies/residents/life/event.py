@@ -1,5 +1,4 @@
 from datetime import datetime
-from billiard import current_process
 
 from bson import ObjectId
 from kombu import uuid
@@ -7,10 +6,14 @@ from structlog import get_logger
 from mies.buildings.model import remove_occupant, add_occupant, load_bldg, create_buildings
 from mies.buildings.utils import get_flr_level, replace_flr_level
 from mies.celery import app
+from mies.redis_config import get_cache
 from mies.residents.acting.flow import update_bldg_with_results
 from mies.residents.model import Resident
 
 logging = get_logger()
+
+LIFE_EVENT_TASK_LOCK = "lock.resident.life_event.{}"
+LOCK_EXPIRE = 60 * 10
 
 
 def create_result_bldgs(curr_bldg, action_results):
@@ -51,6 +54,27 @@ def create_result_bldgs(curr_bldg, action_results):
                                      raw_payload, result_payload)
 
 
+def acquire_lock(resident_id):
+    cache = get_cache()
+    cache_key = LIFE_EVENT_TASK_LOCK.format(resident_id)
+    if cache.get(cache_key) is None:
+        cache.set(cache_key, True, ex=LOCK_EXPIRE)
+        return True
+    return False
+
+
+def is_running(resident_id):
+    cache = get_cache()
+    cache_key = LIFE_EVENT_TASK_LOCK.format(resident_id)
+    return cache.get(cache_key)
+
+
+def release_lock(resident_id):
+    cache = get_cache()
+    cache_key = LIFE_EVENT_TASK_LOCK.format(resident_id)
+    cache.delete(cache_key)
+
+
 @app.task(ignore_result=True)
 def handle_life_event(resident):
     """
@@ -69,6 +93,11 @@ def handle_life_event(resident):
     :param resident: the acting resident
     :return:
     """
+    if not acquire_lock(resident["_id"]):
+        logging.warn("Resident {} previous life event is still ongoing, "
+                     "aborting.".format(resident["_id"]))
+        return
+
     life_event_id = uuid()
     global logging
     # if you need the worker id: worker=(current_process().index+1)
@@ -113,6 +142,7 @@ def handle_life_event(resident):
                 logging.info("Action in {addr} is still pending. "
                              "Doing nothing for now."
                              .format(addr=resident.bldg))
+                release_lock(resident["_id"])
                 return
         else:
             logging.info("5"*100)
@@ -161,3 +191,4 @@ def handle_life_event(resident):
     delta = t2 - t1
     duration_in_ms = delta.seconds * 1000 + delta.microseconds / 1000
     logging.info("Resident life event took: {}ms".format(duration_in_ms))
+    release_lock(resident["_id"])
