@@ -7,7 +7,7 @@ import random
 
 from celery.utils.log import get_task_logger
 from mies.buildings.stats import increment_bldgs, UNPROCESSED
-from mies.buildings.utils import extract_bldg_coordinates, get_flr
+from mies.buildings.utils import extract_bldg_coordinates, get_flr, time_print
 from mies.celery import app
 from mies.mongo_config import get_db
 from mies.constants import FLOOR_W, FLOOR_H, PROXIMITY, DEFAULT_BLDG_ENERGY
@@ -202,7 +202,7 @@ def create_buildings(content_type, keys, summary_payloads, raw_payloads,
     return created_addresses
 
 
-def get_nearby_addresses(address, proximity=50):
+def get_nearby_addresses(address, proximity=10):
     # generate a list of neighbour addresses
     addresses = []
     flr = get_flr(address)
