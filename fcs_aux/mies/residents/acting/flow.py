@@ -1,6 +1,7 @@
 from datetime import datetime
 import random
-from json import dumps
+from bson.json_util import dumps, loads
+
 
 from mies.buildings.stats import decrement_bldgs, UNPROCESSED, \
     PROCESSED, increment_bldgs, BEING_PROCESSED
@@ -62,6 +63,12 @@ def update_bldg_processed_status(bldg, energy_change):
                         }, {
                             "$set": change
                         })
+    # also update the cache
+    cache = get_cache()
+    cached_bldg = loads(cache.get(bldg["address"]))
+    cached_bldg.update(change)
+    cache.set(bldg["address"], dumps(cached_bldg), ex=ONE_DAY_IN_SECONDS)
+
     propagate_smell(bldg["address"], new_energy)
     if not was_processed and is_processed:
         decrement_bldgs(bldg["flr"], UNPROCESSED)

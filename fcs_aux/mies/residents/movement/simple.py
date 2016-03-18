@@ -24,7 +24,6 @@ def _build_resident_location_cache_key(addr):
     return "OCCUPIED_{}".format(addr)
 
 
-
 class MovementBehavior:
 
     def choose_bldg(self, curr_bldg):
