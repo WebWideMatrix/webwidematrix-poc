@@ -22,9 +22,9 @@ def _create_bldg(target_flr, today, data_pipe):
         "date": today,
         "data_pipes": [data_pipe["type"]]
     }
-    address = create_buildings(content_type=DAILY_FEED, keys=[today],
-                               summary_payloads=[payload], raw_payloads=[payload],
-                               result_payloads=[payload], flr=target_flr,
+    address = create_buildings(flr=target_flr, content_type=DAILY_FEED, heads=[dict(key=today)],
+                               bodies=[dict(summary_payload=payload, raw_payload=payload,
+                                            result_payload=payload)],
                                position_hints={"next_free": True},
                                is_composite=True)
     if type(address) == list:

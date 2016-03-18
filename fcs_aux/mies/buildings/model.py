@@ -84,9 +84,26 @@ def find_spot(flr, state=None, position_hints=None, db=None):
     return build_bldg_address(flr, x, y), x, y
 
 
-def construct_bldg(flr, content_type, key, summary_payload, raw_payload=None,
-                   result_payload=None, position_hints=None, is_composite=False,
+def construct_bldg(flr, content_type, head, body, position_hints=None, is_composite=False,
                    db=None):
+    """
+    Constructs a bldg
+    :param flr: the flr
+    :param content_type: the content-type
+    :param head: a dict of head attributes, such as: key, title, picture
+    :param body: a dict of body payloads, such as:
+        * summary_payload: basic summary details of the building content.
+          This get persisted in the database.
+        * raw_payload: the full content of the building. This doesn't get
+          persisted in the databased, but only transiently stored in cache.
+        * result_payload: content that should be persisted in the database.
+          Note that this should be kept small.
+    :param position_hints: hints to guide finding a location for the bldg
+    :param is_composite: whether to mark the bldgs as composite ones
+      (i.e., containing levels & inner bldgs)
+    :param db: reference to the database
+    :return:
+    """
     x = 0
     y = 0
     address = None
@@ -107,15 +124,15 @@ def construct_bldg(flr, content_type, key, summary_payload, raw_payload=None,
     #              .format(content_type=content_type,
     #                      address=address,
     #                      text=payload["text"]))
-    if sys.getsizeof(summary_payload) > MAX_SUMMARY_SIZE:
+    if sys.getsizeof(body.get('summary_payload')) > MAX_SUMMARY_SIZE:
         logging.error("Summary is too big!")
         raise RuntimeError("Summary is too big! ({} bytes)"
-                           .format(sys.getsizeof(summary_payload)))
-    if sys.getsizeof(result_payload) > MAX_PAYLOAD_SIZE:
+                           .format(sys.getsizeof(body.get('summary_payload'))))
+    if sys.getsizeof(body.get('result_payload')) > MAX_PAYLOAD_SIZE:
         logging.error("Payload is too big!")
-        logging.info(result_payload)
+        logging.info(body.get('result_payload'))
         raise RuntimeError("Payload is too big! ({} bytes)"
-                           .format(sys.getsizeof(result_payload)))
+                           .format(sys.getsizeof(body.get('result_payload'))))
     return dict(
         address=address,
         flr=flr,
@@ -123,10 +140,10 @@ def construct_bldg(flr, content_type, key, summary_payload, raw_payload=None,
         y=y,
         createdAt=datetime.utcnow(),
         contentType=content_type,
-        key=key,
+        key=head.get('key'),
         isComposite=is_composite,
-        summary=summary_payload,
-        payload=result_payload,
+        summary=body.get('summary_payload'),
+        payload=body.get('result_payload'),
         processed=False,
         occupied=False,
         occupiedBy=None,
@@ -135,21 +152,14 @@ def construct_bldg(flr, content_type, key, summary_payload, raw_payload=None,
 
 
 @app.task(ignore_results=True)
-def create_buildings(content_type, keys, summary_payloads, raw_payloads,
-                     result_payloads, flr, position_hints=None, is_composite=False,
+def create_buildings(flr, content_type, heads, bodies, position_hints=None, is_composite=False,
                      write_to_cache=True, cache_period=ONE_DAY_IN_SECONDS):
     """
     Creates a batch of buildings.
-    :param content_type: the content-type of the buildings
-    :param keys: the list of keys for the buildings
-    :param summary_payloads: the list of summary-payloads for the buildings: basic
-    summary details of the building content. These get persisted in the database.
-    :param raw_payloads: the list of raw-payloads for the buildings: the full
-    content of the building. This doesn't get persisted in the databased, but only
-    transiently stored in cache.
-    :param result_payloads: the list of result-payloads for the buildings: content
-    that should be persisted in the database. Note that this should be kept small.
     :param flr: the target floor in which to create the buildings
+    :param content_type: the content-type of the buildings
+    :param heads: the list of dicts containing the head attributes of the bldgs
+    :param bodies: the list of dicts containing the payload attributes of the bldgs
     :param position_hints: dict of hints where to position
       the new buildings, such as:
       * near_x: x coordinate, near which the buildings will be created
@@ -173,7 +183,7 @@ def create_buildings(content_type, keys, summary_payloads, raw_payloads,
             for j, bldg in enumerate(buildings):
                 # FIXME: create a Building class & instance & cache its serialization
                 # the cache should also contain the raw-payload
-                bldg["raw"] = raw_payloads[j]
+                bldg["raw"] = bodies[j]["raw_payload"]
                 cache.set(bldg["address"], dumps(bldg), ex=cache_period)
         for bldg in buildings:
             propagate_smell(bldg["address"], bldg["energy"])
@@ -186,9 +196,8 @@ def create_buildings(content_type, keys, summary_payloads, raw_payloads,
     batch_size = 10
     buildings = []
     count = 0
-    for i, summary_payload in enumerate(summary_payloads):
-        bldg = construct_bldg(flr, content_type, keys[i], summary_payload,
-                              result_payload=result_payloads[i],
+    for i, head in enumerate(heads):
+        bldg = construct_bldg(flr, content_type, head, bodies[i],
                               position_hints=position_hints, is_composite=is_composite,
                               db=db)
         buildings.append(bldg)

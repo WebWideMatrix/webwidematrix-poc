@@ -150,8 +150,13 @@ def pull_from_data_pipes(page):
                 # create_buildings.s(TWITTER_SOCIAL_POST,
                 #                    keys, payloads, target_flr) \
                 #     .apply_async()
-                create_buildings(TWITTER_SOCIAL_POST,
-                                 keys, summary_payloads, raw_payloads, result_payloads, target_flr)
+                heads = [{"key": key} for key in keys]
+                bodies = [{
+                    "summary_payload": summary_payloads[i],
+                    "result_payload": result_payloads[i],
+                    "raw_payload": raw_payloads[i],
+                } for i in xrange(len(summary_payloads))]
+                create_buildings(target_flr, TWITTER_SOCIAL_POST, heads, bodies)
                 if new_latest_id is not None:
                     update_data_pipe(dp["_id"],
                                      {"latestId": new_latest_id})

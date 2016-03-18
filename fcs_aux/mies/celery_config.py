@@ -23,7 +23,7 @@ CELERY_DEFAULT_EXCHANGE = 'tasks'
 CELERY_DEFAULT_EXCHANGE_TYPE = 'topic'
 CELERY_DEFAULT_ROUTING_KEY = 'task.default'
 
-DATA_PIPES_INTERVAL = 500
+DATA_PIPES_INTERVAL = 5
 
 CELERYBEAT_SCHEDULE = {
     'invoke_data_pipes_every_few_minutes': {

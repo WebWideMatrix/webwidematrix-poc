@@ -42,8 +42,10 @@ def create_result_bldgs(curr_bldg, action_results):
             # create_buildings.s(content_type, [key], [payload], flr, position_hints).apply_async(
             #     queue='bldg_creation', routing_key='bldg.create'
             # )
-            create_buildings(content_type, [key], [summary_payload], [raw_payload],
-                             [result_payload], flr, position_hints)
+            create_buildings(flr, content_type, [dict(key=key)],
+                             [dict(summary_payload=summary_payload, raw_payload=raw_payload,
+                                   result_payload=result_payload)],
+                             position_hints)
         else:
             # just update the current bldg
             update_bldg_with_results(curr_bldg, content_type, summary_payload,
