@@ -28,7 +28,9 @@ def measure_coverage(db, cache):
             "flr": flr,
             "processed": True
         }).count()
-        if unprocessed:
+        if processed and not unprocessed:
+            return 1
+        elif unprocessed:
             results.append(float(processed) / float(unprocessed))
     if results:
         return float(sum(results)) / float(len(results))

@@ -1,11 +1,11 @@
 import logging as raw_logging
-from datetime import datetime
 
 from structlog import get_logger
 import random
 from mies.buildings.model import load_nearby_bldgs, has_bldgs, get_bldg_flrs, get_nearby_addresses
 from mies.buildings.stats import decrement_residents, increment_residents
-from mies.buildings.utils import extract_bldg_coordinates, get_flr, get_flr_level, replace_flr_level
+from mies.buildings.utils import extract_bldg_coordinates, get_flr, get_flr_level, replace_flr_level, \
+    replace_bldg_coordinates
 from mies.constants import GIVE_UP_ON_FLR, MAX_INTERACTION_RATE, FLOOR_H, FLOOR_W
 from mies.senses.smell.smell_propagator import get_bldg_smell
 from mies.lifecycle_managers.daily_building.manager import _build_user_current_bldg_cache_key
@@ -109,17 +109,11 @@ class MovementBehavior:
 
         logging.info("No food in sight, moving by smell")
         logging.info("XX smells:")
-        t1 = datetime.utcnow()
         logging.info(self.log_perception(smells, bldgs, neighbours))
-        t2 = datetime.utcnow()
-        delta = t2 - t1
-        duration_in_ms = delta.seconds * 1000 + delta.microseconds / 1000
-        logging.info("Logging perception took: {}ms".format(duration_in_ms))
 
         most_smelly_addr = None
         max_smell = -1
         occupied = []
-        t1 = datetime.utcnow()
         for addr, smell in smells.iteritems():
             # don't move to a place caught by another resident
             if neighbours.get(addr):
@@ -133,10 +127,6 @@ class MovementBehavior:
                 if smell > max_smell:
                     most_smelly_addr = addr
                     max_smell = smell
-        t2 = datetime.utcnow()
-        delta = t2 - t1
-        duration_in_ms = delta.seconds * 1000 + delta.microseconds / 1000
-        logging.info("Finding max smell took: {}ms".format(duration_in_ms))
         logging.info("Found max smell {} at {}".format(max_smell, most_smelly_addr))
 
         # don't consider occupied addresses
@@ -145,8 +135,7 @@ class MovementBehavior:
 
         if max_smell <= 0:
             logging.info("No available smell, going randomly about")
-            # FIXME: smells is probably empty - need to choose from area around
-            most_smelly_addr = random.choice(smells.keys())
+            most_smelly_addr = self.random_jump()
 
         bldg = bldgs.get(most_smelly_addr)
         return most_smelly_addr, bldg
@@ -304,3 +293,15 @@ class MovementBehavior:
             # switched flr - update stats
             decrement_residents(prev_loc)
             increment_residents(self.location)
+
+    def random_jump(self):
+        x, y = extract_bldg_coordinates(self.location)
+        found = False
+        half_w, half_h = FLOOR_W / 2, FLOOR_H / 2
+        dx, dy = 0, 0
+        while not found:
+            dx, dy = random.choice(xrange(-half_w, half_w)), random.choice(xrange(-half_h, half_h))
+            if 0 < (x + dx) < FLOOR_W and 0 < (y + dy) < FLOOR_H:
+                found = True
+        x, y = x + dx, y + dy
+        return replace_bldg_coordinates(self.location, x, y)
