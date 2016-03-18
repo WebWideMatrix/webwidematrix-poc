@@ -20,18 +20,17 @@ def measure_coverage(db, cache):
     for user in users:
         todays_bldg_addr = cache.get(_build_user_current_bldg_cache_key(user["_id"]))
         flr = "{}-l0".format(todays_bldg_addr)
-        unprocessed = db.buildings.find({
-            "flr": flr,
-            "processed": False
-        }).count()
         processed = db.buildings.find({
             "flr": flr,
             "processed": True
         }).count()
-        if processed and not unprocessed:
-            return 1
-        elif unprocessed:
-            results.append(float(processed) / float(unprocessed))
+        total = db.buildings.find({
+            "flr": flr
+        }).count()
+        if not total:
+            return 0
+        else:
+            results.append(float(processed) / float(total))
     if results:
         return float(sum(results)) / float(len(results))
     return 0
