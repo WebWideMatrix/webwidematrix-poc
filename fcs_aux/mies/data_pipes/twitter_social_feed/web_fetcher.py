@@ -8,6 +8,9 @@ from mies.data_pipes.twitter_social_feed import TWITTER_SOCIAL_POST
 from mies.data_pipes.model import update_data_pipe
 
 
+def extract_picture_from_post(post):
+    return post.user.profile_image_url
+
 def extract_raw_payload_from_post(post):
     payload = {
         "external_url": "http://twitter.com/{user}/status/{id}"
@@ -109,6 +112,7 @@ def pull_from_data_pipes(page):
         batch_count = 0
         while not done:
             keys = []
+            pictures = []
             summary_payloads = []
             raw_payloads = []
             result_payloads = []
@@ -128,6 +132,7 @@ def pull_from_data_pipes(page):
                 if not done:
                     max_id = post.id
                     keys.append(post.id)
+                    pictures.append(extract_picture_from_post(post))
                     raw = extract_raw_payload_from_post(post)
                     raw_payloads.append(raw)
                     summary_payloads.append(extract_summary_from_post_raw_payload(raw))
@@ -150,7 +155,7 @@ def pull_from_data_pipes(page):
                 # create_buildings.s(TWITTER_SOCIAL_POST,
                 #                    keys, payloads, target_flr) \
                 #     .apply_async()
-                heads = [{"key": key} for key in keys]
+                heads = [{"key": keys[i], "picture": pictures[i]} for i in xrange(len(keys))]
                 bodies = [{
                     "summary_payload": summary_payloads[i],
                     "result_payload": result_payloads[i],

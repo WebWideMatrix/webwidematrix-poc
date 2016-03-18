@@ -148,11 +148,10 @@ extractBldgCoordinates = function(bldgAddr) {
 };
 
 getBldgLink = function(d) {
-    if (d.summary && d.summary.external_url) {
+    if (d.contentType == "twitter-social-post")
         return d.summary.external_url;
-    }
-    else {
-        // if no external link, link to the 1st flr of the bldg
+    else if (d.contentType == "article-text")
+        return d.key;
+    else
         return "/buildings/" + d.address + "-l0";
-    }
 };

@@ -22,6 +22,7 @@ def create_result_bldgs(curr_bldg, action_results):
         return
     for r in action_results:
         key = r.get("key")
+        picture = r.get("picture")
         content_type = r.get("contentType")
         summary_payload = r.get("summary")
         raw_payload = r.get("raw")
@@ -42,7 +43,7 @@ def create_result_bldgs(curr_bldg, action_results):
             # create_buildings.s(content_type, [key], [payload], flr, position_hints).apply_async(
             #     queue='bldg_creation', routing_key='bldg.create'
             # )
-            create_buildings(flr, content_type, [dict(key=key)],
+            create_buildings(flr, content_type, [dict(key=key, picture=picture)],
                              [dict(summary_payload=summary_payload, raw_payload=raw_payload,
                                    result_payload=result_payload)],
                              position_hints)

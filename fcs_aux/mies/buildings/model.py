@@ -141,6 +141,7 @@ def construct_bldg(flr, content_type, head, body, position_hints=None, is_compos
         createdAt=datetime.utcnow(),
         contentType=content_type,
         key=head.get('key'),
+        picture=head.get('picture'),
         isComposite=is_composite,
         summary=body.get('summary_payload'),
         payload=body.get('result_payload'),

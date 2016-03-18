@@ -26,10 +26,12 @@ bldgRenderFunc = {
     },
     'article-text': function(d) {
         var text = d.summary.display_url;
-        var html = "<p " +
+        var pic = d.picture;
+        var html = "<img src=\"" + pic + "\" " +
+                "alt=\"" + text + "\" " +
             "style=\"color: blue; " +
             "background-color: white; " +
-            "height: 10px; \">" + text + "</p>";
+            "height: 10px; \"/>";
         return html;
     },
     'daily-feed': function(d) {

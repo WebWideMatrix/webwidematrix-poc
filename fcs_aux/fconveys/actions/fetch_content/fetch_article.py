@@ -1,3 +1,5 @@
+from urlparse import urlparse
+
 from celery.utils.log import get_task_logger
 import os
 import requests
@@ -25,6 +27,10 @@ def delete_downloaded_file(file_name):
      os.unlink(file_name)
 
 
+def get_favicon(url):
+    parts = urlparse(url)
+    return "{}://{}/favicon.ico".format(parts.scheme, parts.netloc)
+
 @app.task(name='fetch-article')
 def fetch_article_action(input_payload):
     logging.info("Fetching article from social post")
@@ -51,6 +57,7 @@ def fetch_article_action(input_payload):
             {
                 "contentType": "article-text",
                 "key": url,
+                "picture": get_favicon(url),
                 "summary": {
                     "url": url,
                     "display_url": display_url,
