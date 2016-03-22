@@ -5,6 +5,8 @@ import os
 import requests
 from tempfile import NamedTemporaryFile
 import textract
+
+from mies.buildings.utils import time_print
 from mies.celery import app
 
 logging = get_task_logger(__name__)
@@ -33,9 +35,14 @@ def get_favicon(url):
 
 @app.task(name='fetch-article')
 def fetch_article_action(input_payload):
+    with time_print(logging, "Fetching article"):
+        result_payloads = do_fetch_article(input_payload)
+    return result_payloads
+
+
+def do_fetch_article(input_payload):
     logging.info("Fetching article from social post")
     logging.info(input_payload)
-
     result_payloads = []
     for link in input_payload["urls"]:
         url = link.get("expanded_url")
@@ -47,8 +54,8 @@ def fetch_article_action(input_payload):
 
         text = textract.process(file_name)
         logging.info("Extracted article text ({} characters)".format(len(text)))
-        logging.info("T"*100)
-        logging.info("T"*100)
+        logging.info("T" * 100)
+        logging.info("T" * 100)
 
         delete_downloaded_file(file_name)
         logging.info("Deleted temp file: {}".format(file_name))
@@ -81,6 +88,5 @@ def fetch_article_action(input_payload):
                 }
             }
         )
-
     return result_payloads
 
