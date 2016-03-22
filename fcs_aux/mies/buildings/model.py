@@ -184,6 +184,8 @@ def create_buildings(flr, content_type, heads, bodies, position_hints=None, is_c
         for b in buildings:
             if not cache.hget(FLR_KEYS.format(flr), b["key"]):
                 unique_buildings.append(b)
+        if not unique_buildings:
+            return 0
         db.buildings.insert(unique_buildings)
         if write_to_cache:
             # by default, we also want to cache newly created bldgs
