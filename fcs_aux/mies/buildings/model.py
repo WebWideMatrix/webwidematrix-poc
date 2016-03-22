@@ -22,6 +22,8 @@ logging = get_task_logger(__name__)
 
 ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
+FLR_KEYS = "KEYS_IN_{}"
+
 
 class NoSpotLeft(Exception):
     pass
@@ -177,19 +179,24 @@ def create_buildings(flr, content_type, heads, bodies, position_hints=None, is_c
     """
     def _create_batch_of_buildings():
         # TODO handle errors
-        db.buildings.insert(buildings)
+        unique_buildings = []
+        cache = get_cache()
+        for b in buildings:
+            if not cache.hget(FLR_KEYS.format(flr), b["key"]):
+                unique_buildings.append(b)
+        db.buildings.insert(unique_buildings)
         if write_to_cache:
             # by default, we also want to cache newly created bldgs
-            cache = get_cache()
-            for j, bldg in enumerate(buildings):
+            for j, bldg in enumerate(unique_buildings):
                 # FIXME: create a Building class & instance & cache its serialization
                 # the cache should also contain the raw-payload
                 bldg["raw"] = bodies[j]["raw_payload"]
                 cache.set(bldg["address"], dumps(bldg), ex=cache_period)
-        for bldg in buildings:
+                cache.hset(FLR_KEYS.format(flr), bldg["key"], True)
+        for bldg in unique_buildings:
             propagate_smell(bldg["address"], bldg["energy"])
-        increment_bldgs(flr, UNPROCESSED, len(buildings))
-        return len(buildings)
+        increment_bldgs(flr, UNPROCESSED, len(unique_buildings))
+        return len(unique_buildings)
 
     logging.info("C"*100)
     created_addresses = []

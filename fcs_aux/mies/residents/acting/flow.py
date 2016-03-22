@@ -65,9 +65,18 @@ def update_bldg_processed_status(bldg, energy_change):
                         })
     # also update the cache
     cache = get_cache()
-    cached_bldg = loads(cache.get(bldg["address"]))
-    cached_bldg.update(change)
-    cache.set(bldg["address"], dumps(cached_bldg), ex=ONE_DAY_IN_SECONDS)
+    cached_bldg_json = cache.get(bldg["address"])
+    cached_bldg = None
+    try:
+        cached_bldg = loads(cached_bldg_json)
+        cached_bldg.update(change)
+        cache.set(bldg["address"], dumps(cached_bldg), ex=ONE_DAY_IN_SECONDS)
+    except:
+        logging.exception(":;._.;:"*300)
+        logging.exception("couldn't update cache")
+        logging.error("there's {} in the cache at {}".format(
+            str(cached_bldg_json), bldg["address"]
+        ))
 
     propagate_smell(bldg["address"], new_energy)
     if not was_processed and is_processed:
