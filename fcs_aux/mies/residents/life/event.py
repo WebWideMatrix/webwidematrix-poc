@@ -118,7 +118,11 @@ def handle_life_event(resident):
                  .format(name=resident.name))
 
     # Check status of previous action.
-    curr_bldg = load_bldg(_id=ObjectId(resident.bldg)) if resident.bldg else None
+    curr_bldg = None
+    try:
+        curr_bldg = load_bldg(_id=ObjectId(resident.bldg)) if resident.bldg else None
+    except:
+        logging.exception("Couldn't load bldg: {}".format(resident.bldg))
     logging.info("0"*100)
     logging.info(resident.bldg)
     logging.info(resident.processing)

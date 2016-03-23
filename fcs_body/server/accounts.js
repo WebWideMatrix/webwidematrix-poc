@@ -1,6 +1,6 @@
 Accounts.onCreateUser(function (options, user) {
 
-    var INITIAL_RESIDENTS_PER_USER = 10;
+    var INITIAL_RESIDENTS_PER_USER = 30;
 
     console.log(JSON.stringify(options));
 
