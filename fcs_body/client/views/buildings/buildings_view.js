@@ -224,9 +224,9 @@ Template.buildingsGrid.rendered = function () {
                     },
                     fill: 'none'
                 })
-                .append("xhtml:body").append("xhtml:div")
+                .append("xhtml:p")
                 .style({
-                    "font-size": "0.6px"
+                    "font-size": "1px"
                 })
                 .html(function (d) {
                     return bldgRenderFunc[d.contentType](d);
