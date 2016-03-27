@@ -27,11 +27,24 @@ bldgRenderFunc = {
     'article-text': function(d) {
         var text = d.summary.display_url;
         var pic = d.picture;
-        var html = "<img src=\"" + pic + "\" " +
-                "alt=\"" + text + "\" " +
-            "style=\"color: blue; " +
+        var html = "";
+        if (Session.get("currentAddress") == d.address) {
+            html += "<p " +
+            "style=\"color: gray; " +
             "background-color: white; " +
-            "height: 10px; \"/>";
+            "height: 10px; \">" + text + "</p>";
+        }
+        else {
+            var bldg = Session.get("bldgContent");
+            if (bldg) {
+                text = bldg.raw;
+            }
+            html = "<img src=\"" + pic + "\" " +
+                "alt=\"" + text + "\" " +
+                "style=\"color: blue; " +
+                "background-color: white; " +
+                "height: 10px; \"/>";
+        }
         return html;
     },
     'daily-feed': function(d) {
@@ -87,8 +100,19 @@ Template.buildingsGrid.helpers({
 Template.buildingsGrid.events({
     "click .bldg": function(event) {
         var externalUrl = $(event.currentTarget).attr("href");
-        openExternalURL(externalUrl);
+        var newAddress = $(event.currentTarget).attr("address");
+        if (Session.get("currentAddress") == newAddress) {
+            openExternalURL(externalUrl);
+        }
+        else {
+            redirectTo(newAddress);
+        }
     },
+    "click .rsdt": function(event) {
+        var name = $(event.currentTarget).attr("name");
+        alert(name + " says hey!")
+    },
+
     "click .navigate-out-of": function() {
         var newAddress = getContainingBldgAddress(Session.get("currentAddress"));
         redirectTo(newAddress);
@@ -176,15 +200,18 @@ Template.buildingsGrid.rendered = function () {
                 .enter()
                 .append("g")
                 .attr("class", "bldg")
-                .attr("xlink:href", getBldgLink);
+                .attr("xlink:href", getBldgLink)
+                .attr("address", function(d) {
+                    return d.address
+                });
 
             // draw the bldg frame
             dom.bldgs
                 .append('rect')
                 .attr({
                     x: function (d) {
-                        console.log("XX");
-                        console.log(d);
+                        //console.log("XX");
+                        //console.log(d);
                         return xScale(d.x * SQUARE_WIDTH)
                     },
                     y: function (d) {
@@ -257,7 +284,10 @@ Template.buildingsGrid.rendered = function () {
                 .data(getResidents())
                 .enter()
                 .append("g")
-                .attr("class", "rsdt");
+                .attr("class", "rsdt")
+                .attr("name", function(d) {
+                    return d.name;
+                });
 
             // draw the residents frame
             dom.residents

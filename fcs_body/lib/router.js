@@ -34,6 +34,23 @@ Router.route('/buildings/:addr', function () {
         Session.set("viewingCurrentBuildings", false);
         Session.set("currentAddress", this.params.addr);
 
+        console.log(this.params.addr);
+        if (this.params.addr) {
+            var bldg = getBldg(this.params.addr);
+            console.log(bldg);
+            if (bldg == this.params.addr) {
+                console.log("Calling method: getBldgContent");
+                // We're drilling into a bldg - get it's content
+                Meteor.call("getBldgContent", this.params.addr, function (error, result) {
+                    console.log("No way: got bldg content!!!!!");
+                    console.log(error);
+                    console.log(result);
+                    Session.set("bldgContent", result);
+                });
+            }
+        }
+
+
         if (this.ready()) {
             this.render('buildingsView');
         } else {

@@ -17,7 +17,8 @@ createRsdt = function(name, bldg, userId, userProfileName, callback) {
             flr: bldg.flr,
             energy: DEFAULT_ENERGY,
             status: "active",
-            movesWithoutSmell: 0
+            movesWithoutSmell: 0,
+            movesWithoutBldgs: 0
         };
     };
 
