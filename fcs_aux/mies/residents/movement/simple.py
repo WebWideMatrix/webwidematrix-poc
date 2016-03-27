@@ -62,12 +62,12 @@ class MovementBehavior:
             self.get_outside()
             self.reset_interactions_log()
         # if encountered many residents in the last hour, switch flr
-        elif self.get_interactions_rate() > MAX_INTERACTION_RATE:
-            logging.info("^"*100)
-            logging.info("|"*100)
-            logging.info("Switching flr due to high interaction rate")
-            self.randomly_switch_flr()
-            self.reset_interactions_log()
+        # elif self.get_interactions_rate() > MAX_INTERACTION_RATE:
+        #     logging.info("^"*100)
+        #     logging.info("|"*100)
+        #     logging.info("Switching flr due to high interaction rate")
+        #     self.randomly_switch_flr()
+        #     self.reset_interactions_log()
 
         # if it's a composite bldg with smell, get inside
         if curr_bldg and curr_bldg["isComposite"] and get_bldg_smell(curr_bldg["address"]):
@@ -84,6 +84,7 @@ class MovementBehavior:
         neighbours = self.look_for_neighbours_around()  # dict: addr->neighbour
         logging.info("Saw {} neighbours".format(len(neighbours)))
 
+        self.track_moves_without_bldgs(len(bldgs) > 0)
         self.track_moves_without_smell(len(smells) > 0)
 
         if bldgs:
@@ -132,7 +133,7 @@ class MovementBehavior:
         for addr in occupied:
             del smells[addr]
 
-        if max_smell <= 0:
+        if max_smell <= 0 or self.movesWithoutBldgs > 3:
             logging.info("No available smell, going randomly about")
             most_smelly_addr = self.random_jump()
 
@@ -190,6 +191,12 @@ class MovementBehavior:
             self.movesWithoutSmell += 1
         else:
             self.movesWithoutSmell = 0
+
+    def track_moves_without_bldgs(self, saw_bldg):
+        if not saw_bldg:
+            self.movesWithoutBldgs += 1
+        else:
+            self.movesWithoutBldgs = 0
 
     def occupy_bldg(self, bldg):
         logging.info("OCCUPY "*10)
