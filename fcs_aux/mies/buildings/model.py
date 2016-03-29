@@ -179,14 +179,19 @@ def create_buildings(flr, content_type, heads, bodies, position_hints=None, is_c
     """
     def _create_batch_of_buildings():
         # TODO handle errors
+        output_bldgs = []
         unique_buildings = []
         cache = get_cache()
         for b in buildings:
-            if not cache.hget(FLR_KEYS.format(flr), b["key"]):
+            existing = cache.hget(FLR_KEYS.format(flr), b["key"])
+            if existing:
+                output_bldgs.append(existing["address"])
+            else:
                 unique_buildings.append(b)
         if not unique_buildings:
-            return 0
+            return output_bldgs
         db.buildings.insert(unique_buildings)
+        output_bldgs.extend([b["address"] for b in unique_buildings])
         if write_to_cache:
             # by default, we also want to cache newly created bldgs
             for j, bldg in enumerate(unique_buildings):
@@ -199,27 +204,25 @@ def create_buildings(flr, content_type, heads, bodies, position_hints=None, is_c
         for bldg in unique_buildings:
             propagate_smell(bldg["address"], bldg["energy"])
         increment_bldgs(flr, UNPROCESSED, len(unique_buildings))
-        return len(unique_buildings)
+        return output_bldgs
 
     logging.info("C"*100)
-    created_addresses = []
+    output_bldgs = []
     db = get_db()
     batch_size = 10
     buildings = []
-    count = 0
     for i, head in enumerate(heads):
         bldg = construct_bldg(flr, content_type, head, bodies[i],
                               position_hints=position_hints, is_composite=is_composite,
                               db=db)
         buildings.append(bldg)
-        created_addresses.append(bldg["address"])
         if len(buildings) == batch_size:
-            count += _create_batch_of_buildings()
+            output_bldgs.extend(_create_batch_of_buildings())
             buildings = []
     if buildings:
-        count += _create_batch_of_buildings()
-    logging.info("Created {} buildings in {}".format(count, flr))
-    return created_addresses
+        output_bldgs.extend(_create_batch_of_buildings())
+    logging.info("Created {} buildings in {}".format(len(output_bldgs), flr))   # TODO subtract existing bldgs
+    return output_bldgs
 
 
 def get_nearby_addresses(address, proximity=10):

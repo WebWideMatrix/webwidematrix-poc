@@ -17,6 +17,7 @@ LOCK_EXPIRE = 60 * 10
 
 
 def create_result_bldgs(curr_bldg, action_results):
+    output_bldgs = []
     if action_results is None:
         logging.warn("No results for {}".format(curr_bldg["address"]))
         return
@@ -43,14 +44,20 @@ def create_result_bldgs(curr_bldg, action_results):
             # create_buildings.s(content_type, [key], [payload], flr, position_hints).apply_async(
             #     queue='bldg_creation', routing_key='bldg.create'
             # )
-            create_buildings(flr, content_type, [dict(key=key, picture=picture)],
-                             [dict(summary_payload=summary_payload, raw_payload=raw_payload,
-                                   result_payload=result_payload)],
-                             position_hints)
+            output_bldgs.extend(create_buildings(flr, content_type,
+                                                 [dict(key=key, picture=picture)],
+                                                 [dict(summary_payload=summary_payload,
+                                                       raw_payload=raw_payload,
+                                                       result_payload=result_payload)],
+                                                 position_hints))
         else:
             # just update the current bldg
             update_bldg_with_results(curr_bldg, content_type, summary_payload,
                                      raw_payload, result_payload)
+            output_bldgs.append(curr_bldg["address"])
+    if output_bldgs:
+        return output_bldgs
+    return None
 
 
 def acquire_lock(resident_id):
@@ -119,6 +126,7 @@ def handle_life_event(resident):
 
     # Check status of previous action.
     curr_bldg = None
+    output_bldgs = None
     try:
         curr_bldg = load_bldg(_id=ObjectId(resident.bldg)) if resident.bldg else None
     except:
@@ -151,12 +159,12 @@ def handle_life_event(resident):
             logging.info("5"*100)
             # yay, we have results
             with time_print(logging, "create result bldg"):
-                create_result_bldgs(curr_bldg, action_result)
+                output_bldgs = create_result_bldgs(curr_bldg, action_result)
 
         logging.info("6"*100)
         # if we got here, it means that no action is still pending
         with time_print(logging, "finish processing"):
-            resident.finish_processing(action_status, curr_bldg)
+            resident.finish_processing(action_status, curr_bldg, output_bldgs)
 
     # choose a bldg to move into
     logging.info("~~BEFORE~~"*10)

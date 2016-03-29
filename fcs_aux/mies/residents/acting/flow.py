@@ -46,7 +46,7 @@ def add_new_action_status(bldg, action_status):
         bldg["address"], action_status))
 
 
-def update_bldg_processed_status(bldg, energy_change):
+def update_bldg_processed_status(bldg, energy_change, output_bldgs=None):
     # TODO have a Bldg class & move the method there
     was_processed = bldg["processed"]
     is_processed = (energy_change < 0)
@@ -57,6 +57,8 @@ def update_bldg_processed_status(bldg, energy_change):
         "processed": is_processed,
         "energy": new_energy
     }
+    if output_bldgs:
+        change["output_bldgs"] = output_bldgs
     db = get_db()
     db.buildings.update({
                             "_id": bldg["_id"]
@@ -121,7 +123,7 @@ class ActingBehavior:
         self.processing = is_processing
         self.energy = self.energy + energy_gained
 
-    def finish_processing(self, action_status, bldg):
+    def finish_processing(self, action_status, bldg, output_bldgs=None):
         bldg_energy = bldg["energy"] or DEFAULT_BLDG_ENERGY
         logging.info("I GOT MY "*10)
         logging.info(action_status)
@@ -132,7 +134,7 @@ class ActingBehavior:
         self.update_processing_status(False, energy_gained)
         logging.info("BONN"*20)
         logging.info(energy_gained)
-        update_bldg_processed_status(bldg, -energy_gained)
+        update_bldg_processed_status(bldg, -energy_gained, output_bldgs)
         decrement_bldgs(bldg["flr"], BEING_PROCESSED)
 
     def get_latest_action(self, bldg):
