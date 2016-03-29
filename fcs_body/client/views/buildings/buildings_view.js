@@ -124,6 +124,19 @@ Template.buildingsGrid.events({
     "click .navigate-down": function() {
         var newAddress = getOneFlrDown(Session.get("currentAddress"));
         redirectTo(newAddress);
+    },
+    "click .navigate-into": function() {
+        var selectedAddress = $(event.currentTarget).attr("address");
+        var currentAddress = Session.get("currentAddress");
+        var newAddress = getOneFlrDown(currentAddress);
+        var bldg = getBldg(currentAddress);
+        if (currentAddress == bldg) {
+            newAddress += "?withOutput=" + selectedAddress;
+            redirectTo(newAddress);
+        }
+        else {
+            alert("Please select a building to drill-into");
+        }
     }
 });
 
