@@ -33,7 +33,7 @@ CELERYBEAT_SCHEDULE = {
     },
     'invoke_daily_lifecycle_manager_every_hour': {
         'task': 'mies.lifecycle_managers.daily_building.manager.invoke',
-        'schedule': timedelta(minutes=30),  # FIXME: should be 1 hour
+        'schedule': timedelta(minutes=3),  # FIXME: should be 1 hour
     },
     'invoke_residents_life_event_frequently': {
         'task': 'mies.lifecycle_managers.residents_life.manager.invoke',

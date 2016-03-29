@@ -185,7 +185,7 @@ def create_buildings(flr, content_type, heads, bodies, position_hints=None, is_c
         for b in buildings:
             existing = cache.hget(FLR_KEYS.format(flr), b["key"])
             if existing:
-                output_bldgs.append(existing["address"])
+                output_bldgs.append(existing)
             else:
                 unique_buildings.append(b)
         if not unique_buildings:
@@ -199,7 +199,7 @@ def create_buildings(flr, content_type, heads, bodies, position_hints=None, is_c
                 # the cache should also contain the raw-payload
                 bldg["raw"] = bodies[j]["raw_payload"]
                 cache.set(bldg["address"], dumps(bldg), ex=cache_period)
-                cache.hset(FLR_KEYS.format(flr), bldg["key"], True)
+                cache.hset(FLR_KEYS.format(flr), bldg["key"], bldg["address"])
                 cache.expire(FLR_KEYS.format(flr), cache_period)
         for bldg in unique_buildings:
             propagate_smell(bldg["address"], bldg["energy"])

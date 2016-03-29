@@ -58,7 +58,7 @@ def update_bldg_processed_status(bldg, energy_change, output_bldgs=None):
         "energy": new_energy
     }
     if output_bldgs:
-        change["output_bldgs"] = output_bldgs
+        change["outputs"] = output_bldgs
     db = get_db()
     db.buildings.update({
                             "_id": bldg["_id"]
