@@ -34,6 +34,10 @@ Router.route('/buildings/:addr', function () {
         Session.set("viewingCurrentBuildings", false);
         Session.set("currentAddress", this.params.addr);
 
+        if (this.params.query.filterByOutput) {
+            Session.set("filterByOutput", this.params.query.filterByOutput);
+        }
+
         console.log(this.params.addr);
         if (this.params.addr) {
             var bldg = getBldg(this.params.addr);

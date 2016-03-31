@@ -126,12 +126,11 @@ Template.buildingsGrid.events({
         redirectTo(newAddress);
     },
     "click .navigate-into": function() {
-        var selectedAddress = $(event.currentTarget).attr("address");
         var currentAddress = Session.get("currentAddress");
-        var newAddress = getOneFlrDown(currentAddress);
+        var newAddress = getOneFlrDown(getFlr(currentAddress));
         var bldg = getBldg(currentAddress);
         if (currentAddress == bldg) {
-            newAddress += "?withOutput=" + selectedAddress;
+            newAddress += "?filterByOutput=" + currentAddress;
             redirectTo(newAddress);
         }
         else {
@@ -205,6 +204,10 @@ Template.buildingsGrid.rendered = function () {
         return Residents.find().fetch();
     };
 
+    function matchesOutputFilter(d) {
+        return _.contains(d.outputs, Session.get("filterByOutput"));
+    }
+
     if (!self.handle) {
         self.handle = Meteor.autorun(function () {
             // add g elements for all bldgs
@@ -234,13 +237,19 @@ Template.buildingsGrid.rendered = function () {
                     height: yScale(SQUARE_HEIGHT),
                     stroke: function(d) {
                         if (d.processed)
-                            return 'green';
+                            if (matchesOutputFilter(d))
+                                return 'red';
+                            else
+                                return 'green';
                         else
                             return 'grey';
                     },
                     "stroke-width": function(d) {
                         if (d.processed)
-                            return 0.5;
+                            if (matchesOutputFilter(d))
+                                return 5;
+                            else
+                                return 0.5;
                         else
                             return 0.01;
                     },
