@@ -42,7 +42,6 @@ def fetch_article_action(input_payload):
 
 def do_fetch_article(input_payload):
     logging.info("Fetching article from social post")
-    logging.info(input_payload)
     result_payloads = []
     for link in input_payload["urls"]:
         url = link.get("expanded_url")
@@ -50,12 +49,9 @@ def do_fetch_article(input_payload):
         shortened_url = link.get("url")
 
         file_name = download_file(url)
-        logging.info("Downloaded article into temp file: {}".format(file_name))
 
         text = textract.process(file_name)
         logging.info("Extracted article text ({} characters)".format(len(text)))
-        logging.info("T" * 100)
-        logging.info("T" * 100)
 
         delete_downloaded_file(file_name)
         logging.info("Deleted temp file: {}".format(file_name))

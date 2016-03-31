@@ -74,7 +74,6 @@ def update_bldg_processed_status(bldg, energy_change, output_bldgs=None):
         cached_bldg.update(change)
         cache.set(bldg["address"], dumps(cached_bldg), ex=ONE_DAY_IN_SECONDS)
     except:
-        logging.exception(":;._.;:"*300)
         logging.exception("couldn't update cache")
         logging.error("there's {} in the cache at {}".format(
             str(cached_bldg_json), bldg["address"]
@@ -125,15 +124,11 @@ class ActingBehavior:
 
     def finish_processing(self, action_status, bldg, output_bldgs=None):
         bldg_energy = bldg["energy"] or DEFAULT_BLDG_ENERGY
-        logging.info("I GOT MY "*10)
-        logging.info(action_status)
         #success = action_status["successLevel"]
         # TODO figure out the success level & store in action status
         success = 1
         energy_gained = bldg_energy * success
         self.update_processing_status(False, energy_gained)
-        logging.info("BONN"*20)
-        logging.info(energy_gained)
         update_bldg_processed_status(bldg, -energy_gained, output_bldgs)
         decrement_bldgs(bldg["flr"], BEING_PROCESSED)
 

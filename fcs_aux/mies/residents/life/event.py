@@ -131,48 +131,34 @@ def handle_life_event(resident):
         curr_bldg = load_bldg(_id=ObjectId(resident.bldg)) if resident.bldg else None
     except:
         logging.exception("Couldn't load bldg: {}".format(resident.bldg))
-    logging.info("0"*100)
-    logging.info(resident.bldg)
-    logging.info(resident.processing)
     if curr_bldg is not None and resident.processing:
-        logging.info("1"*100)
         action_status = resident.get_latest_action(curr_bldg)
-        logging.info(action_status)
         action_result = resident.get_action_result(action_status)
         # logging.info(action_result)
         # check if action is still pending
         if action_status is not None and \
                         action_result is None and \
                 resident.is_action_pending(action_status):
-            logging.info("2"*100)
             if resident.should_discard_action(action_status):
                 resident.discard_action(curr_bldg, action_status)
-                logging.info("3"*100)
             else:
-                logging.info("4"*100)
                 logging.info("Action in {addr} is still pending. "
                              "Doing nothing for now."
                              .format(addr=resident.bldg))
                 release_lock(resident["_id"])
                 return
         else:
-            logging.info("5"*100)
             # yay, we have results
             with time_print(logging, "create result bldg"):
                 output_bldgs = create_result_bldgs(curr_bldg, action_result)
 
-        logging.info("6"*100)
         # if we got here, it means that no action is still pending
         with time_print(logging, "finish processing"):
             resident.finish_processing(action_status, curr_bldg, output_bldgs)
 
     # choose a bldg to move into
-    logging.info("~~BEFORE~~"*10)
-    logging.info("BBBefore {}".format(resident.location))
     with time_print(logging, "choose bldg"):
         destination_addr, destination_bldg = resident.choose_bldg(curr_bldg)
-    logging.info("~~AFTER~~"*10)
-    logging.info("AAAfter {}".format(resident.location))
 
     # update the bldg at the previous location (if existing),
     # that the resident has left the bldg

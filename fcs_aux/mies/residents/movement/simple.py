@@ -35,29 +35,18 @@ class MovementBehavior:
         # get the current bldg for the user
         logging.info("Choosing bldg for {}".format(self.name))
         user_id = self.userId
-        logging.info(self)
         curr_user_bldg_key = _build_user_current_bldg_cache_key(user_id)
         cache = get_cache()
         curr_user_bldg_address = cache.get(curr_user_bldg_key)
-        logging.info("   &&&CUR_BLDG {}".format(curr_bldg))
-        if curr_bldg:
-            logging.info("   &&&CUR_BLDG_ADDR {}".format(curr_bldg["address"]))
-            logging.info("   &&&CUR_BLDG_ADDR_STARTSW {}".format(curr_bldg["address"].startswith(curr_user_bldg_address)))
 
         # if curr_bldg is None or not curr_bldg["address"].startswith(curr_user_bldg_address):
         if not self.location.startswith(curr_user_bldg_address):
             # this means we're in some old bldg, move to the current one
-            logging.info("---------^^^^^^^*********"*100)
-            logging.info(self.name)
-            logging.info(id(self))
-            logging.info(self.location)
             self.move_to(curr_user_bldg_address + "-l0-b(0,0)")
-            logging.info(self.location)
 
         # if haven't smelled anything for a long time, give up
         # & get outside this flr
         if self.movesWithoutSmell > GIVE_UP_ON_FLR:
-            logging.info("->"*100)
             logging.info("Giving up on flr: nothing smelled for {} ticks".format(self.movesWithoutSmell))
             self.get_outside()
             self.reset_interactions_log()
@@ -107,8 +96,6 @@ class MovementBehavior:
                 logging.info("Saw food, eating.")
                 return most_energy_addr, bldgs[most_energy_addr]
 
-        logging.info("No food in sight, moving by smell")
-        logging.info("XX smells:")
         logging.info(self.log_perception(smells, bldgs, neighbours))
 
         most_smelly_addr = None
@@ -141,8 +128,6 @@ class MovementBehavior:
         return most_smelly_addr, bldg
 
     def log_perception(self, smells, bldgs, rsdts):
-        logging.info("LP "*100)
-        logging.info("ATTTTTT: {}".format(self.location))
         min_x, min_y = 1000, 1000
         max_x, max_y = 0, 0
 
@@ -199,13 +184,10 @@ class MovementBehavior:
             self.movesWithoutBldgs = 0
 
     def occupy_bldg(self, bldg):
-        logging.info("OCCUPY "*10)
-        logging.info(bldg)
         curr_location = self.location
         x, y = extract_bldg_coordinates(curr_location)
         new_x, new_y = bldg["x"], bldg["y"]
         self.bldg = str(bldg["_id"])
-        logging.info(self.bldg)
         self.move_to(bldg["address"])
         self.velocity = [new_x - x, new_y - y]
 
@@ -219,8 +201,6 @@ class MovementBehavior:
 
     def look_around(self):
         assert self.location
-        logging.info("LA "*30)
-        logging.info("AAAAT {}".format(self.location))
         return load_nearby_bldgs(self.location)
 
     def look_for_neighbours_around(self):
@@ -228,15 +208,10 @@ class MovementBehavior:
         cache = get_cache()
         addresses = get_nearby_addresses(self.location)
         result = {}
-        logging.info("r"*100)
-        logging.info("r"*100)
         for addr in addresses:
             rsdt = cache.get(_build_resident_location_cache_key(addr))
             if rsdt:
-                logging.info(rsdt)
                 result[addr] = rsdt
-        logging.info("r"*100)
-        logging.info("r"*100)
         return result
 
     def get_inside(self, curr_bldg):

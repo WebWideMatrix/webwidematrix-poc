@@ -92,7 +92,6 @@ def pull_from_data_pipes(page):
     Send the received results to the buildings-creator task
     :param page: batch of data-pipe objects read from the database.
     """
-    logging.info("WEB_FETCHER"*10)
     # TODO send to an async web-fetcher service (Tornado)
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     count = 0
@@ -145,9 +144,7 @@ def pull_from_data_pipes(page):
                 done = True
 
             if summary_payloads:
-                logging.info("P"*100)
                 logging.info("Got {} posts".format(len(summary_payloads)))
-                logging.info("P"*100)
                 # TODO check whether the connected bldg is a flr or a bldg
                 target_flr = dp["connectedBldg"] + "-l0"
                 logging.info("Sending {} buildings to {}.."
