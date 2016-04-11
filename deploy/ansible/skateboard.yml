@@ -1,0 +1,51 @@
+---
+- hosts: skateboard
+
+  vars: 
+      project_root: /root
+      environment_name : fcsvenv
+      project_name: fcs-skateboard
+      project_repo: https://github.com/dibaunaumh/fcs-skateboard.git
+      project_version: residents-lifecycle-work-cache
+      environment_path: /root/fcsvenv
+
+  tasks:
+   - name: Install required system packages.
+     apt: pkg={{ item }} state=installed update-cache=yes
+     with_items:
+       - python-dev
+       - gcc
+       - python-setuptools
+       - redis-server
+       - git-core
+       - libzmq-dev
+       - libevent-dev
+       - libxml2-dev
+       - libxslt1-dev
+       - libtiff5-dev 
+       - libjpeg8-dev 
+       - zlib1g-dev 
+       - libfreetype6-dev 
+       - liblcms2-dev 
+       - libwebp-dev 
+       - tcl8.6-dev 
+       - tk8.6-dev 
+       - python-tk
+
+   - name: Install required Python packages
+     easy_install: name={{item}}
+     with_items:
+       - pip
+
+   - name: install various libraries with pip
+     action: pip name={{item}} state=present
+     with_items: 
+       - virtualenv
+       - circus
+       - circus-web
+
+   - name: clone project from git 
+     git: repo={{project_repo}} dest={{project_root}}/{{project_name}} remote=origin version={{project_version}}
+
+   - name: install dependencies into virtualenv
+     action: pip requirements={{project_root}}/{{project_name}}/fcs_aux/requirements.txt virtualenv={{environment_path}} state=present
