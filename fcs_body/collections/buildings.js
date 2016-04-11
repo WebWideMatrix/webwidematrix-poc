@@ -4,7 +4,7 @@ Buildings = new Meteor.Collection('buildings');
 // DB involving functions
 //
 
-createBldg = function(flr, key, near, contentType, isComposite, payload, callback) {
+createBldg = function(flr, key, near, contentType, isComposite, summary, payload, callback) {
     var x = 0,
         y = 0,
         address = buildBldgAddress(flr, x, y),
@@ -42,6 +42,7 @@ createBldg = function(flr, key, near, contentType, isComposite, payload, callbac
             createdAt: new Date(),
             contentType: contentType,
             isComposite: isComposite,
+            summary: summary,
             payload: payload,
             processed: false,
             occupied: false,
@@ -110,6 +111,25 @@ getContainingBldgAddress = function(addr) {
     return parts.join("-");
 };
 
+
+getOneFlrUp = function(addr) {
+    // FIXME implement properly: use utility functions, & check for edges
+    var parts = addr.split("-");
+    var flrPart = parts.pop();
+    var flrLevel = parseInt(flrPart.substring(1, flrPart.length));
+    parts.push("l" + (flrLevel + 1));
+    return parts.join("-");
+};
+
+getOneFlrDown = function(addr) {
+    // FIXME implement properly: use utility functions, & check for edges
+    var parts = addr.split("-");
+    var flrPart = parts.pop();
+    var flrLevel = parseInt(flrPart.substring(1, flrPart.length));
+    parts.push("l" + (flrLevel - 1));
+    return parts.join("-");
+};
+
 extractBldgCoordinates = function(bldgAddr) {
     // FIXME: rename to: extractCoordinatesFromLocation
     var parts = bldgAddr.split("-");
@@ -128,11 +148,10 @@ extractBldgCoordinates = function(bldgAddr) {
 };
 
 getBldgLink = function(d) {
-    if (d.payload.external_url) {
-        return d.payload.external_url;
-    }
-    else {
-        // if no external link, link to the 1st flr of the bldg
+    if (d.contentType == "twitter-social-post")
+        return d.summary.external_url;
+    else if (d.contentType == "article-text")
+        return d.key;
+    else
         return "/buildings/" + d.address + "-l0";
-    }
 };

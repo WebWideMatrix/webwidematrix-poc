@@ -1,0 +1,34 @@
+# Meteor packages used by this project, one per line.
+#
+# 'meteor add' and 'meteor remove' will edit this file for you,
+# but you can also edit it by hand.
+
+insecure
+mizzao:bootstrap-3
+iron:router
+sacha:spin
+accounts-base
+accounts-twitter
+ian:accounts-ui-bootstrap-3
+sewdn:twitter-api
+lepozepo:streams
+meteorhacks:async
+mike:mocha
+d3js:d3
+momentjs:moment
+slava:redis-livedata
+meteor-base
+mobile-experience
+mongo
+blaze-html-templates
+session
+jquery
+tracker
+logging
+reload
+random
+ejson
+spacebars
+check
+standard-minifier-css
+standard-minifier-js

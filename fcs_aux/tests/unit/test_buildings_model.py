@@ -126,6 +126,7 @@ def test_create_buildings(create_smell_source, get_db):
     content_type = "SomeContent"
     nbuildings = 35
     keys = ["key-{}".format(i) for i in xrange(nbuildings)]
+    heads = [dict(key=key) for key in keys]
     payloads = [
         {
             "field1": "value 1.1",
@@ -133,8 +134,9 @@ def test_create_buildings(create_smell_source, get_db):
             "field3": "value 1.3",
         },
     ]* nbuildings
+    bodies = [dict(summary_payload=p, result_payload=p, raw_payload=p) for p in payloads]
     flr = "g-b(1,2)-l1"
-    got = create_buildings(content_type, keys, payloads, flr)
+    got = create_buildings(flr, content_type, heads, bodies)
     assert len(got) == nbuildings
     assert db.buildings.insert.call_count == 4  # 4 batch inserts
     create_smell_source.assert_has_calls([

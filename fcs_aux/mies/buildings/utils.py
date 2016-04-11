@@ -1,4 +1,7 @@
+import contextlib
 from math import sqrt
+
+import time
 
 
 def get_flr(addr):
@@ -102,3 +105,12 @@ def calculate_distance(addr1, addr2):
     if not all([x is not None for x in (x1, y1, x2, y2)]):
         return 0
     return sqrt((x2 - x1)**2 + (y2 - y1)**2)
+
+
+@contextlib.contextmanager
+def time_print(logging, task_name):
+    t = time.time()
+    try:
+        yield
+    finally:
+        logging.debug("{} took {} seconds".format(task_name, time.time() - t))

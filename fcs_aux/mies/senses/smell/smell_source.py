@@ -23,7 +23,10 @@ def get_smell_sources(page_size=100):
 def get_smell_source(address):
     key = build_key(address)
     cache = get_cache()
-    cache.get(key)
+    s = cache.get(key)
+    if s is not None:
+        return int(s)
+    return None
 
 
 def create_smell_source(address, strength, expiry=DEFAULT_SMELL_SOURCE_EXPIRY):
@@ -35,4 +38,26 @@ def create_smell_source(address, strength, expiry=DEFAULT_SMELL_SOURCE_EXPIRY):
 def update_smell_source(address, strength_delta):
     key = build_key(address)
     cache = get_cache()
-    cache.hincrby(key, strength_delta)
+    if strength_delta > 0:
+        cache.incr(key, strength_delta)
+    else:
+        cache.decr(key, strength_delta)
+
+
+def create_or_update_smell_source(address, strength,
+                                  expiry=DEFAULT_SMELL_SOURCE_EXPIRY):
+    """
+    Creates a smell source cache entry, or updates it if it already exists.
+    :param address: smell source location
+    :param strength: the smell strength, which equals the bldg energy
+    :param expiry: expiry time of the smell source in the cache
+    :return: the smell strength change
+    """
+    existing = get_smell_source(address)
+    if existing is None:
+        create_smell_source(address, strength, expiry)
+        delta = strength
+    else:
+        update_smell_source(address, strength)
+        delta = strength - existing
+    return delta

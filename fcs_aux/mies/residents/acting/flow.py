@@ -1,12 +1,17 @@
 from datetime import datetime
 import random
-from mies.buildings.stats import decrement_bldgs, UNPROCESSED, PROCESSED, increment_bldgs, BEING_PROCESSED
+from bson.json_util import dumps, loads
+
+
+from mies.buildings.stats import decrement_bldgs, UNPROCESSED, \
+    PROCESSED, increment_bldgs, BEING_PROCESSED
 
 from mies.constants import DEFAULT_BLDG_ENERGY
-from mies.buildings.model import logging
+from mies.buildings.model import logging, ONE_DAY_IN_SECONDS
 from mies.celery import app
 from mies.mongo_config import get_db
-from mies.senses.smell.smell_source import update_smell_source
+from mies.redis_config import get_cache
+from mies.senses.smell.smell_propagator import propagate_smell
 
 
 def update_action_status(bldg, action_status):
@@ -41,23 +46,40 @@ def add_new_action_status(bldg, action_status):
         bldg["address"], action_status))
 
 
-def update_bldg_processed_status(bldg, energy_change):
+def update_bldg_processed_status(bldg, energy_change, output_bldgs=None):
     # TODO have a Bldg class & move the method there
     was_processed = bldg["processed"]
     is_processed = (energy_change < 0)
 
     curr_bldg_energy = bldg["energy"] or DEFAULT_BLDG_ENERGY
+    new_energy = curr_bldg_energy + energy_change
     change = {
         "processed": is_processed,
-        "energy": curr_bldg_energy + energy_change
+        "energy": new_energy
     }
+    if output_bldgs:
+        change["outputs"] = output_bldgs
     db = get_db()
     db.buildings.update({
                             "_id": bldg["_id"]
                         }, {
                             "$set": change
                         })
-    update_smell_source(bldg["address"], energy_change)
+    # also update the cache
+    cache = get_cache()
+    cached_bldg_json = cache.get(bldg["address"])
+    cached_bldg = None
+    try:
+        cached_bldg = loads(cached_bldg_json)
+        cached_bldg.update(change)
+        cache.set(bldg["address"], dumps(cached_bldg), ex=ONE_DAY_IN_SECONDS)
+    except:
+        logging.exception("couldn't update cache")
+        logging.error("there's {} in the cache at {}".format(
+            str(cached_bldg_json), bldg["address"]
+        ))
+
+    propagate_smell(bldg["address"], new_energy)
     if not was_processed and is_processed:
         decrement_bldgs(bldg["flr"], UNPROCESSED)
         increment_bldgs(bldg["flr"], PROCESSED)
@@ -66,13 +88,18 @@ def update_bldg_processed_status(bldg, energy_change):
         bldg["address"], change))
 
 
-def update_bldg_with_results(bldg, content_type, payload):
+def update_bldg_with_results(bldg, content_type, summary_payload,
+                             raw_payload, result_payload,
+                             cache_period=ONE_DAY_IN_SECONDS):
     # TODO have a Bldg class & move the method there
     change = {}
     if content_type and content_type != bldg["contentType"]:
         change["contentType"] = content_type
-    if payload:
-        bldg["payload"].update(payload)
+    if summary_payload is not None:
+        bldg["summary"].update(summary_payload)
+        change["summary"] = bldg["summary"]
+    if result_payload is not None:
+        bldg["payload"].update(result_payload)
         change["payload"] = bldg["payload"]
 
     db = get_db()
@@ -81,6 +108,11 @@ def update_bldg_with_results(bldg, content_type, payload):
                         }, {
                             "$set": change
                         })
+    # if raw payload also changed, update it in cache
+    if raw_payload is not None:
+        bldg["raw"] = raw_payload
+    cache = get_cache()
+    cache.set(bldg["address"], dumps(bldg), ex=cache_period)
     logging.info("Updated bldg {} with results".format(bldg["address"]))
 
 
@@ -90,12 +122,14 @@ class ActingBehavior:
         self.processing = is_processing
         self.energy = self.energy + energy_gained
 
-    def finish_processing(self, action_status, bldg):
+    def finish_processing(self, action_status, bldg, output_bldgs=None):
         bldg_energy = bldg["energy"] or DEFAULT_BLDG_ENERGY
-        success = action_status["successLevel"]
+        #success = action_status["successLevel"]
+        # TODO figure out the success level & store in action status
+        success = 1
         energy_gained = bldg_energy * success
         self.update_processing_status(False, energy_gained)
-        update_bldg_processed_status(bldg, -energy_gained)
+        update_bldg_processed_status(bldg, -energy_gained, output_bldgs)
         decrement_bldgs(bldg["flr"], BEING_PROCESSED)
 
     def get_latest_action(self, bldg):
@@ -121,9 +155,11 @@ class ActingBehavior:
         :param action_status:
         :return:
         """
-        if (datetime.utcnow() - action_status["startedAt"]).seconds > 60 * 60 * 24:
+        if (datetime.utcnow() - action_status["startedAt"]).days > 0 or \
+           (datetime.utcnow() - action_status["startedAt"]).seconds > 60 * 60:
             return True
-        if action_status["result"] == "ERROR":
+        # TODO How come there wasn't a result key???
+        if action_status.get("result") == "ERROR":
             return True
         return False
 
@@ -158,7 +194,14 @@ class ActingBehavior:
         self.update_processing_status(True)
 
     def start_processing(self, action, bldg):
-        task = app.send_task(action, [bldg["payload"]])
+        if bldg.get("raw") is None:
+            # TODO increment metric
+            logging.warning("Invoking actions but couldn't find raw payload, "
+                            "using result payload instead")
+        payload = bldg["payload"]
+        if "raw" in bldg:
+            payload.update(bldg["raw"])
+        task = app.send_task(action, [payload], queue="actions")
         action_status = {
             "startedAt": datetime.utcnow(),
             "startedBy": self._id,

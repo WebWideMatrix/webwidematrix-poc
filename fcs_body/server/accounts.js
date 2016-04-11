@@ -1,6 +1,6 @@
 Accounts.onCreateUser(function (options, user) {
 
-    var INITIAL_RESIDENTS_PER_USER = 10;
+    var INITIAL_RESIDENTS_PER_USER = 30;
 
     console.log(JSON.stringify(options));
 
@@ -8,24 +8,30 @@ Accounts.onCreateUser(function (options, user) {
 
     user.profile = getUserDetails(options, user);
 
+    var userId = user._id,
+        username = user.profile.screenName;
+
+    console.log("Handling new user: " + userId + " " + username);
+
     var tokens = {
         accessToken: user.services.twitter.accessToken,
         accessTokenSecret: user.services.twitter.accessTokenSecret
     };
 
     var wrappedCreateBldg = Async.wrap(createBldg);
-    var bldgId = wrappedCreateBldg(INITIAL_FLOOR, user.profile.screenName, null,
-        USER_CONTENT_TYPE, true, user.profile);
+    var bldgId = wrappedCreateBldg(INITIAL_FLOOR, username, null,
+        USER_CONTENT_TYPE, true, user.profile, user.profile);
     var bldg = Buildings.findOne({_id: bldgId});
 
     var wrappedCreateDataPipe = Async.wrap(createDataPipe);
-    var dataPipeId = wrappedCreateDataPipe(tokens);
+    var dataPipeId = wrappedCreateDataPipe(userId, tokens);
     var wrappedCreateLifecycleManager = Async.wrap(createLifecycleManager);
-    var lifecycleManagerId = wrappedCreateLifecycleManager(bldgId, dataPipeId);
+    var lifecycleManagerId = wrappedCreateLifecycleManager(userId, bldgId, dataPipeId);
     var wrappedCreateRsdt = Async.wrap(createRsdt);
     var residents = [];
     for (var i = 0; i < INITIAL_RESIDENTS_PER_USER; i++) {
-        var rsdtId = wrappedCreateRsdt(initialResidentName(user.profile, i), bldg);
+        var residentName = initialResidentName(username, i);
+        var rsdtId = wrappedCreateRsdt(residentName, bldg, userId, username);
         residents.push(rsdtId);
     }
 
@@ -58,7 +64,7 @@ getUserDetailsFromTwitter = function(profile, user) {
     return profile;
 };
 
-initialResidentName = function(profile, i) {
+initialResidentName = function(username, i) {
     var chars = "abcdefghijklmnopqrstuvwxyz";
-    return (Math.floor((i / chars.length)) + 1) + chars.charAt((i % chars.length)) + ' ' + profile.screenName;
+    return (Math.floor((i / chars.length)) + 1) + chars.charAt((i % chars.length)) + ' ' + username;
 };

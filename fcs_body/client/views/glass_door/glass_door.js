@@ -5,31 +5,19 @@ Template.glassDoor.helpers({
     }
 });
 
-var tryOpenDay = function(n) {
-    if (n > 30) {
-        $("#error").text("No data yet, please try again soon..");
-    }
-    else {
-        var key = daysAgo(n);
-        Meteor.call("getBldgAddressByKey", key, function (err, data) {
-                if (err) {
-                    // TODO handle errors, such as no bldg
-                    console.log(err);
-                }
-                if (data) {
-                    // TODO use router
-                    redirectTo(data + "-l0");
-                }
-                else {
-                    n++;
-                    Meteor.setTimeout(function() { tryOpenDay(n) }, 100);
-                }
-            });
-    }
+var tryOpenToday = function() {
+    // assuming the user is logged in
+    var userId = Meteor.userId();
+    var key = buildUserCurrentBldgCacheKey(userId);
+    var addr = Redis.get(key);
+
+//    redirectTo(addr + "-l0", "/current/");    unfortunately, redis-livedata has issues,
+//                                              so we're not using the work cache for UI
+    redirectTo(addr + "-l0");
 };
 
 Template.glassDoor.events({
     "click .enter-button": function() {
-        tryOpenDay(0);
+        tryOpenToday();
     }
 });

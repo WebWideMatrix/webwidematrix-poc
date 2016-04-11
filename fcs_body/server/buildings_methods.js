@@ -14,5 +14,15 @@ Meteor.methods({
         else {
             return null;
         }
+    },
+
+    "getBldgContent": function (addr) {
+        console.log("Answering call to method getBldgContent");
+        if (!addr) return {};
+        console.log("Sending content of bldg at " + addr);
+        var result = Redis.matching(addr);
+        console.log(result);
+        return result;
     }
+
 });
