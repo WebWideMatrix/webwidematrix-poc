@@ -5,7 +5,7 @@ import random
 from mies.buildings.model import load_nearby_bldgs, has_bldgs, get_bldg_flrs, get_nearby_addresses
 from mies.buildings.stats import decrement_residents, increment_residents
 from mies.buildings.utils import extract_bldg_coordinates, get_flr, get_flr_level, replace_flr_level, \
-    replace_bldg_coordinates
+    replace_bldg_coordinates, get_containing_bldg_address
 from mies.constants import GIVE_UP_ON_FLR, MAX_INTERACTION_RATE, FLOOR_H, FLOOR_W
 from mies.senses.smell.smell_propagator import get_bldg_smell
 from mies.lifecycle_managers.daily_building.manager import _build_user_current_bldg_cache_key
@@ -51,12 +51,13 @@ class MovementBehavior:
             self.get_outside()
             self.reset_interactions_log()
         # if encountered many residents in the last hour, switch flr
-        # elif self.get_interactions_rate() > MAX_INTERACTION_RATE:
-        #     logging.info("^"*100)
-        #     logging.info("|"*100)
-        #     logging.info("Switching flr due to high interaction rate")
-        #     self.randomly_switch_flr()
-        #     self.reset_interactions_log()
+        elif self.get_interactions_rate() > MAX_INTERACTION_RATE:
+            logging.info("^"*100)
+            logging.info("|"*100)
+            logging.info("Interaction rate is: {}".format(self.get_interactions_rate()))
+            logging.info("Switching flr due to high interaction rate")
+            self.randomly_switch_flr()
+            self.reset_interactions_log()
 
         # if it's a composite bldg with smell, get inside
         if curr_bldg and curr_bldg["isComposite"] and get_bldg_smell(curr_bldg["address"]):
@@ -239,9 +240,13 @@ class MovementBehavior:
         Move up or down one flr randomly.
         :return:
         """
+        global logging
+        # if you need the worker id: worker=(current_process().index+1)
+        logging = logging.bind(resident=self.name)
+
         flr = get_flr(self.location)
         flr_level = get_flr_level(flr)
-        flrs = get_bldg_flrs(self.location)
+        flrs = get_bldg_flrs(get_containing_bldg_address(self.location))
         # following code assumes bldg flrs start from 0, are consecutive & all populated
         if len(flrs) <= 1:
             return
@@ -255,10 +260,15 @@ class MovementBehavior:
             # we're at the middle, so choose randomly whether to go up or down
             destination_flr = random.choice([flr_level - 1, flr_level + 1])
 
+        logging.info("Switching to flr: {}".format(destination_flr))
         self.switch_to_flr(destination_flr)
 
     def switch_to_flr(self, flr_level):
+        global logging
+        # if you need the worker id: worker=(current_process().index+1)
+        logging = logging.bind(resident=self.name)
         new_addr = replace_flr_level(self.location, flr_level)
+        logging.info("Moving to address in different flr: {}".format(new_addr))
         self.move_to(new_addr)
 
     def move_to(self, address):

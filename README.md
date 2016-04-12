@@ -57,5 +57,6 @@ redis: redis-server
 
 meteor: env REDIS_CONFIGURE_KEYSPACE_NOTIFICATIONS=1 meteor
 
-workers: celery -A mies worker -l info -B --concurrency=5 -Q default
-residents: celery -A mies worker -l info --concurrency=10 -Q life_events
+workers: celery -A mies worker -l info -B --concurrency=4 -Q default
+residents: celery -A mies worker -l info --concurrency=4 -Q life_events
+actions: celery -A mies worker -l info --concurrency=4 -Q actions

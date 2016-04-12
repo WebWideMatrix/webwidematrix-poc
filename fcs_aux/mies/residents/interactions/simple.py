@@ -1,4 +1,3 @@
-import logging
 from mies.constants import INTERACTION_RATE_PERIOD
 from mies.redis_config import get_cache
 
@@ -23,4 +22,4 @@ class InteractionBehavior:
     def get_interactions_rate(self):
         key = self._build_interactions_log_key()
         cache = get_cache()
-        return len(cache.hgetall(key))
+        return cache.hlen(key)

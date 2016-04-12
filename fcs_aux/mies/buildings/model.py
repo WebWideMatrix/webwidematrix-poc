@@ -7,7 +7,7 @@ import random
 
 from celery.utils.log import get_task_logger
 from mies.buildings.stats import increment_bldgs, UNPROCESSED
-from mies.buildings.utils import extract_bldg_coordinates, get_flr, time_print
+from mies.buildings.utils import extract_bldg_coordinates, get_flr, time_print, get_bldg
 from mies.celery import app
 from mies.mongo_config import get_db
 from mies.constants import FLOOR_W, FLOOR_H, PROXIMITY, DEFAULT_BLDG_ENERGY
@@ -292,10 +292,9 @@ def remove_occupant(bldg):
 
 
 def has_bldgs(flr):
-    db = get_db()
-    count = db.buildings.find({
-        "flr": flr
-    }).count()
+    cache = get_cache()
+    key = "KEYS_IN_{}".format(flr)
+    count = cache.hlen(key)
     return count > 0
 
 
@@ -309,5 +308,6 @@ def get_bldg_flrs(bldg_addr):
     result = []
     flr = 0
     while has_bldgs("{bldg}-l{flr}".format(bldg=bldg_addr, flr=flr)):
+        flr += 1
         result.append(flr)
     return result

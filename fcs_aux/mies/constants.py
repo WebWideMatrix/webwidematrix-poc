@@ -21,8 +21,8 @@ GIVE_UP_ON_FLR = 20
 
 # how much time (in seconds) to store a log of interactions
 # for the calculation of a resident's interaction rate
-INTERACTION_RATE_PERIOD = 60 * 60
+INTERACTION_RATE_PERIOD = 5 * 60
 
 # the threshold number of unique residents recently encountered
 # that when exceeded will cause a resident to move to another flr
-MAX_INTERACTION_RATE = 5
+MAX_INTERACTION_RATE = 2
