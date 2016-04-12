@@ -12,6 +12,7 @@ app = Celery('mies',
                  'mies.buildings.model',
                  'mies.senses.smell.smell_propagator',
                  'fconveys.actions.fetch_content.fetch_article',
+                 'fconveys.actions.extract_metadata.extract_article_metadata',
              ])
 
 app.config_from_object('mies.celery_config')
