@@ -174,7 +174,8 @@ class ActingBehavior:
         TODO lookup actions registered for given content-type
         """
         registered_actions = {
-            "twitter-social-post": ["fetch-article"]
+            "twitter-social-post": ["fetch-article"],
+            "article-text": ["extract-article-metadata"],
         }
         return registered_actions.get(content_type)
 
