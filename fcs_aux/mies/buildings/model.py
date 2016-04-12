@@ -293,7 +293,7 @@ def remove_occupant(bldg):
 
 def has_bldgs(flr):
     cache = get_cache()
-    key = "KEYS_IN_{}".format(flr)
+    key = FLR_KEYS.format(flr)
     count = cache.hlen(key)
     return count > 0
 
