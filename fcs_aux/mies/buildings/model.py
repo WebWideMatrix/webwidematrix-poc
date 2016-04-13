@@ -243,6 +243,14 @@ def load_bldg(**kwargs):
     return db.buildings.find_one(kwargs)
 
 
+def load_raw_bldg(addr):
+    cache = get_cache()
+    bldg = cache.get(addr)
+    if bldg is not None:
+        return bldg.get("raw")
+    return None
+
+
 def load_nearby_bldgs(address):
     addresses = get_nearby_addresses(address)
     # query the cache for any bldg whose address is one of these addresses
