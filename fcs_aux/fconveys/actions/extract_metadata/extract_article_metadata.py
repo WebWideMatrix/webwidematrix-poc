@@ -13,11 +13,10 @@ def extract_article_metadata_action(input_payload):
     logging.info(input_payload)
     assert "url" in input_payload
     url = input_payload.get("url")
-    raw = load_raw_bldg(input_payload.get("address"))
-
     result_payloads = []
 
-    article = Schemato(raw)
+    logging.info("text in raw? {}".format("text" in input_payload))
+    article = Schemato(input_payload.get("text"))
     metadata = None
     d1 = ParselyDistiller(article)
     try:

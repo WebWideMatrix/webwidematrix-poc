@@ -27,10 +27,10 @@ bldgRenderFunc = {
     'article-text': function(d) {
         var text = d.summary.display_url;
         var pic = d.picture;
-        if (d.summary && d.summary.image_url)
-            pic = d.summary.image_url;
-        if (d.summary && d.summary.title)
-            text = d.summary.title;
+        if (d.summary && d.summary.metadata && d.summary.metadata.image_url)
+            pic = d.summary.metadata.image_url;
+        if (d.summary && d.summary.metadata && d.summary.metadata.title)
+            text = d.summary.metadata.title;
         var html = "";
         if (Session.get("currentAddress") == d.address) {
             html += "<p " +

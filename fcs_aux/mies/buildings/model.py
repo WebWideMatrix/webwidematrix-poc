@@ -244,9 +244,14 @@ def load_bldg(**kwargs):
 
 
 def load_raw_bldg(addr):
+    logging.info("LRB-."*300)
     cache = get_cache()
+    logging.info("Looking for bldg in cache at {}".format(addr))
     bldg = cache.get(addr)
+    logging.info("Found:")
+    logging.info(bldg.keys())
     if bldg is not None:
+        logging.info("Not none & has raw? {}".format("raw" in bldg))
         return bldg.get("raw")
     return None
 

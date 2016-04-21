@@ -5,6 +5,8 @@ import os
 import requests
 from tempfile import NamedTemporaryFile
 import textract
+from schemato import Schemato
+from schemato.distillery import ParselyDistiller, NewsDistiller
 
 from mies.buildings.utils import time_print
 from mies.celery import app
@@ -33,11 +35,45 @@ def get_favicon(url):
     parts = urlparse(url)
     return "{}://{}/favicon.ico".format(parts.scheme, parts.netloc)
 
+
 @app.task(name='fetch-article')
 def fetch_article_action(input_payload):
     with time_print(logging, "Fetching article"):
         result_payloads = do_fetch_article(input_payload)
     return result_payloads
+
+
+def extract_metadata(source):
+    logging.info("-"*70)
+    logging.info("-"*70)
+    logging.info("-"*70)
+    logging.info(source)
+    logging.info("-"*70)
+    logging.info("-"*70)
+    logging.info("-"*70)
+
+    article = Schemato(source)
+    metadata = {}
+    d1 = ParselyDistiller(article)
+    try:
+        metadata = d1.distill()
+    except AttributeError:
+        logging.exception("ParselyDistiller failed to extract metadata from article")
+        try:
+            d2 = NewsDistiller(article)
+            metadata = d2.distill()
+        except AttributeError:
+            logging.exception("NewsDistiller failed to extract metadata from article")
+    if metadata:
+        logging.info("Yay, extracted metadata:")
+        logging.info(metadata)
+    return metadata
+
+
+def read_file(file_name):
+    with open(file_name) as f:
+        result = f.read()
+    return result
 
 
 def do_fetch_article(input_payload):
@@ -53,6 +89,12 @@ def do_fetch_article(input_payload):
         text = textract.process(file_name)
         logging.info("Extracted article text ({} characters)".format(len(text)))
 
+        metadata = {}
+        try:
+            metadata = extract_metadata(file_name)
+        except:
+            logging.exception("Failed to extract metadata from {}".format(url))
+
         delete_downloaded_file(file_name)
         logging.info("Deleted temp file: {}".format(file_name))
 
@@ -65,6 +107,7 @@ def do_fetch_article(input_payload):
                     "url": url,
                     "display_url": display_url,
                     "shortened_url": shortened_url,
+                    "metadata": metadata
                 },
                 "raw": {
                     "text": text
