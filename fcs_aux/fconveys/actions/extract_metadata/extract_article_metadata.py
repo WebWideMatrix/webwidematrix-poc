@@ -2,7 +2,6 @@ import logging
 from schemato import Schemato
 from schemato.distillery import ParselyDistiller, NewsDistiller
 
-from mies.buildings.model import load_raw_bldg
 from mies.celery import app
 
 

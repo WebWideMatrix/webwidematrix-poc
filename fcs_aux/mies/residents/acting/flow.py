@@ -175,7 +175,7 @@ class ActingBehavior:
         """
         registered_actions = {
             "twitter-social-post": ["fetch-article"],
-            # "article-text": ["extract-article-metadata"],
+            "article-text": ["extract-article-concepts"],
         }
         return registered_actions.get(content_type)
 

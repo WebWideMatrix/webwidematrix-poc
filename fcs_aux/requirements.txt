@@ -20,6 +20,8 @@ lxml==3.5.0
 MarkupSafe==0.23
 mccabe==0.2.1
 mock==1.0.1
+nltk==3.2.1
+numpy==1.11.0
 pdfminer==20140328
 pep8==1.5.7
 Pillow==3.0.0
@@ -42,6 +44,5 @@ SpeechRecognition==1.4.0
 structlog==16.0.0
 textract==1.2.0
 tweepy==2.3.0
-wheel==0.24.0
 xlrd==0.9.3
 XlsxWriter==0.7.7
