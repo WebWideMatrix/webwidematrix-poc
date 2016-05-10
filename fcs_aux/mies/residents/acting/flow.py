@@ -202,6 +202,8 @@ class ActingBehavior:
         payload = bldg["payload"]
         if "raw" in bldg:
             payload.update(bldg["raw"])
+        if "summary" in bldg:
+            payload.update(bldg["summary"])
         task = app.send_task(action, [payload], queue="actions")
         action_status = {
             "startedAt": datetime.utcnow(),

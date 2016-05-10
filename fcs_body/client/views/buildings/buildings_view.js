@@ -51,6 +51,18 @@ bldgRenderFunc = {
         }
         return html;
     },
+    'concept': function(d) {
+        var text = d.summary.concept;
+        var color = "white";
+        if (d.summary.famous) {
+            color = "blue";
+        }
+        var html = "<p " +
+            "style=\"color: gray; " +
+            "background-color: " + color + "; " +
+            "height: 10px; \">" + text + "</p>";
+        return html;
+    },
     'daily-feed': function(d) {
         var html = "<table style='border-color: red; height: 5px;' " +
             "width='5px;'>";
@@ -282,7 +294,10 @@ Template.buildingsGrid.rendered = function () {
                     "font-size": "1px"
                 })
                 .html(function (d) {
-                    return bldgRenderFunc[d.contentType](d);
+                    if (d.contentType)
+                        return bldgRenderFunc[d.contentType](d);
+                    else
+                        return "<p>?</p>";
                 });
 
             // if given a bldg address, zoom on it

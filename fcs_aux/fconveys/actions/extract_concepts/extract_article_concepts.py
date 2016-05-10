@@ -2,6 +2,7 @@ import logging
 from collections import defaultdict
 
 import nltk
+from SPARQLWrapper import SPARQLWrapper, JSON
 
 from mies.celery import app
 
@@ -30,6 +31,25 @@ def extract_named_entities(text):
     return list(set(entity_names))
 
 
+def get_entries_in_wikipedia(name):
+    entries = []
+    sparql = SPARQLWrapper("http://dbpedia.org/sparql")
+    name = name.replace(" ", "_")
+    query = """
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        SELECT ?label
+        WHERE { <http://dbpedia.org/resource/%s> rdfs:label ?label }
+    """ % name
+    sparql.setReturnFormat(JSON)
+    sparql.setQuery(query)
+    results = sparql.query().convert()
+    for result in results["results"]["bindings"]:
+        entries.append(result["label"]["value"])
+    return entries
+
+
+# TODO template function for filtering
+
 def filter_named_entities_by_appearance_in_metadata(named_entities, metadata):
     RANK_THRESHOLD = 2
     all_metadata = metadata.values()
@@ -39,6 +59,15 @@ def filter_named_entities_by_appearance_in_metadata(named_entities, metadata):
         for value in all_metadata:
             if concept in value:
                 score += 1
+        concept_rank[concept] = score
+    return [concept for concept in named_entities if concept_rank[concept] > RANK_THRESHOLD]
+
+
+def filter_by_appearance_in_wikipedia(named_entities):
+    RANK_THRESHOLD = 1
+    concept_rank = defaultdict(int)
+    for concept in named_entities:
+        score = len(get_entries_in_wikipedia(concept))
         concept_rank[concept] = score
     return [concept for concept in named_entities if concept_rank[concept] > RANK_THRESHOLD]
 
@@ -55,24 +84,39 @@ def extract_article_concepts_action(input_payload):
     logging.info("Extracting article concepts")
     logging.info(input_payload)
     result_payloads = []
-    raw = input_payload.get("raw")
-    text = raw.get("text")
-    summary = input_payload.get("summary")
-    metadata = summary.get("metadata")
+    text = input_payload.get("text")
+    metadata = input_payload.get("metadata", {})
+    logging.info("Mm"*300)
+    logging.info(metadata)
     named_entities = extract_named_entities(text)
-    concepts = filter_named_entities_by_appearance_in_metadata(named_entities, metadata)
+    famous = False
+    # TODO consolidate ranking & tagging (rank by all criteria)
+    logging.info("Filtering"*300)
+    if metadata.values() and all(metadata.values()):
+        concepts = filter_named_entities_by_appearance_in_metadata(named_entities, metadata)
+        logging.info("Metadata based filtering returned {} out of {} named entities".format(
+            len(concepts), len(named_entities)
+        ))
+    else:
+        concepts = filter_by_appearance_in_wikipedia(named_entities)
+        logging.info("Wikipedia based filtering returned {} out of {} named entities".format(
+            len(concepts), len(named_entities)
+        ))
+        famous = True
 
     for concept in concepts:
         result_payloads.append(
             {
-                "content_type": "concept",
+                "contentType": "concept",
                 "key": concept,
                 "summary": {
                     "concept": concept,
-                    "source": summary.get("display_url")
+                    "famous": famous,
+                    "source": input_payload.get("display_url")
                 },
                 "payload": {
-                    "concept": concept
+                    "concept": concept,
+                    "famous": famous
                 },
                 "placement_hints": {
                     "new_bldg": True,

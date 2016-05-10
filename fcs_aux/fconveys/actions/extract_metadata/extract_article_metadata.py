@@ -5,7 +5,6 @@ from schemato.distillery import ParselyDistiller, NewsDistiller
 from mies.celery import app
 
 
-
 @app.task(name='extract-article-metadata')
 def extract_article_metadata_action(input_payload):
     logging.info("Extracting article metadata")
@@ -33,7 +32,7 @@ def extract_article_metadata_action(input_payload):
 
     result_payloads.append(
         {
-            "content_type": "article-with-metadata",
+            "contentType": "article-with-metadata",
             "key": url,
             "summary": metadata,
             "placement_hints": {
