@@ -53,14 +53,15 @@ bldgRenderFunc = {
     },
     'concept': function(d) {
         var text = d.summary.concept;
-        var color = "white";
+        var color = "lightgrey";
         if (d.summary.famous) {
-            color = "blue";
+            color = "white";
         }
         var html = "<p " +
-            "style=\"color: gray; " +
+            "style=\"color: blue; " +
+            "font-size: 1pt; " +
             "background-color: " + color + "; " +
-            "height: 10px; \">" + text + "</p>";
+            "height: 10px; \">"  + text + "</p>";
         return html;
     },
     'daily-feed': function(d) {

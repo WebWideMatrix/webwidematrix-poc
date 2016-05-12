@@ -57,10 +57,13 @@ def filter_named_entities_by_appearance_in_metadata(named_entities, metadata):
     for concept in named_entities:
         score = 0
         for value in all_metadata:
-            if concept in value:
+            if value is not None and concept in value:
                 score += 1
         concept_rank[concept] = score
-    return [concept for concept in named_entities if concept_rank[concept] > RANK_THRESHOLD]
+    results = [concept for concept in named_entities if concept_rank[concept] > RANK_THRESHOLD]
+    logging.info("Metadata ditched" + ":"*80)
+    logging.info([c for c in named_entities if c not in results])
+    return results
 
 
 def filter_by_appearance_in_wikipedia(named_entities):
@@ -69,7 +72,10 @@ def filter_by_appearance_in_wikipedia(named_entities):
     for concept in named_entities:
         score = len(get_entries_in_wikipedia(concept))
         concept_rank[concept] = score
-    return [concept for concept in named_entities if concept_rank[concept] > RANK_THRESHOLD]
+    results = [concept for concept in named_entities if concept_rank[concept] > RANK_THRESHOLD]
+    logging.info("Wikipedia ditched" + ":"*80)
+    logging.info([c for c in named_entities if c not in results])
+    return results
 
 
 @app.task(name='extract-article-concepts')
@@ -83,24 +89,28 @@ def extract_article_concepts_action(input_payload):
     """
     logging.info("Extracting article concepts")
     logging.info(input_payload)
+    filter_by_metadata = True
+    filter_by_wikipedia = True
     result_payloads = []
     text = input_payload.get("text")
     metadata = input_payload.get("metadata", {})
     logging.info("Mm"*300)
     logging.info(metadata)
-    named_entities = extract_named_entities(text)
-    famous = False
+    concepts = extract_named_entities(text)
+    nconcepts = len(concepts)
     # TODO consolidate ranking & tagging (rank by all criteria)
-    logging.info("Filtering"*300)
-    if metadata.values() and all(metadata.values()):
-        concepts = filter_named_entities_by_appearance_in_metadata(named_entities, metadata)
+    if filter_by_metadata and metadata.values() and any(metadata.values()):
+        concepts = filter_named_entities_by_appearance_in_metadata(concepts, metadata)
+        logging.info("Metadata"*300)
         logging.info("Metadata based filtering returned {} out of {} named entities".format(
-            len(concepts), len(named_entities)
+            len(concepts), nconcepts
         ))
-    else:
-        concepts = filter_by_appearance_in_wikipedia(named_entities)
+        nconcepts = len(concepts)
+    if filter_by_wikipedia:
+        logging.info("Wikipedia"*300)
+        concepts = filter_by_appearance_in_wikipedia(concepts)
         logging.info("Wikipedia based filtering returned {} out of {} named entities".format(
-            len(concepts), len(named_entities)
+            len(concepts), nconcepts
         ))
         famous = True
 
