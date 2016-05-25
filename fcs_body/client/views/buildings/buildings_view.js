@@ -53,15 +53,26 @@ bldgRenderFunc = {
     },
     'concept': function(d) {
         var text = d.summary.concept;
+        var pic = d.summary.picture;
         var color = "lightgrey";
         if (d.summary.famous) {
             color = "white";
         }
-        var html = "<p " +
-            "style=\"color: blue; " +
-            "font-size: 1pt; " +
-            "background-color: " + color + "; " +
-            "height: 10px; \">"  + text + "</p>";
+        var html = "";
+        if (pic) {
+            html = "<img src=\"" + pic + "\" " +
+                "alt=\"" + text + "\" " +
+                "style=\"height: 10px; \"/>";
+        }
+        else {
+            // TODO need show the concept on click - & navigate to the Wiki page on 2nd
+
+            html = "<p " +
+                "style=\"color: blue; " +
+                "font-size: 1pt; " +
+                "background-color: " + color + "; " +
+                "height: 10px; \">" + text + "</p>";
+        }
         return html;
     },
     'daily-feed': function(d) {

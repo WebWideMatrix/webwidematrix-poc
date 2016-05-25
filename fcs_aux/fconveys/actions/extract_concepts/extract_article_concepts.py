@@ -48,6 +48,26 @@ def get_entries_in_wikipedia(name):
     return entries
 
 
+def get_concept_features_from_wikipedia(name):
+    entries = []
+    sparql = SPARQLWrapper("http://dbpedia.org/sparql")
+    name = name.replace(" ", "_")
+    query = """
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        SELECT ?label, ?picture
+        WHERE {
+            <http://dbpedia.org/resource/%s> rdfs:label ?label .
+            <http://dbpedia.org/resource/%s> dbo:thumbnail ?picture
+        }
+    """ % (name, name)
+    sparql.setReturnFormat(JSON)
+    sparql.setQuery(query)
+    results = sparql.query().convert()
+    for result in results["results"]["bindings"]:
+        entries.append(dict(label=result["label"]["value"], picture=result["picture"]["value"]))
+    return entries
+
+
 # TODO template function for filtering
 
 def filter_named_entities_by_appearance_in_metadata(named_entities, metadata):
@@ -115,17 +135,25 @@ def extract_article_concepts_action(input_payload):
         famous = True
 
     for concept in concepts:
+        picture = None
+        features_by_language = get_concept_features_from_wikipedia(concept)
+        if features_by_language:
+            picture = features_by_language[0].get("picture")
+        # FIXME: why duplicate data so much?
         result_payloads.append(
             {
                 "contentType": "concept",
                 "key": concept,
+                "picture": picture,
                 "summary": {
                     "concept": concept,
                     "famous": famous,
+                    "picture": picture,
                     "source": input_payload.get("display_url")
                 },
                 "payload": {
                     "concept": concept,
+                    "picture": picture,
                     "famous": famous
                 },
                 "placement_hints": {
