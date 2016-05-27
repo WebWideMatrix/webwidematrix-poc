@@ -53,18 +53,21 @@ def get_concept_features_from_wikipedia(name):
     sparql = SPARQLWrapper("http://dbpedia.org/sparql")
     name = name.replace(" ", "_")
     query = """
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        SELECT ?label, ?picture
-        WHERE {
-            <http://dbpedia.org/resource/%s> rdfs:label ?label .
-            <http://dbpedia.org/resource/%s> dbo:thumbnail ?picture
-        }
-    """ % (name, name)
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    SELECT ?label, ?pic, ?wiki
+    WHERE {
+        <http://dbpedia.org/resource/%s> rdfs:label ?label .
+        <http://dbpedia.org/resource/%s> dbo:thumbnail ?pic .
+        <http://dbpedia.org/resource/%s> foaf:isPrimaryTopicOf ?wiki
+    }
+    """ % (name, name, name)
     sparql.setReturnFormat(JSON)
     sparql.setQuery(query)
     results = sparql.query().convert()
     for result in results["results"]["bindings"]:
-        entries.append(dict(label=result["label"]["value"], picture=result["picture"]["value"]))
+        entries.append(dict(label=result["label"]["value"],
+                            picture=result["picture"]["value"],
+                            wiki=result["wiki"]["value"]))
     return entries
 
 
@@ -136,9 +139,11 @@ def extract_article_concepts_action(input_payload):
 
     for concept in concepts:
         picture = None
+        wiki = None
         features_by_language = get_concept_features_from_wikipedia(concept)
         if features_by_language:
             picture = features_by_language[0].get("picture")
+            wiki = features_by_language[0].get("wiki")
         # FIXME: why duplicate data so much?
         result_payloads.append(
             {
@@ -147,6 +152,7 @@ def extract_article_concepts_action(input_payload):
                 "picture": picture,
                 "summary": {
                     "concept": concept,
+                    "external_url": wiki,
                     "famous": famous,
                     "picture": picture,
                     "source": input_payload.get("display_url")

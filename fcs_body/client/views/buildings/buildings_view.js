@@ -15,6 +15,28 @@ redirectTo = function(newAddress, prefix) {
     window.open(prefix + newAddress, "_top");
 };
 
+function renderBldgWithTextAndPicture(d, text, pic) {
+    var html = "";
+    if (Session.get("currentAddress") == d.address) {
+        html += "<p " +
+            "style=\"color: gray; " +
+            "background-color: white; " +
+            "height: 10px; \">" + text + "</p>";
+    }
+    else {
+        var bldg = Session.get("bldgContent");
+        if (bldg) {
+            text = bldg.raw;
+        }
+        html = "<img src=\"" + pic + "\" " +
+            "alt=\"" + text + "\" " +
+            "style=\"color: blue; " +
+            "background-color: white; " +
+            "height: 10px; \"/>";
+    }
+    return html;
+}
+
 bldgRenderFunc = {
     'twitter-social-post': function(d) {
         var text = d.summary.text;
@@ -31,49 +53,12 @@ bldgRenderFunc = {
             pic = d.summary.metadata.image_url;
         if (d.summary && d.summary.metadata && d.summary.metadata.title)
             text = d.summary.metadata.title;
-        var html = "";
-        if (Session.get("currentAddress") == d.address) {
-            html += "<p " +
-            "style=\"color: gray; " +
-            "background-color: white; " +
-            "height: 10px; \">" + text + "</p>";
-        }
-        else {
-            var bldg = Session.get("bldgContent");
-            if (bldg) {
-                text = bldg.raw;
-            }
-            html = "<img src=\"" + pic + "\" " +
-                "alt=\"" + text + "\" " +
-                "style=\"color: blue; " +
-                "background-color: white; " +
-                "height: 10px; \"/>";
-        }
-        return html;
+        return renderBldgWithTextAndPicture(d, text, pic);
     },
     'concept': function(d) {
         var text = d.summary.concept;
         var pic = d.summary.picture;
-        var color = "lightgrey";
-        if (d.summary.famous) {
-            color = "white";
-        }
-        var html = "";
-        if (pic) {
-            html = "<img src=\"" + pic + "\" " +
-                "alt=\"" + text + "\" " +
-                "style=\"height: 10px; \"/>";
-        }
-        else {
-            // TODO need show the concept on click - & navigate to the Wiki page on 2nd
-
-            html = "<p " +
-                "style=\"color: blue; " +
-                "font-size: 1pt; " +
-                "background-color: " + color + "; " +
-                "height: 10px; \">" + text + "</p>";
-        }
-        return html;
+        return renderBldgWithTextAndPicture(d, text, pic);
     },
     'daily-feed': function(d) {
         var html = "<table style='border-color: red; height: 5px;' " +

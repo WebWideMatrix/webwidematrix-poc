@@ -152,6 +152,8 @@ getBldgLink = function(d) {
         return d.summary.external_url;
     else if (d.contentType == "article-text")
         return d.key;
+    else if (d.contentType == "concept")
+        return d.summary.external_url;
     else
         return "/buildings/" + d.address + "-l0";
 };
