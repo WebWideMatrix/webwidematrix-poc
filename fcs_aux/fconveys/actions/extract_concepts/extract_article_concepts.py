@@ -66,7 +66,7 @@ def get_concept_features_from_wikipedia(name):
     results = sparql.query().convert()
     for result in results["results"]["bindings"]:
         entries.append(dict(label=result["label"]["value"],
-                            picture=result["picture"]["value"],
+                            picture=result["pic"]["value"],
                             wiki=result["wiki"]["value"]))
     return entries
 
@@ -80,7 +80,7 @@ def filter_named_entities_by_appearance_in_metadata(named_entities, metadata):
     for concept in named_entities:
         score = 0
         for value in all_metadata:
-            if value is not None and concept in value:
+            if value is not None and isinstance(value, basestring) and concept in value:
                 score += 1
         concept_rank[concept] = score
     results = [concept for concept in named_entities if concept_rank[concept] > RANK_THRESHOLD]
