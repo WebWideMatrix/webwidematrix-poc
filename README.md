@@ -1,11 +1,13 @@
 fcs-skateboard
 ==============
 
+[![Join the chat at https://gitter.im/dibaunaumh/fcs-skateboard](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dibaunaumh/fcs-skateboard?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 What is this
 ------------
 
-This project is a reference implementation of an architecture
-that tries to create emergence inspired by life.
+This project is a reference implementation of a consumption layer over the Web,
+transforming content feeds into organized spaces.
 
 It is based on several simple idioms:
 
