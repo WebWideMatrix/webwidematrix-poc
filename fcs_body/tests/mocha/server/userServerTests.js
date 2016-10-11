@@ -29,6 +29,21 @@ if (!(typeof MochaWeb === 'undefined')){
                     }
                 }
             });
+
+            it("should generate initial user name", function() {
+                var names = [];
+                var profileName = {screenName: "joe"};
+                for (var i = 0; i < 100; i++) {
+                    names.push(initialResidentName(profileName, i));
+                }
+                chai.assert.equal(names[0], "1a joe");
+                chai.assert.equal(names[1], "1b joe");
+                chai.assert.equal(names[10], "1k joe");
+                chai.assert.equal(names[30], "2e joe");
+                chai.assert.equal(names[50], "2y joe");
+                chai.assert.equal(names[80], "4c joe");
+
+            });
         });
     });
 }

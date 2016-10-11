@@ -1,5 +1,8 @@
 from collections import namedtuple
+from random import choice
+
 import pytest
+from mies.constants import DEFAULT_RESIDENT_ENERGY, FLOOR_W, FLOOR_H
 
 
 @pytest.fixture()
@@ -88,3 +91,27 @@ def home_timeline_response():
              )
     ]
     return resp
+
+@pytest.fixture
+def resident_data():
+    return {
+            "name": "3j",
+            "type": "ContentVisualizer",
+            "bldg": "bldg123",
+            "processing": False,
+            "acceleration": None,
+            "velocity": None,
+            "location": "g-b(1,2)-l0",
+            "energy": DEFAULT_RESIDENT_ENERGY,
+            "status": "active"
+    }
+
+@pytest.fixture
+def bldg_addresses_on_same_flr():
+    addresses = []
+    base = "g-b(10,10)-l0-b({x},{y})"
+    for i in xrange(100):
+        x = choice(xrange(FLOOR_W))
+        y = choice(xrange(FLOOR_H))
+        addresses.append(base.format(x=x, y=y))
+    return addresses

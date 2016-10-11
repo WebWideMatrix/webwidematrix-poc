@@ -1,12 +1,13 @@
 from datetime import datetime
+
 from mock import patch, MagicMock
 import pytest
-
-from mies.buildings.model import build_bldg_address, _get_next_free
+from mies.buildings.model import build_bldg_address, _get_next_free, get_nearby_addresses
 from mies.buildings.model import is_vacant
 from mies.buildings.model import find_spot
-from mies.buildings.constants import FLOOR_W, FLOOR_H, PROXIMITY
+from mies.constants import FLOOR_W, FLOOR_H, PROXIMITY
 from mies.buildings.model import construct_bldg, create_buildings
+from mies.buildings.utils import extract_bldg_coordinates
 
 
 @pytest.mark.parametrize("flr,x,y,address", [
@@ -115,7 +116,8 @@ def test_construct_bldg():
 
 
 @patch('mies.buildings.model.get_db')
-def test_create_buildings(get_db):
+@patch('mies.buildings.model.create_smell_source')
+def test_create_buildings(create_smell_source, get_db):
     db = MagicMock()
     db.buildings.find_one = MagicMock(return_value=None)
     db.buildings.insert = MagicMock(return_value=None)
@@ -124,6 +126,7 @@ def test_create_buildings(get_db):
     content_type = "SomeContent"
     nbuildings = 35
     keys = ["key-{}".format(i) for i in xrange(nbuildings)]
+    heads = [dict(key=key) for key in keys]
     payloads = [
         {
             "field1": "value 1.1",
@@ -131,7 +134,21 @@ def test_create_buildings(get_db):
             "field3": "value 1.3",
         },
     ]* nbuildings
+    bodies = [dict(summary_payload=p, result_payload=p, raw_payload=p) for p in payloads]
     flr = "g-b(1,2)-l1"
-    got = create_buildings(content_type, keys, payloads, flr)
+    got = create_buildings(flr, content_type, heads, bodies)
     assert len(got) == nbuildings
     assert db.buildings.insert.call_count == 4  # 4 batch inserts
+    create_smell_source.assert_has_calls([
+
+    ])
+
+def test_get_nearby_addresses():
+    addr = "g-b(1,2)-l0-b(50,50)"
+    res = get_nearby_addresses(addr)
+    assert len(res) == 99
+    assert addr not in res
+    nearby_addr = res[47]
+    x, y = extract_bldg_coordinates(nearby_addr)
+    assert abs(x - 50) < 10
+    assert abs(y - 50) < 10
