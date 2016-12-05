@@ -8,6 +8,7 @@ What is this
 
 This project is a reference implementation of a consumption layer over the Web,
 transforming content feeds into organized spaces.
+http://webwidematrix.org
 
 It is based on several simple idioms:
 
