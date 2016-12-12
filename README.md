@@ -56,10 +56,10 @@ although it's still unclear whether they'll prove useful or simple enough to imp
 To run:
 -------
 
-redis: redis-server
+* **redis**: redis-server
 
-meteor: env REDIS_CONFIGURE_KEYSPACE_NOTIFICATIONS=1 meteor
+* **meteor**: env REDIS_CONFIGURE_KEYSPACE_NOTIFICATIONS=1 meteor
 
-workers: celery -A mies worker -l info -B --concurrency=4 -Q default
-residents: celery -A mies worker -l info --concurrency=4 -Q life_events
-actions: celery -A mies worker -l info --concurrency=4 -Q actions
+* **workers**: celery -A mies worker -l info -B --concurrency=4 -Q default
+* **residents**: celery -A mies worker -l info --concurrency=4 -Q life_events
+* **actions**: celery -A mies worker -l info --concurrency=4 -Q actions
