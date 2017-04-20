@@ -6,9 +6,9 @@ Web-Wide-Matrix POC
 What is this
 ------------
 
-This project is a reference implementation of a consumption layer over the Web,
-transforming content feeds into organized spaces.
-http://webwidematrix.org
+This project is a reference implementation for an effective consumption layer over the Web,
+transforming Content Feeds into Organized Spaces.
+For more information, visit http://webwidematrix.org
 
 It is based on several simple idioms:
 
@@ -47,10 +47,6 @@ is by providing knowledge or training environment that train the residents
 in achieving some desired value creation. However, once the system is operational
 the residents may alter their knowledge to adapt to changing user needs or data inputs.
 
-
-
-We call the principles that this architecture is based on Life Oriented Programming,
-although it's still unclear whether they'll prove useful or simple enough to implement.
 
 
 To run:
