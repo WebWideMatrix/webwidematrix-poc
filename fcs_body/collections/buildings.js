@@ -1,4 +1,4 @@
-Buildings = new Meteor.Collection('buildings');
+Buildings = new Meteor.Collection('buildings', {idGeneration: 'MONGO'});
 
 //
 // DB involving functions
