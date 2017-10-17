@@ -22,7 +22,7 @@ def create_result_bldgs(curr_bldg, action_results):
         logging.warn("No results for {}".format(curr_bldg["address"]))
         return
     for r in action_results:
-        key = r.get("key")
+        key = unicode(r.get("key"))
         picture = r.get("picture")
         content_type = r.get("contentType")
         summary_payload = r.get("summary")

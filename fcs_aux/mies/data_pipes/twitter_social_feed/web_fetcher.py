@@ -130,7 +130,7 @@ def pull_from_data_pipes(page):
                     new_latest_id = post.id
                 if not done:
                     max_id = post.id
-                    keys.append(post.id)
+                    keys.append(unicode(post.id))
                     pictures.append(extract_picture_from_post(post))
                     raw = extract_raw_payload_from_post(post)
                     raw_payloads.append(raw)
