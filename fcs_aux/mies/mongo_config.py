@@ -2,8 +2,8 @@ import os
 from pymongo import MongoClient
 
 DEFAULT_MONGO_HOST = 'localhost'
-DEFAULT_MONGO_PORT = 3001
-DEFAULT_MONGO_DB = 'meteor'
+DEFAULT_MONGO_PORT = 27017
+DEFAULT_MONGO_DB = 'w2m'
 
 
 def get_config_var(name, default):

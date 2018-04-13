@@ -26,3 +26,10 @@ INTERACTION_RATE_PERIOD = 5 * 60
 # the threshold number of unique residents recently encountered
 # that when exceeded will cause a resident to move to another flr
 MAX_INTERACTION_RATE = 2
+
+
+USER_CONTENT_TYPE = "user";
+
+PERSONAL_TWITTER_FEED_DATA_PIPE = "PersonalTwitterFeed"
+
+ACTIVE_STATUS = "active"
