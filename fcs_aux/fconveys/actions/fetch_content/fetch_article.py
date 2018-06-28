@@ -76,6 +76,15 @@ def read_file(file_name):
     return result
 
 
+def store_text_for_experiment(shortened_url, url, text, folder="articles1"):
+    tmp_folder = "/Users/udi/tmp/{folder}".format(folder=folder)
+    parts = shortened_url.split("/")
+    file_name = "{folder}/{filename}.txt".format(folder=tmp_folder, filename=parts[-1])
+    with open(file_name, "wb") as f:
+        f.write(text)
+        f.flush()
+
+
 def do_fetch_article(input_payload):
     logging.info("Fetching article from social post")
     result_payloads = []
@@ -88,6 +97,8 @@ def do_fetch_article(input_payload):
 
         text = textract.process(file_name)
         logging.info("Extracted article text ({} characters)".format(len(text)))
+
+        store_text_for_experiment(shortened_url, url, text)
 
         metadata = {}
         try:
@@ -128,4 +139,3 @@ def do_fetch_article(input_payload):
             }
         )
     return result_payloads
-

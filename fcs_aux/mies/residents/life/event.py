@@ -128,9 +128,9 @@ def handle_life_event(resident):
     curr_bldg = None
     output_bldgs = None
     try:
-        curr_bldg = load_bldg(_id=ObjectId(resident.bldg)) if resident.bldg else None
+        curr_bldg = load_bldg(_id=ObjectId(resident.bldgId)) if resident.bldgId else None
     except:
-        logging.exception("Couldn't load bldg: {}".format(resident.bldg))
+        logging.exception("Couldn't load bldg: {}".format(resident.bldgId))
     if curr_bldg is not None and resident.processing:
         action_status = resident.get_latest_action(curr_bldg)
         action_result = resident.get_action_result(action_status)
@@ -144,7 +144,7 @@ def handle_life_event(resident):
             else:
                 logging.info("Action in {addr} is still pending. "
                              "Doing nothing for now."
-                             .format(addr=resident.bldg))
+                             .format(addr=resident.bldgId))
                 release_lock(resident["_id"])
                 return
         else:

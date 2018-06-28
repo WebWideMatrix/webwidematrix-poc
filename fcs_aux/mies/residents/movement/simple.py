@@ -188,7 +188,7 @@ class MovementBehavior:
         curr_location = self.location
         x, y = extract_bldg_coordinates(curr_location)
         new_x, new_y = bldg["x"], bldg["y"]
-        self.bldg = str(bldg["_id"])
+        self.bldgId = str(bldg["_id"])
         self.move_to(bldg["address"])
         self.velocity = [new_x - x, new_y - y]
 
@@ -196,7 +196,7 @@ class MovementBehavior:
         curr_location = self.location
         x, y = extract_bldg_coordinates(curr_location)
         new_x, new_y = extract_bldg_coordinates(addr)
-        self.bldg = None
+        self.bldgId = None
         self.move_to(addr)
         self.velocity = [new_x - x, new_y - y]
 

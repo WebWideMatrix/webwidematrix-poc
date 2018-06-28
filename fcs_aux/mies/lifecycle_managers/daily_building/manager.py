@@ -50,11 +50,11 @@ def _build_user_current_bldg_cache_key(user_id):
 def create_daily_bldg(db, today, manager):
     user_id = manager["userId"]
     # FIXME: support more than one data-pipe
-    data_pipe = db.data_pipes.find_one({"_id": manager["dataPipe"]})
+    data_pipe = db.data_pipes.find_one({"_id": manager["dataPipeId"]})
     if data_pipe is None or data_pipe.get("status") != STATUS_ACTIVE:
         # no need to create daily bldg if the data-pipe isn't active
         return
-    user_bldg = db.buildings.find_one({"_id": manager["bldg"]})
+    user_bldg = db.buildings.find_one({"_id": manager["bldgId"]})
     user_bldg_address = user_bldg["address"]
     target_flr = "{}-l0".format(user_bldg_address)
     existing_bldg = db.buildings.find_one({
